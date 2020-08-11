@@ -2,7 +2,7 @@
   "name": "musicthroughdecades",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/app.js"
@@ -16,5 +16,12 @@
   "bugs": {
     "url": "https://github.com/ruwanidealwis/musicThroughDecades/issues"
   },
-  "homepage": "https://github.com/ruwanidealwis/musicThroughDecades#readme"
+  "homepage": "https://github.com/ruwanidealwis/musicThroughDecades#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "pg": "^8.3.0",
+    "spotify-web-api-node": "^4.0.0"
+  }
 }
