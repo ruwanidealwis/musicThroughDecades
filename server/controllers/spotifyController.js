@@ -1,4 +1,4 @@
-/************* module imports  *******************************8/
+/************* module imports  *******************************/
 let SpotifyWebApi = require("spotify-web-api-node");
 config = require("../../variableConfig.js");
 /** @global */ const db = require("../../models/index.js");
