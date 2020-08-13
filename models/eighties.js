@@ -21,11 +21,12 @@ module.exports = (sequelize, DataTypes) => {
       valence: DataTypes.REAL,
       danceability: DataTypes.REAL,
       energy: DataTypes.REAL,
-      mode: DataTypes.STRING,
+      mode: DataTypes.INTEGER,
       key: DataTypes.INTEGER,
       speechiness: DataTypes.REAL,
       tempo: DataTypes.REAL,
       acousticness: DataTypes.REAL,
+      rank: DataTypes.INTEGER,
     },
     {
       sequelize,

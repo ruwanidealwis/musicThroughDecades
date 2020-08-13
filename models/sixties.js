@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
   Sixties.init(
     {
       song: DataTypes.STRING,
-      artists: DataTypes.STRING,
+      artists: DataTypes.ARRAY(DataTypes.STRING),
       imageUrl: DataTypes.STRING,
       yearOfRelease: DataTypes.INTEGER,
       genre: DataTypes.STRING,
@@ -26,10 +26,11 @@ module.exports = (sequelize, DataTypes) => {
       speechiness: DataTypes.REAL,
       tempo: DataTypes.REAL,
       acousticness: DataTypes.REAL,
+      rank: DataTypes.INTEGER,
     },
     {
       sequelize,
-      modelName: "Sixties",
+      modelName: "sixties",
     }
   );
   return Sixties;

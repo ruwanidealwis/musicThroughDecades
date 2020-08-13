@@ -11,6 +11,7 @@ var { PythonShell } = require("python-shell");
 /** @global */ var spotifyApi; //create an instance of webAPI
 /** @global */ var clientId = process.env.CLIENTID; //client id for app
 /** @global */ var clientSecret = process.env.CLIENTSECRET; //client secret for app
+/** @global */ var databaseTable; //the relevant table needed...
 
 /*********************************************** SET BASIC INFO (if running locally...) *********************************/
 if (process.env.PORT == null) {
@@ -19,6 +20,35 @@ if (process.env.PORT == null) {
 }
 
 /************************ FUNCTIONS *******************************/
+
+let determineDatabaseTable = (decade) => {
+  let table;
+  console.log(decade);
+  switch (decade) {
+    case "60s":
+      table = db.sixties;
+      break;
+    case "70s":
+      table = db.seventies;
+      break;
+    case "80s":
+      table = db.eighties;
+      break;
+    case "90s":
+      console.log("hwere");
+      table = db.nineties;
+      break;
+    case "00s":
+      table = db.twothousands;
+      break;
+    case "10s":
+      console.log("hwere");
+      table = db.twenty10s;
+      break;
+  }
+
+  return table;
+};
 
 let runPy = (decade) => {
   /**
@@ -90,12 +120,15 @@ formatData = (data) => {
   console.log(newData);
 
   newData.forEach((hit) => {
+    console.log(hit);
+    let artists = [];
     let splitHit = hit.replace("'", "").split(" - ");
-    let artists = splitHit[1].split("&");
+    if (splitHit[1] != null) artists = splitHit[1].split("&") || "";
     //console.log(splitHit[0]);
-    allHitsArray.push({ track: splitHit[0], artist: artists[0] }); //because of the way the website is structured (this may not be exactly correc t)
+    allHitsArray.push({ track: splitHit[0] || hit, artist: artists[0] }); //because of the way the website is structured (this may not be exactly correc t)
   });
 
+  console.log(allHitsArray);
   return allHitsArray;
 };
 
@@ -107,8 +140,16 @@ var getBasicSongInfo = async function (trackObject) {
         if (data.body.tracks.items === []) {
           //console.log(trackObject.track);
         }
+        console.log(trackObject);
         //console.log(data.body.tracks.items || trackObject.track);
 
+        if (
+          trackObject.track == "Careless Whisper" ||
+          trackObject.artist == "Careless Whisper"
+        ) {
+          //console.log(data.body);
+          //console.log(data.body.tracks.items);
+        }
         return data.body.tracks.items[0];
       },
       function (err) {
@@ -118,13 +159,14 @@ var getBasicSongInfo = async function (trackObject) {
     )
     .then((data) => {
       //format array properly...
-      //console.log(data);
+
       let artists = [];
       data.artists.forEach((artist) => {
         artists.push(artist.name);
       });
       let object = {
         id: data.id,
+        albumId: data.album.id,
         name: data.name,
         release: data.album.release_date,
         image: data.album.images[0].url,
@@ -141,8 +183,10 @@ getSongInformation = async function () {
   for (const trackObject of top100Hits) {
     //console.log(trackObject);
     await getBasicSongInfo(trackObject);
+    //await genreInformation(trackObject); //gets genre of ALBUM!
   } //waits till promise is resolved (this maintains order)
   console.log("done");
+  console.log(fullInfoHitArray);
   return fullInfoHitArray;
 };
 
@@ -161,10 +205,13 @@ getAudioInfo = async function () {
 
 getSongAudioInformation = async function () {
   let returnData = await getAudioInfo();
-  console.log(returnData);
+
+  //åconsole.log(returnData);
   let i = 0;
   fullInfoHitArray.forEach((songObject) => {
     songObject.danceability = returnData[i].danceability;
+    songObject.energy = returnData[i].energy;
+    songObject.acousticness = returnData[i].acousticness;
     songObject.key = returnData[i].key;
     songObject.mode = returnData[i].mode;
     songObject.valence = returnData[i].valence;
@@ -172,16 +219,43 @@ getSongAudioInformation = async function () {
     songObject.tempo = returnData[i].tempo;
     i++;
   });
+
   //waits till promise is resolved (this maintains order)
   console.log("done");
 };
 
+saveToDatabase = async () => {
+  index = 1;
+  for (const songObjects of fullInfoHitArray) {
+    let dateArray = songObjects.release.split("-");
+    console.log(songObjects);
+    await databaseTable.create({
+      song: songObjects.name,
+      artists: songObjects.artists,
+      yearOfRelease: dateArray[0],
+      imageUrl: songObjects.image,
+      valence: songObjects.valence,
+      danceability: songObjects.danceability,
+      popularity: songObjects.popularity,
+      key: songObjects.key,
+      mode: songObjects.mode,
+      speechiness: songObjects.speechiness,
+      tempo: songObjects.speechiness,
+      acousticness: songObjects.acousticness,
+      energy: songObjects.energy,
+      rank: index,
+    });
+    index++;
+  }
+};
 /*********************************** EXPORTED FUNTIONS ***********************************/
 exports.getMusicInformation = async function (comparator) {
   //only called when it is a decade...
   //need to check if database has the data...
-
-  const amount = await db.eighties.count();
+  console.log(databaseTable);
+  databaseTable = determineDatabaseTable(comparator);
+  console.log(databaseTable);
+  const amount = await databaseTable.count();
   console.log(amount);
   if (amount > 0) {
     //already in database...we can load from there else
@@ -191,6 +265,7 @@ exports.getMusicInformation = async function (comparator) {
     runPy(comparator)
       .then((data) => {
         top100Hits = formatData(data);
+
         return authorizeApp();
       })
       .then((data) => {
@@ -205,6 +280,12 @@ exports.getMusicInformation = async function (comparator) {
       })
       .then((data) => {
         console.log(fullInfoHitArray);
+
+        return saveToDatabase();
+      })
+      .then(() => {
+        databaseTable = {};
+        fullInfoHitArray = [];
       });
   }
 

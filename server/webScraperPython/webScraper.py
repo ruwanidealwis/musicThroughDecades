@@ -15,6 +15,7 @@ def getDecadeInfo(decade):
         [finalList]: [list of the top 100 songs]
     """
     finalList = []
+
     if(decade in ["60s", "70s", "80s", "90s"]):
         nextPage = ""
 
@@ -26,7 +27,7 @@ def getDecadeInfo(decade):
             soup = BeautifulSoup(src, 'html.parser')
 
             # get the top songs and artists
-            itemNames = [s.get_text().replace("'", "")
+            itemNames = [s.get_text().replace("'", "").split("/", 1)[0]
                          for s in soup.find_all(class_="item-name")]
             itemNamesFormatted = [' '.join(myString.split())
                                   for myString in itemNames]
@@ -62,13 +63,13 @@ def getDecadeInfo(decade):
         src = page.content
         soup = BeautifulSoup(src, 'html.parser')
         # get all the song names and artist names
-        songNames = [' '.join(myString.split()) for myString in (s.get_text()
+        songNames = [' '.join(myString.split()) for myString in (re.sub("\((.*?)\)", "", s.get_text().replace("'", ""))
                                                                  for s in soup.find_all(class_="ye-chart-item__title"))]
-        artistNames = [' '.join(myString.split()) for myString in (s.get_text().replace("Featuring", "&")
+        artistNames = [' '.join(myString.split()) for myString in (s.get_text().replace("Featuring", "&").replace("'", "")
                                                                    for s in soup.find_all(class_="ye-chart-item__artist"))]
         for i in range(100):
             # format like others
-            finalList.append(songNames[i] + " - " + songNames[i])
+            finalList.append(songNames[i] + " - " + artistNames[i])
 
     return finalList
 

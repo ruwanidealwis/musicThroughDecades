@@ -14,18 +14,19 @@ module.exports = (sequelize, DataTypes) => {
   twenty10s.init(
     {
       song: DataTypes.STRING,
-      artists: DataTypes.STRING,
+      artists: DataTypes.ARRAY(DataTypes.STRING),
       imageUrl: DataTypes.STRING,
       yearOfRelease: DataTypes.INTEGER,
       genre: DataTypes.STRING,
       valence: DataTypes.REAL,
       danceability: DataTypes.REAL,
       energy: DataTypes.REAL,
-      mode: DataTypes.STRING,
+      mode: DataTypes.INTEGER,
       key: DataTypes.INTEGER,
       speechiness: DataTypes.REAL,
       tempo: DataTypes.REAL,
       acousticness: DataTypes.REAL,
+      rank: DataTypes.INTEGER,
     },
     {
       sequelize,
