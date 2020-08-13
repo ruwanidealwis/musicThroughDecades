@@ -1,21 +1,24 @@
-/************* module imports  */
+/************* module imports  *******************************8/
 let SpotifyWebApi = require("spotify-web-api-node");
 config = require("../../variableConfig.js");
-const db = require("../../models/index.js");
+/** @global */ const db = require("../../models/index.js");
 var { PythonShell } = require("python-shell");
-var top100Hits;
-var fullInfoHitArray = [];
-var songIdArray = [];
+
 /********* variable declaration */
-var spotifyApi;
-var clientId = process.env.CLIENTID;
-var clientSecret = process.env.CLIENTSECRET;
+/** @global */ var top100Hits; //stores 100 hits as retrived from webScraper
+/** @global */ var fullInfoHitArray = []; //this array contains all the information on the song (audio features etc)
+/** @global */ var songIdArray = []; //spotify id's of the song, enabling to get audio information
+/** @global */ var spotifyApi; //create an instance of webAPI
+/** @global */ var clientId = process.env.CLIENTID; //client id for app
+/** @global */ var clientSecret = process.env.CLIENTSECRET; //client secret for app
 
 /*********************************************** SET BASIC INFO (if running locally...) *********************************/
 if (process.env.PORT == null) {
   console.log("local");
   redirectUri = "http://localhost:8000/callback";
 }
+
+/************************ FUNCTIONS *******************************/
 
 let runPy = (decade) => {
   /**
@@ -48,11 +51,17 @@ let runPy = (decade) => {
 };
 
 async function authorizeApp() {
+  /**
+   * @summary Authorizes the app through spotify client credential, only when there does not need to be user authentication
+   * @return {Promise} returns a promise that resolves to the instance of the spotifyWebAPI (that is a authorized), or returns an error
+   */
+
   return new Promise(function (resolve, reject) {
     spotifyApi = new SpotifyWebApi({
       clientId: clientId,
       clientSecret: clientSecret,
     });
+    //adapted from from: https://github.com/thelinmichael/spotify-web-api-node
     spotifyApi.clientCredentialsGrant().then(
       function (data) {
         console.log("The access token expires in " + data.body["expires_in"]);
@@ -166,6 +175,8 @@ getSongAudioInformation = async function () {
   //waits till promise is resolved (this maintains order)
   console.log("done");
 };
+
+/*********************************** EXPORTED FUNTIONS ***********************************/
 exports.getMusicInformation = async function (comparator) {
   //only called when it is a decade...
   //need to check if database has the data...
