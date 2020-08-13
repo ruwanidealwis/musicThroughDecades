@@ -1,5 +1,6 @@
 //set up routes
 let express = require("express");
+let spotifyController = require("../controllers/spotifyController");
 var router = express.Router();
 
 let determineYears = (comparators) => {
@@ -17,8 +18,8 @@ let determineYears = (comparators) => {
   if (years.includes(comparators[0])) {
     let result = comparators[0].split("");
     comparator1 =
-      result[comparators[0].length - 1] +
       result[comparators[0].length - 2] +
+      result[comparators[0].length - 1] +
       "s"; //format it correctly (ex: 1980 would become 80s)
   } else {
     //means it is one of the spotify calls;
@@ -28,8 +29,8 @@ let determineYears = (comparators) => {
     //second year could possibly aslo be a year
     let result = comparators[1].split("");
     comparator2 =
-      result[comparators[1].length - 1] +
       result[comparators[1].length - 2] +
+      result[comparators[1].length - 1] +
       "s"; //format it correctly (ex: 1980 would become 80s)
   } else {
     //means it is one of the spotify calls;
@@ -47,8 +48,21 @@ router.get("/", (req, res) => {
   });
 });
 
-router.post("/:comparators", (req, res) => {
+router.get("/:comparators", (req, res) => {
   let comparators = determineYears(req.params.comparators.split("-")); //getting properly formatted comparators
+  console.log(comparators);
+  let userSpotify = ["all-time", "6 months", "1 month"];
+  if (!userSpotify.includes(comparators[0])) {
+    //this means the comparator is a decade (does not need user authentication)
+    //call spotify controller method to get year data
+    spotifyController.getMusicInformation(comparators[0]);
+  }
+  if (!userSpotify.includes(comparators[1])) {
+    //same as above
+    //call spotify controller method to get year data
+  }
+
+  res.send("hi");
 
   //call spotify controller here and from there determine how the database/everything works
 });

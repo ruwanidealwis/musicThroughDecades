@@ -1,63 +1,63 @@
-'use strict';
+"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('twothousands', {
+    await queryInterface.createTable("twothousands", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       song: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       artists: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       imageUrl: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       yearOfRelease: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       genre: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       valence: {
-        type: Sequelize.REAL
+        type: Sequelize.REAL,
       },
       danceability: {
-        type: Sequelize.REAL
+        type: Sequelize.REAL,
       },
       energy: {
-        type: Sequelize.REAL
+        type: Sequelize.REAL,
       },
       mode: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       key: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       speechiness: {
-        type: Sequelize.REAL
+        type: Sequelize.REAL,
       },
       tempo: {
-        type: Sequelize.REAL
+        type: Sequelize.REAL,
       },
       acousticness: {
-        type: Sequelize.REAL
+        type: Sequelize.REAL,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('twothousands');
-  }
+    await queryInterface.dropTable("twothousands");
+  },
 };

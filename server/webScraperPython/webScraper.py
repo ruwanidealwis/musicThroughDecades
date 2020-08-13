@@ -1,7 +1,8 @@
 # import requests
 import requests
-import regex
+import re
 from bs4 import BeautifulSoup
+import sys
 
 
 def getDecadeInfo(decade):
@@ -25,7 +26,7 @@ def getDecadeInfo(decade):
             soup = BeautifulSoup(src, 'html.parser')
 
             # get the top songs and artists
-            itemNames = [s.get_text()
+            itemNames = [s.get_text().replace("'", "")
                          for s in soup.find_all(class_="item-name")]
             itemNamesFormatted = [' '.join(myString.split())
                                   for myString in itemNames]
@@ -39,8 +40,9 @@ def getDecadeInfo(decade):
         src = page.content
         soup = BeautifulSoup(src, 'html.parser')
         # get all song names
-        songNames = [' '.join(myString.split()) for myString in (s.get_text()
-                                                                 for s in soup.tbody.select("a[href*=title]"))]
+        songNames = [' '.join(myString.split()) for myString in (re.sub("\[(.*?)\]", "", s.get_text().replace(
+            '"', "").replace("'", ""))
+            for s in soup.tbody.select("a[href*=title]"))]
         artistNames = []
         songTable = soup.find("tbody")
         # get all artists (need to loop because there are multiple artists for some songs)
@@ -48,7 +50,7 @@ def getDecadeInfo(decade):
             songRow = song.findAll("td")
             if(songRow[2].get_text() != "ARTIST"):
                 artistNames.append(songRow[2].get_text().replace(
-                    '"', "").replace("Featuring", "&"))
+                    '"', "").replace("Featuring", "&").replace("'", ""))
 
         for i in range(100):
             # format like other ones
@@ -62,11 +64,11 @@ def getDecadeInfo(decade):
         # get all the song names and artist names
         songNames = [' '.join(myString.split()) for myString in (s.get_text()
                                                                  for s in soup.find_all(class_="ye-chart-item__title"))]
-        artistNames = [' '.join(myString.split()) for myString in (s.get_text()
-                                                                   for s in soup.find_all(class_="ye-chart-item__artist").replace("Featuring", "&"))]
+        artistNames = [' '.join(myString.split()) for myString in (s.get_text().replace("Featuring", "&")
+                                                                   for s in soup.find_all(class_="ye-chart-item__artist"))]
         for i in range(100):
             # format like others
-            finalList.append(songNames[i] + " - " + artistNames[i])
+            finalList.append(songNames[i] + " - " + songNames[i])
 
     return finalList
 
@@ -99,5 +101,4 @@ def getYearInfo(year):
     return finalList
 
 
-# print(getYearInfo(2004))
-print(getDecadeInfo("60s"))
+print(getDecadeInfo(sys.argv[1]))
