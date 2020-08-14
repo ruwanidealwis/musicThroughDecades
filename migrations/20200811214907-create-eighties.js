@@ -12,7 +12,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       artists: {
-        type: Sequelize.STRING,
+        type: Sequelize.ARRAY(Sequelize.TEXT),
       },
       imageUrl: {
         type: Sequelize.STRING,
@@ -46,6 +46,9 @@ module.exports = {
       },
       acousticness: {
         type: Sequelize.REAL,
+      },
+      rank: {
+        type: Sequelize.INTEGER,
       },
       createdAt: {
         allowNull: false,

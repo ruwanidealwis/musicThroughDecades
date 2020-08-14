@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
       artists: DataTypes.ARRAY(DataTypes.STRING),
       imageUrl: DataTypes.STRING,
       yearOfRelease: DataTypes.INTEGER,
-      genre: DataTypes.STRING,
       valence: DataTypes.REAL,
       danceability: DataTypes.REAL,
       energy: DataTypes.REAL,

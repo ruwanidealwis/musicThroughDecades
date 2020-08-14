@@ -1,19 +1,17 @@
 {
   "development": {
     "username": "ruwani",
-    "password": null,
+    "password": "DATABASE_PASSWORD",
     "database": "musicthroughdecades",
-    "host": "127.0.0.1",
-
+    "host": "localhost",
     "dialect": "postgres"
   },
   "production": {
-    "username": "tomkadwill",
-    "password": "password",
-    "database": "urlshortener_production",
+    "username": "ruwani",
+    "password": "DATABASE_PASSWORD",
+    "database": "musicthroughdecades",
     "host": "localhost",
     "dialect": "postgres",
-
     "use_env_variable": "DATABASE_URL"
   }
 }

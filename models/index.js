@@ -5,9 +5,15 @@ const path = require("path");
 const Sequelize = require("sequelize");
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || "development";
-const config = require(__dirname + "/../config/config.json")[env];
-const db = {};
+var config = require(__dirname + "/../config/config.js")[env];
+const configVar = require("../variableConfig");
 
+const db = {};
+//allows the use of environmental variables
+if (config.use_env_variable != null) {
+  config.use_env_variable == process.env.DATABASE_URL;
+}
+config.password = process.env.PASSWORD || configVar.password;
 let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);

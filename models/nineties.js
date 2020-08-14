@@ -17,11 +17,11 @@ module.exports = (sequelize, DataTypes) => {
       artists: DataTypes.ARRAY(DataTypes.STRING),
       imageUrl: DataTypes.STRING,
       yearOfRelease: DataTypes.INTEGER,
-      genre: DataTypes.STRING,
+
       valence: DataTypes.REAL,
       danceability: DataTypes.REAL,
       energy: DataTypes.REAL,
-      mode: DataTypes.STRING,
+      mode: DataTypes.INTEGER,
       key: DataTypes.INTEGER,
       speechiness: DataTypes.REAL,
       tempo: DataTypes.REAL,

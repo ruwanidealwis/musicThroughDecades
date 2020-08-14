@@ -11,4 +11,5 @@ if (dotenv.error) {
 module.exports = {
   clientID: process.env.CLIENTID,
   clientSecret: process.env.CLIENTSECRET,
+  password: process.env.PASSWORD,
 };

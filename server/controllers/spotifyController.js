@@ -286,6 +286,7 @@ exports.getMusicInformation = async function (comparator) {
       .then(() => {
         databaseTable = {};
         fullInfoHitArray = [];
+        top100Hits = [];
       });
   }
 
