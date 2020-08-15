@@ -49,7 +49,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:comparators", (req, res) => {
-  let comparators = determineYears(req.params.comparators.split("-")); //getting properly formatted comparators
+  let comparators = req.params.comparators.split("-"); //getting properly formatted comparators
   console.log(comparators);
   let userSpotify = ["all-time", "6 months", "1 month"];
   if (!userSpotify.includes(comparators[0])) {

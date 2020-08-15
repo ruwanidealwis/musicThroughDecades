@@ -50,6 +50,9 @@ module.exports = {
       rank: {
         type: Sequelize.INTEGER,
       },
+      popularity: {
+        type: Sequelize.INTEGER,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

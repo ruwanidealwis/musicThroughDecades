@@ -10,9 +10,7 @@ const configVar = require("../variableConfig");
 
 const db = {};
 //allows the use of environmental variables
-if (config.use_env_variable != null) {
-  config.use_env_variable == process.env.DATABASE_URL;
-}
+
 config.password = process.env.PASSWORD || configVar.password;
 let sequelize;
 if (config.use_env_variable) {

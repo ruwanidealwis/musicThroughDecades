@@ -3,6 +3,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import sys
+import csv
 
 
 def getDecadeInfo(decade):
@@ -16,12 +17,56 @@ def getDecadeInfo(decade):
     """
     finalList = []
 
-    if(decade in ["60s", "70s", "80s", "90s"]):
+    if(decade in ["1950", "1960", "1970", "1980", "1990", "2000"]):
+
+        # TAKEN FROM: http://tsort.info/music/index.htm
+        page = requests.get(
+            "http://tsort.info/music/ds" + decade + ".htm")  # data from website...
+        src = page.content
+        soup = BeautifulSoup(src, 'html.parser')
+
+        songs = [re.sub("\((.*?)\)", "", s.get_text().replace("'", ""))
+                 for s in soup.find_all(class_="tit")]
+
+        artists = [s.get_text().replace("'", "").replace("$", "s")
+
+                   for s in soup.find_all(class_="art")]
+
+        year = [s.get_text().replace("'", "")
+
+                for s in soup.find_all(class_="yer")]
+        for i in range(100):
+            finalList.append(songs[i] + " - " + artists[i] + " - " + year[i])
+    if(decade == "2010"):
+        # CSV TAKE FROM: http://chart2000.com/about.htm
+        with open('/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/webScraperPython/files/2010scharts.csv') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            line_count = 0
+            for row in csv_reader:
+                if line_count == 0:
+
+                    line_count += 1
+                else:
+                    artist = row[2].replace("'", "").replace(
+                        ",", " &").replace("$", "s")
+                    song = re.sub("\((.*?)\)", "", row[3].replace("'", ""))
+                    finalList.append(song + " - " + artist)
+                    line_count += 1
+                if(line_count == 101):
+                    break  # only want first 100
+    return finalList
+    '''songTable = soup.find("tbody", {"class": "songlist"})
+        for song in songTable.findAll("tr"):
+            songRow = song.findAll("td")
+            if(songRow[2].get_text() != "ARTIST"):
+                artistNames.append(songRow[2].get_text().replace(
+                    '"', "").replace("Featuring", "&").replace("'", ""))
+
         nextPage = ""
 
         for i in range(1, 4):
             page = requests.get(
-                "https://www.listchallenges.com/the-top-100-songs-of-the-" + decade + nextPage)
+                "http://tsort.info/music/ds" + decade + ".htm")
 
             src = page.content
             soup = BeautifulSoup(src, 'html.parser')
@@ -99,7 +144,7 @@ def getYearInfo(year):
             finalList.append(songRow[0].get_text().replace('"', "") +
                              " - " + ' '.join((songRow[1].get_text().replace("featuring", "&").replace("and", "&").split())))
         print(len(finalList))
-    return finalList
+    return finalList'''
 
 
 print(getDecadeInfo(sys.argv[1]))

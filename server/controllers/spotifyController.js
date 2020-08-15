@@ -25,23 +25,26 @@ let determineDatabaseTable = (decade) => {
   let table;
   console.log(decade);
   switch (decade) {
-    case "60s":
+    case "1950":
+      table = db.fifties;
+      break;
+    case "1960":
       table = db.sixties;
       break;
-    case "70s":
+    case "1970":
       table = db.seventies;
       break;
-    case "80s":
+    case "1980":
       table = db.eighties;
       break;
-    case "90s":
+    case "1990":
       console.log("hwere");
       table = db.nineties;
       break;
-    case "00s":
+    case "2000":
       table = db.twothousands;
       break;
-    case "10s":
+    case "2010":
       console.log("hwere");
       table = db.twenty10s;
       break;
@@ -125,7 +128,11 @@ formatData = (data) => {
     let splitHit = hit.replace("'", "").split(" - ");
     if (splitHit[1] != null) artists = splitHit[1].split("&") || "";
     //console.log(splitHit[0]);
-    allHitsArray.push({ track: splitHit[0] || hit, artist: artists[0] }); //because of the way the website is structured (this may not be exactly correc t)
+    allHitsArray.push({
+      track: splitHit[0] || hit,
+      artist: artists[0],
+      year: splitHit[2].replace("'", "") || "",
+    }); //because of the way the website is structured (this may not be exactly correc t)
   });
 
   console.log(allHitsArray);
@@ -150,6 +157,7 @@ var getBasicSongInfo = async function (trackObject) {
           //console.log(data.body);
           //console.log(data.body.tracks.items);
         }
+        console.log(data.body);
         return data.body.tracks.items[0];
       },
       function (err) {
@@ -159,23 +167,35 @@ var getBasicSongInfo = async function (trackObject) {
     )
     .then((data) => {
       //format array properly...
-
-      let artists = [];
-      data.artists.forEach((artist) => {
-        artists.push(artist.name);
-      });
-      let object = {
-        id: data.id,
-        albumId: data.album.id,
-        name: data.name,
-        release: data.album.release_date,
-        image: data.album.images[0].url,
-        artists: artists,
-        popularity: data.popularity,
-      };
-      fullInfoHitArray.push(object);
-      songIdArray.push(data.id);
-
+      if (data == null) {
+        let object = {
+          id: "",
+          albumId: "",
+          name: "",
+          release: trackObject.year,
+          image: "",
+          artists: [],
+          popularity: -1,
+        };
+        fullInfoHitArray.push(object);
+        songIdArray.push("");
+      } else {
+        let artists = [];
+        data.artists.forEach((artist) => {
+          artists.push(artist.name);
+        });
+        let object = {
+          id: data.id,
+          albumId: data.album.id,
+          name: trackObject.track,
+          release: trackObject.year,
+          image: data.album.images[0].url,
+          artists: artists,
+          popularity: data.popularity,
+        };
+        fullInfoHitArray.push(object);
+        songIdArray.push(data.id);
+      }
       //console.log(object);
     });
 };
@@ -208,16 +228,30 @@ getSongAudioInformation = async function () {
 
   //åconsole.log(returnData);
   let i = 0;
+
   fullInfoHitArray.forEach((songObject) => {
-    songObject.danceability = returnData[i].danceability;
-    songObject.energy = returnData[i].energy;
-    songObject.acousticness = returnData[i].acousticness;
-    songObject.key = returnData[i].key;
-    songObject.mode = returnData[i].mode;
-    songObject.valence = returnData[i].valence;
-    songObject.speechiness = returnData[i].speechiness;
-    songObject.tempo = returnData[i].tempo;
-    i++;
+    console.log(returnData[i]);
+    if (returnData[i] == null) {
+      songObject.danceability = -1;
+      songObject.energy = -1;
+      songObject.acousticness = -1;
+      songObject.key = -1;
+      songObject.mode = -1;
+      songObject.valence = -1;
+      songObject.speechiness = -1;
+      songObject.tempo = -1;
+      i++;
+    } else {
+      songObject.danceability = returnData[i].danceability;
+      songObject.energy = returnData[i].energy;
+      songObject.acousticness = returnData[i].acousticness;
+      songObject.key = returnData[i].key;
+      songObject.mode = returnData[i].mode;
+      songObject.valence = returnData[i].valence;
+      songObject.speechiness = returnData[i].speechiness;
+      songObject.tempo = returnData[i].tempo;
+      i++;
+    }
   });
 
   //waits till promise is resolved (this maintains order)
@@ -279,7 +313,7 @@ exports.getMusicInformation = async function (comparator) {
         return getSongAudioInformation();
       })
       .then((data) => {
-        console.log(fullInfoHitArray);
+        // console.log(fullInfoHitArray);
 
         return saveToDatabase();
       })

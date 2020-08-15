@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       tempo: DataTypes.REAL,
       acousticness: DataTypes.REAL,
       rank: DataTypes.INTEGER,
+      popularity: DataTypes.INTEGER,
     },
     {
       sequelize,
