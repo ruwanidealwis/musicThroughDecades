@@ -48,21 +48,30 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/callback", (req, res) => {
+  res.send("ola");
+  //should be loading page...
+  spotifyController.getUserListeningHabbits(req);
+});
+
 router.get("/:comparators", (req, res) => {
   let comparators = req.params.comparators.split("-"); //getting properly formatted comparators
   console.log(comparators);
-  let userSpotify = ["all-time", "6 months", "1 month"];
+  let userSpotify = ["allTime", "6Months", "1Month"];
   if (!userSpotify.includes(comparators[0])) {
     //this means the comparator is a decade (does not need user authentication)
     //call spotify controller method to get year data
     spotifyController.getMusicInformation(comparators[0]);
+  } else {
+    let url = spotifyController.getAuthorizationURL(comparators[0]);
+    res.redirect(url); //now redirects user to authorization... (after successful should return to callback...)
   }
   if (!userSpotify.includes(comparators[1])) {
     //same as above
     //call spotify controller method to get year data
+    spotifyController.getMusicInformation(comparators[1]);
+  } else {
   }
-
-  res.send("hi");
 
   //call spotify controller here and from there determine how the database/everything works
 });
