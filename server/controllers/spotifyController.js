@@ -57,8 +57,23 @@ let determineDatabaseTable = (decade) => {
       table = db.twenty10s;
       break;
   }
-
   return table;
+};
+
+/**
+ * Gets the time range for the top songs according to what the user wnats
+ * @param {string} comparator - String that indicates which time range the user wants
+ * @return {String} returns time range in format compatible for spotify api query
+ */
+let getReadChoice = (comparator) => {
+  switch (comparator) {
+    case "allTime":
+      return "long_term";
+    case "6Months":
+      return "medium_term";
+    case "1Month":
+      return "short_term";
+  }
 };
 /**
  * runs python script that webscrapes (should ideally only run once) for billboard music data
@@ -88,17 +103,6 @@ let runPy = (decade) => {
       success(results);
     });
   });
-};
-
-let getReadChoice = (comparator) => {
-  switch (comparator) {
-    case "allTime":
-      return "long_term";
-    case "6Months":
-      return "medium_term";
-    case "1Month":
-      return "short_term";
-  }
 };
 
 /**
@@ -162,6 +166,12 @@ let formatData = (data) => {
   console.log(allHitsArray);
   return allHitsArray;
 };
+/**
+ *
+ * @summary searches for the track in the spotify database and creates a new object with the aquired data
+ * @param {object} trackObject - Object containing the name of the song, the artist, along with the year it was released
+ * @return {Promise} that resolves to array with data from spotify API, or the error generated when quereying the API
+ */
 
 var getBasicSongInfo = async (trackObject) => {
   return spotifyApi
@@ -189,41 +199,51 @@ var getBasicSongInfo = async (trackObject) => {
         return err;
       }
     )
-    .then((data) => {
-      //format array properly...
-      if (data == null) {
-        let object = {
-          id: "",
-          albumId: "",
-          name: "",
-          release: trackObject.year,
-          image: "",
-          artists: [],
-          popularity: -1,
-        };
-        fullInfoHitArray.push(object);
-        songIdArray.push("");
-      } else {
-        let artists = [];
-        data.artists.forEach((artist) => {
-          artists.push(artist.name);
-        });
-        let object = {
-          id: data.id,
-          albumId: data.album.id,
-          name: trackObject.track,
-          release: trackObject.year,
-          image: data.album.images[0].url,
-          artists: artists,
-          popularity: data.popularity,
-        };
-        fullInfoHitArray.push(object);
-        songIdArray.push(data.id);
+    .then(
+      (data) => {
+        //format array properly...
+        if (data == null) {
+          let object = {
+            id: "",
+            albumId: "",
+            name: "",
+            release: trackObject.year,
+            image: "",
+            artists: [],
+            popularity: -1,
+          };
+          fullInfoHitArray.push(object);
+          songIdArray.push("");
+        } else {
+          let artists = [];
+          data.artists.forEach((artist) => {
+            artists.push(artist.name);
+          });
+          let object = {
+            id: data.id,
+            albumId: data.album.id,
+            name: trackObject.track,
+            release: trackObject.year,
+            image: data.album.images[0].url,
+            artists: artists,
+            popularity: data.popularity,
+          };
+          fullInfoHitArray.push(object);
+          songIdArray.push(data.id);
+        }
+        return fullInfoHitArray;
+      },
+      (error) => {
+        return err;
       }
-      //console.log(object);
-    });
+    );
 };
-getSongInformation = async function () {
+
+/**
+ * @summary traverses the list of all top 100 songs to get the basic info for the track using the spotify API
+ * @return {Array} Array of objects with full info about the audio features
+ */
+let getSongInformation = async function () {
   for (const trackObject of top100Hits) {
     //console.log(trackObject);
     await getBasicSongInfo(trackObject);
@@ -233,8 +253,12 @@ getSongInformation = async function () {
   console.log(fullInfoHitArray);
   return fullInfoHitArray;
 };
-
-getAudioInfo = async function () {
+/**
+ * Gets audio features for the tracks in the top 100 list using the spotify ids of the songs
+ * @summary traverses the list of all top 100 songs to get the audio features for the track using the spotify API
+ * @return {Promise} resolves to the audio features for the track or the error
+ */
+let getAudioInfo = async function () {
   return spotifyApi.getAudioFeaturesForTracks(songIdArray).then(
     function (data) {
       //console.log(data.body);
@@ -247,8 +271,14 @@ getAudioInfo = async function () {
   );
 };
 
-getSongAudioInformation = async function (songArray) {
-  let returnData = await getAudioInfo();
+/**
+ * Brief description of the function here.
+ * @summary adds keys to objects of the to array of the top songs with the information generated from the audio feature query of the spotify API
+ * @param {Array} songArray - array with the top songs (can either be the users top songs, or the top songs of the decade)
+ */
+
+let getSongAudioInformation = async function (songArray) {
+  let returnData = await getAudioInfo(); //await until
 
   //åconsole.log(returnData);
   let i = 0;
@@ -282,7 +312,11 @@ getSongAudioInformation = async function (songArray) {
   console.log("done");
 };
 
-getUserTopTracks = () => {
+/**
+ * Usess spotify API to get the top tracks for the current user and creates object with the information returned and adds it to the array of tophits
+ * @return {Array} Array with the information on the users top hits
+ */
+let getUserTopTracks = () => {
   return spotifyApi
     .getMyTopTracks({
       time_range: userTopRead,
@@ -297,6 +331,7 @@ getUserTopTracks = () => {
         songObject.artists.forEach((songArtists) => {
           artist.push(songArtists.name);
         });
+        //create object with information
         object = {
           name: songObject.name,
           popularity: songObject.popularity,
@@ -304,16 +339,21 @@ getUserTopTracks = () => {
           artists: artist,
           imageUrl: songObject.album.images[0].url,
         };
-        myTopHits.push(object);
+        myTopHits.push(object); //push it to the array
       });
       return myTopHits;
     });
 };
-saveToDatabase = async () => {
+/**
+ *
+ * @summary Updates the tables of the postgres database with all the information of the top 100 songs for the current decade
+ */
+let saveToDatabase = async () => {
   index = 1;
   for (const songObjects of fullInfoHitArray) {
-    let dateArray = songObjects.release.split("-");
+    let dateArray = songObjects.release.split("-"); //get the date (we only care about year, not exact date)
     console.log(songObjects);
+    //create a row with the information (INSERT INTO)
     await databaseTable.create({
       song: songObjects.name,
       artists: songObjects.artists,
@@ -332,8 +372,13 @@ saveToDatabase = async () => {
     });
     index++;
   }
-};
-/*********************************** EXPORTED FUNTIONS ***********************************/
+}; /*********************************** EXPORTED FUNTIONS ***********************************/
+/**
+ *
+ * @summary gets the information for a specific query
+ * @param {string} comparator - the decade to get the top hits for
+ * @return {Array} Array of all relevant information about the specific decade (top hits, artists, audio statistics)
+ */
 exports.getMusicInformation = async (comparator) => {
   //only called when it is a decade...
   //need to check if database has the data...
@@ -375,10 +420,16 @@ exports.getMusicInformation = async (comparator) => {
         spotifyApi = {}; //empty object again...
       });
   }
-};
+}; /*********************************** EXPORTED FUNTIONS ***********************************/
 
-/*********************************** EXPORTED FUNTIONS ***********************************/
-exports.getAuthorizationURL = (comparator) => {
+/**
+ * Brief description of the function here.
+ * @summary gets the authorization URL for the current user by creating a new instance of the Spotify API
+ * @param {String} timeRange - the timeRange is the time range that the user would like get their own spotify data for (alltime, last 6 months or the last month)
+ * @return {String} returns the authorization URL for current user
+ */
+
+exports.getAuthorizationURL = (timeRange) => {
   state = "some-state-of-my-choice"; //change later
   spotifyApi = new SpotifyWebApi({
     clientId: clientId,
@@ -387,11 +438,18 @@ exports.getAuthorizationURL = (comparator) => {
   });
 
   let authorizeURL = spotifyApi.createAuthorizeURL(["user-top-read"], state); //generated
-  userTopRead = getReadChoice(comparator); //what data should be queried for...
+  userTopRead = getReadChoice(timeRange); //what data should be queried for...
   return authorizeURL;
 };
 
-/*********************************** EXPORTED FUNTIONS ***********************************/
+//*********************************** EXPORTED FUNTIONS ***********************************/
+/**
+ *
+ * @summary gets the audio information for the top tracks for the current user by authenticating and querying the spotify API
+ * @param {req} String - the code generated after the user authorizes the app
+ * @return {Array} Array of object containing all the relevant information for the user top tracks
+ */
+
 exports.getUserListeningHabbits = async (req) => {
   spotifyApi
     .authorizationCodeGrant(req.query.code)
@@ -410,72 +468,10 @@ exports.getUserListeningHabbits = async (req) => {
       }
     )
     .then((data) => {
-      console.log("hi");
-
-      console.log(userTopRead);
-      //{ time_range: userTopRead, limit: 50 }
-
-      return getUserTopTracks();
+      return getUserTopTracks(); //gets the top tracks for the user
     })
     .then((data) => {
-      //for each item, get song id (and make it like the hit object)
-      return getSongAudioInformation(myTopHits);
+      return getSongAudioInformation(myTopHits); //gets the audio info each of the top hits
     })
-    .then((data) => console.log(myTopHits));
+    .then(() => console.log(myTopHits));
 };
-
-// Retrieve an access token.
-/*spotifyApi.clientCredentialsGrant().then(
-    function (data) {
-      console.log("The access token expires in " + data.body["expires_in"]);
-      console.log("The access token is " + data.body["access_token"]);
-
-      // Save the access token so that it's used in future calls
-      spotifyApi.setAccessToken(data.body["access_token"]);
-    },
-    function (err) {
-      console.log("Something went wrong when retrieving an access token", err);
-    }
-  );*/
-
-/*exports.authorizeSpotify = (comparators) => {
-  let userSpotify = ["all-time", "6 months", "1 month"];
-  if (
-    userSpotify.includes(comparators[0]) ||
-    userSpotify.includes(comparators[1]) //determines if there needs to be a specical scope
-  ) {
-    //need to redirect to login and get a callback
-    //need specical scope authorization... (user top read)
-    //after also get top music info
-    spotifyApi = new SpotifyWebApi({
-      clientId: clientId,
-      clientSecret: clientSecret,
-      redirectUri: redirectUri, //will have to change this later
-    });
-    let scope = ["user-top"];
-    let authorizeURL = spotifyApi.createAuthorizeURL(scope, state); //generated
-  } else {
-    //only need to authenticate the app
-  }
-  //at least one paramter has to be a year so following method is always called
-  if (!userSpotify.includes(comparators[0])) {
-    //this must mean it is a year.... (check if database has it, otherwise call python webscraper)
-  }
-
-  if (!userSpotify.includes(comparators[0])) {
-  }
-};
-
-exports.authorizeSpotifyUser = () => {
-  //should only be called if we need user data...
-  spotifyApi.authorizationCodeGrant(req.query.code).then(
-    //promise function
-    (data) => {
-      // Set the access token on the API object to use it in later calls
-      spotifyApi.setAccessToken(data.body["access_token"]);
-      spotifyApi.setRefreshToken(data.body["refresh_token"]);
-
-      return getUserInformation();
-    }
-  );
-};*/
