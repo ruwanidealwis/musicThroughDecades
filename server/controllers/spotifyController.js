@@ -56,6 +56,10 @@ let determineDatabaseTable = (decade) => {
       console.log("hwere");
       table = db.twenty10s;
       break;
+    default:
+      console.log("hello");
+      console.log(db.tempUser);
+      table = db.tempUser;
   }
   return table;
 };
@@ -74,6 +78,41 @@ let getReadChoice = (comparator) => {
     case "1Month":
       return "short_term";
   }
+};
+
+let getTopValues = (feature, limit) => {
+  let featureArray = [];
+  return databaseTable
+    .findAll({
+      attributes: ["song", "artists", "yearOfRelease", feature],
+      order: [[feature, "DESC"]],
+      limit: limit,
+    })
+    .then((data) => {
+      console.log(data);
+    });
+};
+
+let getDecadeStatistics = async () => {
+  const { Sequelize } = require("sequelize");
+  let featureArray = [
+    "valence",
+    "speechiness",
+    "energy",
+    "danceability",
+    "acousticness",
+    "tempo",
+  ];
+
+  for (const feature of featureArray) {
+    await getTopValues(feature, 3);
+  }
+};
+let getUserStatistics = async (req) => {
+  //check if it is user (if yes, table... and add songs)
+  //database hsould be unique to decade...
+  //need top 5 songs, top 5 artists, average valence (for decade/user, for each year (only for decade)....), average danceability, average energy, average tempo, average accousticness, speechiness (top 3 songs for each), mode dsitribution, key distribution,
+  //check if it is user (if yes DROP ALL ROWS, IT NEEDS TO BE EMPTY)
 };
 /**
  * runs python script that webscrapes (should ideally only run once) for billboard music data
@@ -253,6 +292,7 @@ let getSongInformation = async function () {
   console.log(fullInfoHitArray);
   return fullInfoHitArray;
 };
+
 /**
  * Gets audio features for the tracks in the top 100 list using the spotify ids of the songs
  * @summary traverses the list of all top 100 songs to get the audio features for the track using the spotify API
@@ -284,7 +324,7 @@ let getSongAudioInformation = async function (songArray) {
   let i = 0;
 
   songArray.forEach((songObject) => {
-    console.log(returnData[i]);
+    //console.log(returnData[i]);
     if (returnData[i] == null) {
       songObject.danceability = -1;
       songObject.energy = -1;
@@ -335,7 +375,7 @@ let getUserTopTracks = () => {
         object = {
           name: songObject.name,
           popularity: songObject.popularity,
-          yearOfRelease: songObject.album.release_date,
+          release: songObject.album.release_date,
           artists: artist,
           imageUrl: songObject.album.images[0].url,
         };
@@ -348,28 +388,49 @@ let getUserTopTracks = () => {
  *
  * @summary Updates the tables of the postgres database with all the information of the top 100 songs for the current decade
  */
-let saveToDatabase = async () => {
+let saveToDatabase = async (songArray, id) => {
   index = 1;
-  for (const songObjects of fullInfoHitArray) {
+  for (const songObjects of songArray) {
     let dateArray = songObjects.release.split("-"); //get the date (we only care about year, not exact date)
     console.log(songObjects);
     //create a row with the information (INSERT INTO)
-    await databaseTable.create({
-      song: songObjects.name,
-      artists: songObjects.artists,
-      yearOfRelease: dateArray[0],
-      imageUrl: songObjects.image,
-      valence: songObjects.valence,
-      danceability: songObjects.danceability,
-      popularity: songObjects.popularity,
-      key: songObjects.key,
-      mode: songObjects.mode,
-      speechiness: songObjects.speechiness,
-      tempo: songObjects.speechiness,
-      acousticness: songObjects.acousticness,
-      energy: songObjects.energy,
-      rank: index,
-    });
+    if (songArray == fullInfoHitArray) {
+      await databaseTable.create({
+        song: songObjects.name,
+        artists: songObjects.artists,
+        yearOfRelease: dateArray[0],
+        imageUrl: songObjects.image,
+        valence: songObjects.valence,
+        danceability: songObjects.danceability,
+        popularity: songObjects.popularity,
+        key: songObjects.key,
+        mode: songObjects.mode,
+        speechiness: songObjects.speechiness,
+        tempo: songObjects.tempo,
+        acousticness: songObjects.acousticness,
+        energy: songObjects.energy,
+        rank: index,
+      });
+    } else {
+      await databaseTable.create({
+        song: songObjects.name,
+        artists: songObjects.artists,
+        yearOfRelease: dateArray[0],
+        imageUrl: songObjects.image,
+        valence: songObjects.valence,
+        danceability: songObjects.danceability,
+        popularity: songObjects.popularity,
+        key: songObjects.key,
+        mode: songObjects.mode,
+        speechiness: songObjects.speechiness,
+        tempo: songObjects.speechiness,
+        acousticness: songObjects.acousticness,
+        energy: songObjects.energy,
+        rank: index,
+        sessionID: id,
+      });
+    }
+
     index++;
   }
 }; /*********************************** EXPORTED FUNTIONS ***********************************/
@@ -389,6 +450,7 @@ exports.getMusicInformation = async (comparator) => {
   if (amount > 0) {
     //already in database...we can load from there else
     //load data from DB...
+    return getDecadeStatistics();
   } else {
     //need to run python script and get spotify authentication...
     console.log(comparator);
@@ -411,7 +473,7 @@ exports.getMusicInformation = async (comparator) => {
       .then((data) => {
         // console.log(fullInfoHitArray);
 
-        return saveToDatabase();
+        return saveToDatabase(fullInfoHitArray, "");
       })
       .then(() => {
         databaseTable = {};
@@ -420,7 +482,9 @@ exports.getMusicInformation = async (comparator) => {
         spotifyApi = {}; //empty object again...
       });
   }
-}; /*********************************** EXPORTED FUNTIONS ***********************************/
+};
+
+/*********************************** EXPORTED FUNTIONS ***********************************/
 
 /**
  * Brief description of the function here.
@@ -451,6 +515,8 @@ exports.getAuthorizationURL = (timeRange) => {
  */
 
 exports.getUserListeningHabbits = async (req) => {
+  databaseTable = determineDatabaseTable(""); //should be users
+  console.log(databaseTable);
   spotifyApi
     .authorizationCodeGrant(req.query.code)
     .then(
@@ -473,5 +539,7 @@ exports.getUserListeningHabbits = async (req) => {
     .then((data) => {
       return getSongAudioInformation(myTopHits); //gets the audio info each of the top hits
     })
-    .then(() => console.log(myTopHits));
+    .then((data) => {
+      saveToDatabase(myTopHits, req.session.id);
+    });
 };

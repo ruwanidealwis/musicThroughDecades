@@ -58,10 +58,10 @@ router.get("/:comparators", (req, res) => {
   let comparators = req.params.comparators.split("-"); //getting properly formatted comparators
   console.log(comparators);
   let userSpotify = ["allTime", "6Months", "1Month"];
-  if (!userSpotify.includes(comparators[0])) {
+  if (!userSpotify.includes(comparators[0], req, res)) {
     //this means the comparator is a decade (does not need user authentication)
     //call spotify controller method to get year data
-    spotifyController.getMusicInformation(comparators[0]);
+    spotifyController.getMusicInformation(comparators[0], req);
   } else {
     let url = spotifyController.getAuthorizationURL(comparators[0]);
     res.redirect(url); //now redirects user to authorization... (after successful should return to callback...)
@@ -69,7 +69,7 @@ router.get("/:comparators", (req, res) => {
   if (!userSpotify.includes(comparators[1])) {
     //same as above
     //call spotify controller method to get year data
-    spotifyController.getMusicInformation(comparators[1]);
+    // spotifyController.getMusicInformation(comparators[1], req); //will redirect with session objects...
   } else {
   }
 
