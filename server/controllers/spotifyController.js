@@ -7,15 +7,17 @@ const { Sequelize } = require("../../models/index.js");
 
 /********* variable declaration */
 /** @global allhitdata */ var top100Hits; //stores 100 hits as retrived from webScraper
-/** @global */ var fullInfoHitArray = []; //this array contains all the information on the song (audio features etc)
-/** @global */ var songIdArray = []; //spotify id's of the song, enabling to get audio information
-/** @global */ var myTopHits = []; //spotify id's of the song, enabling to get audio information
-/** @global */ var spotifyApi; //create an instance of webAPI
-/** @global */ var clientId = process.env.CLIENTID; //client id for app
-/** @global */ var clientSecret = process.env.CLIENTSECRET; //client secret for app
-/** @global */ var redirectUri = process.env.CALLBACKURL;
-/** @global */ var userTopRead = "";
-/** @global */ var databaseTable; //the relevant table needed...
+/** @global decade being searched */ var decade; //stores 100 hits as retrived from webScraper
+/** @global full array with relevant info of top songs for decade */ var fullInfoHitArray = []; //this array contains all the information on the song (audio features etc)
+/** @global spotify id's of songs*/ var songIdArray = []; //spotify id's of the song, enabling to get audio information
+/** @global user top hits for specific range*/ var myTopHits = []; //spotify id's of the song, enabling to get audio information
+/** @global spotify web api wrapper*/ var spotifyApi; //create an instance of webAPI
+/** @global clientID of app */ var clientId = process.env.CLIENTID; //client id for app
+/** @global clientSecret of app*/ var clientSecret = process.env.CLIENTSECRET; //client secret for app
+/** @global redirectUri for spotify user authentication*/ var redirectUri =
+  process.env.CALLBACKURL;
+/** @global timerange for user top songs*/ var userTopRead = "";
+/** @global stores databasetable*/ var databaseTable; //the relevant table needed...
 
 /*********************************************** SET BASIC INFO (if running locally...) *********************************/
 if (process.env.PORT == null) {
@@ -45,10 +47,12 @@ let determineDatabaseTable = (decade) => {
       break;
     case "1980":
       table = db.eighties;
+      console.log(db);
       break;
     case "1990":
       console.log("hwere");
       table = db.nineties;
+      console.log(db.nineties);
       break;
     case "2000":
       table = db.twothousands;
@@ -81,6 +85,9 @@ let getReadChoice = (comparator) => {
   }
 };
 
+let getFeatureAverageForDecade = async (feature) => {
+  //weighted?, not weighted?
+};
 let getCountForDecade = async (feature) => {
   const { Op } = require("sequelize");
   const { Sequelize } = require("sequelize");
@@ -89,7 +96,7 @@ let getCountForDecade = async (feature) => {
       feature,
       [Sequelize.fn("COUNT", Sequelize.col(feature)), "count"],
     ],
-    where: { [feature]: { [Op.or]: { [Op.ne]: -1, [Op.ne]: "-1" } } },
+    where: { [feature]: { [Op.or]: { [Op.ne]: -1, [Op.ne]: "-1" } } }, //this is when spotify could not identify a key...
     group: feature, //group by feature
     raw: true, //get raw data
   });
@@ -98,6 +105,20 @@ let getCountForDecade = async (feature) => {
   return data;
 };
 
+let getTopArtistsForDecade = async (decade) => {
+  const { Sequelize } = require("sequelize");
+  const { QueryTypes } = require("sequelize");
+  let data = await databaseTable.sequelize.query(
+    `select artist, count(artist) as numHits from (select song,(unnest(artists)) as artist from ${databaseTable.tableName}) as x group by artist order by numHits desc limit 5`,
+    {
+      replacements: { table: "eighties" },
+      model: databaseTable,
+      mapToModel: true, // pass true here if you have any mapped fields
+      raw: true,
+    }
+  );
+  return data;
+};
 let getAverageFeatureForDecade = async (feature, year) => {
   const { Sequelize } = require("sequelize");
   letYearlyInfo = [];
@@ -114,7 +135,7 @@ let getAverageFeatureForDecade = async (feature, year) => {
     letYearlyInfo.push(data[0].average); //puts each year into a final array (ex: index 0 is year 1990, index 1 is year 1991)
     year++;
   }
-  /*TODO fix rank 95, and rank 7 for 1970s*/
+  //TODO fix rank 95, and rank 7 for 1970s
   return letYearlyInfo;
 };
 let getTopValues = (feature, limit, ordering) => {
@@ -164,6 +185,8 @@ let getDecadeStatistics = async (decade) => {
   //get most and least popular songs
   let mostPopularToday = await getTopValues("popularity", 5, "DESC");
   let leastPopularToday = await getTopValues("popularity", 5, "ASC");
+
+  //get distriubtion for mode and key
   let getModeCount = await getCountForDecade("mode");
   let getKeyCount = await getCountForDecade("key");
 
@@ -171,14 +194,19 @@ let getDecadeStatistics = async (decade) => {
   fullStatsObject.leastPopularToday = leastPopularToday;
   fullStatsObject.modeCount = getModeCount;
   fullStatsObject.keyCount = getKeyCount;
-  console.log(fullStatsObject.leastPopularToday);
+  fullStatsObject.mostHits = g;
+  console.log(fullStatsObject);
+  await getTopArtistsForDecade();
 };
 let getUserStatistics = async (req) => {
   //check if it is user (if yes, table... and add songs)
   //database hsould be unique to decade...
-  //need top 5 songs, top 5 artists, average valence (for decade/user, for each year (only for decade)....), average danceability, average energy, average tempo, average accousticness, speechiness (top 3 songs for each), mode dsitribution, key distribution,
+  //TODO need top 5 songs, top 5 artists, average valence (for decade/user, for each year (only for decade)....), average danceability, average energy, average tempo, average accousticness, speechiness (top 3 songs for each), mode dsitribution, key distribution,
+  //TODO get ranked averages for each feature....and top artists (need to unnest table)
+  //TODO need to fix all lowest popularity....they are wrong!
   //check if it is user (if yes DROP ALL ROWS, IT NEEDS TO BE EMPTY)
 };
+
 /**
  * runs python script that webscrapes (should ideally only run once) for billboard music data
  *
@@ -508,7 +536,7 @@ let saveToDatabase = async (songArray, id) => {
 exports.getMusicInformation = async (comparator) => {
   //only called when it is a decade...
   //need to check if database has the data...
-
+  decade = comparator; //need this for user data, not emptied out after operations are complete
   databaseTable = determineDatabaseTable(comparator);
   const amount = await databaseTable.count();
   console.log(amount);
