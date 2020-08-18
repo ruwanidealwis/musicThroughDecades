@@ -3,6 +3,7 @@ let SpotifyWebApi = require("spotify-web-api-node");
 config = require("../../variableConfig.js");
 /** @global */ const db = require("../../models/index.js");
 var { PythonShell } = require("python-shell");
+const { Sequelize } = require("../../models/index.js");
 
 /********* variable declaration */
 /** @global allhitdata */ var top100Hits; //stores 100 hits as retrived from webScraper
@@ -80,20 +81,67 @@ let getReadChoice = (comparator) => {
   }
 };
 
-let getTopValues = (feature, limit) => {
+let getCountForDecade = async (feature) => {
+  const { Op } = require("sequelize");
+  const { Sequelize } = require("sequelize");
+  let data = await databaseTable.findAll({
+    attributes: [
+      feature,
+      [Sequelize.fn("COUNT", Sequelize.col(feature)), "count"],
+    ],
+    where: { [feature]: { [Op.or]: { [Op.ne]: -1, [Op.ne]: "-1" } } },
+    group: feature, //group by feature
+    raw: true, //get raw data
+  });
+
+  console.log(data);
+  return data;
+};
+
+let getAverageFeatureForDecade = async (feature, year) => {
+  const { Sequelize } = require("sequelize");
+  letYearlyInfo = [];
+  for (let i = 0; i < 10; i++) {
+    featureArray = [];
+    //gets the top songs for a specific year based on a feature (ex: happiest songs of 1995)
+    let data = await databaseTable.findAll({
+      attributes: [[Sequelize.fn("AVG", Sequelize.col(feature)), "average"]],
+      where: { yearOfRelease: parseInt(year) },
+      raw: true,
+    });
+    //creates an array of objects with these songs
+    console.log(data[0]);
+    letYearlyInfo.push(data[0].average); //puts each year into a final array (ex: index 0 is year 1990, index 1 is year 1991)
+    year++;
+  }
+  /*TODO fix rank 95, and rank 7 for 1970s*/
+  return letYearlyInfo;
+};
+let getTopValues = (feature, limit, ordering) => {
   let featureArray = [];
+  //gets the top songs for a specific feature
   return databaseTable
     .findAll({
-      attributes: ["song", "artists", "yearOfRelease", feature],
-      order: [[feature, "DESC"]],
+      attributes: ["song", "artists", "yearOfRelease", feature, "rank"],
+      order: [[feature, ordering]],
       limit: limit,
     })
     .then((data) => {
-      console.log(data);
+      data.forEach((song) => {
+        featureArray.push({
+          name: song.song,
+          artists: song.artists,
+          [feature]: song[feature],
+          year: song.yearOfRelease,
+          rank: song.rank,
+        });
+      });
+      return featureArray; //created an object of arrays with these top songs, the array is returned
     });
 };
 
-let getDecadeStatistics = async () => {
+let getDecadeStatistics = async (decade) => {
+  fullStatsObject = {};
   const { Sequelize } = require("sequelize");
   let featureArray = [
     "valence",
@@ -105,8 +153,25 @@ let getDecadeStatistics = async () => {
   ];
 
   for (const feature of featureArray) {
-    await getTopValues(feature, 3);
+    let descTopArray = await getTopValues(feature, 3, "DESC"); //waits for the top values of each feature (ex: 3 happiest songs of 1996)
+    let ascTopArray = await getTopValues(feature, 3, "ASC"); //waits for the lowest values of each feature (ex: 3 saddest songs of 1995)
+    let yearlyInfoArray = await getAverageFeatureForDecade(feature, decade); //gets the average value for each year for a specific feature
+    //adds to the full statsObject
+    fullStatsObject[`highest_${feature}`] = descTopArray;
+    fullStatsObject[`lowest_${feature}`] = ascTopArray;
+    fullStatsObject[`yearly_${feature}`] = yearlyInfoArray;
   }
+  //get most and least popular songs
+  let mostPopularToday = await getTopValues("popularity", 5, "DESC");
+  let leastPopularToday = await getTopValues("popularity", 5, "ASC");
+  let getModeCount = await getCountForDecade("mode");
+  let getKeyCount = await getCountForDecade("key");
+
+  fullStatsObject.mostPopularToday = mostPopularToday;
+  fullStatsObject.leastPopularToday = leastPopularToday;
+  fullStatsObject.modeCount = getModeCount;
+  fullStatsObject.keyCount = getKeyCount;
+  console.log(fullStatsObject.leastPopularToday);
 };
 let getUserStatistics = async (req) => {
   //check if it is user (if yes, table... and add songs)
@@ -261,7 +326,7 @@ var getBasicSongInfo = async (trackObject) => {
           let object = {
             id: data.id,
             albumId: data.album.id,
-            name: trackObject.track,
+            name: trackObject.track.trim(),
             release: trackObject.year,
             image: data.album.images[0].url,
             artists: artists,
@@ -450,7 +515,7 @@ exports.getMusicInformation = async (comparator) => {
   if (amount > 0) {
     //already in database...we can load from there else
     //load data from DB...
-    return getDecadeStatistics();
+    return getDecadeStatistics(comparator);
   } else {
     //need to run python script and get spotify authentication...
     console.log(comparator);
