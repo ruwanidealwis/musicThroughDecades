@@ -4,6 +4,7 @@ config = require("../../variableConfig.js");
 /** @global */ const db = require("../../models/index.js");
 var { PythonShell } = require("python-shell");
 const { Sequelize } = require("../../models/index.js");
+const artist = require("../../models/artist.js");
 
 /********* variable declaration */
 /** @global allhitdata */ var top100Hits; //stores 100 hits as retrived from webScraper
@@ -17,7 +18,7 @@ const { Sequelize } = require("../../models/index.js");
 /** @global redirectUri for spotify user authentication*/ var redirectUri =
   process.env.CALLBACKURL;
 /** @global timerange for user top songs*/ var userTopRead = "";
-/** @global stores databasetable*/ var databaseTable; //the relevant table needed...
+/** @global stores databasetable*/ var databaseTable = require("./databaseController");
 
 /*********************************************** SET BASIC INFO (if running locally...) *********************************/
 if (process.env.PORT == null) {
@@ -32,6 +33,8 @@ if (process.env.PORT == null) {
  * @param {String} decade - the decade that is being compared
  * @return {Object} returns database object of the correct table to query
  */
+//taken from: https://stackoverflow.com/questions/14226803/wait-5-seconds-before-executing-next-line
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 let determineDatabaseTable = (decade) => {
   let table;
   console.log(decade);
@@ -305,6 +308,32 @@ let formatData = (data) => {
  * @return {Promise} that resolves to array with data from spotify API, or the error generated when quereying the API
  */
 
+var getArtistInfo = async (ids) => {
+  let artistArray = [];
+  return spotifyApi.getArtists(ids).then(
+    function (data) {
+      //console.log("Artist information", data.body.artists);
+      data.body.artists.forEach((artistObject) => {
+        //console.log(artistObject);
+        image = "";
+        if (artistObject.images[0] != null) image = artistObject.images[0].url;
+        let obj = {
+          name: artistObject.name,
+          genres: artistObject.genres,
+          imageURL: image,
+        };
+        artistArray.push(obj);
+      });
+
+      return artistArray;
+    },
+    function (err) {
+      console.error(err.body);
+
+      return err;
+    }
+  );
+};
 var getBasicSongInfo = async (trackObject) => {
   return spotifyApi
     .searchTracks((trackObject.track || "") + " " + (trackObject.artist || ""))
@@ -313,7 +342,7 @@ var getBasicSongInfo = async (trackObject) => {
         if (data.body.tracks.items === []) {
           //console.log(trackObject.track);
         }
-        console.log(trackObject);
+        //console.log(trackObject);
         //console.log(data.body.tracks.items || trackObject.track);
 
         if (
@@ -323,7 +352,7 @@ var getBasicSongInfo = async (trackObject) => {
           //console.log(data.body);
           //console.log(data.body.tracks.items);
         }
-        console.log(data.body);
+        //console.log(data.body);
         return data.body.tracks.items[0];
       },
       function (err) {
@@ -332,7 +361,7 @@ var getBasicSongInfo = async (trackObject) => {
       }
     )
     .then(
-      (data) => {
+      async (data) => {
         //format array properly...
         if (data == null) {
           let object = {
@@ -347,17 +376,19 @@ var getBasicSongInfo = async (trackObject) => {
           fullInfoHitArray.push(object);
           songIdArray.push("");
         } else {
-          let artists = [];
+          let artistsId = [];
           data.artists.forEach((artist) => {
-            artists.push(artist.name);
+            artistsId.push(artist.id);
           });
+          let artistInfo = await getArtistInfo(artistsId); //get
+          await delay(170); //waits 100ms (gets around spotify api rate limiting)
           let object = {
             id: data.id,
             albumId: data.album.id,
             name: trackObject.track.trim(),
             release: trackObject.year,
             image: data.album.images[0].url,
-            artists: artists,
+            artists: artistInfo,
             popularity: data.popularity,
           };
           fullInfoHitArray.push(object);
@@ -382,7 +413,7 @@ let getSongInformation = async function () {
     //await genreInformation(trackObject); //gets genre of ALBUM!
   } //waits till promise is resolved (this maintains order)
   console.log("done");
-  console.log(fullInfoHitArray);
+  //console.log(fullInfoHitArray);
   return fullInfoHitArray;
 };
 
@@ -416,8 +447,9 @@ let getSongAudioInformation = async function (songArray) {
   //åconsole.log(returnData);
   let i = 0;
 
-  songArray.forEach((songObject) => {
+  for (var songObject of songArray) {
     //console.log(returnData[i]);
+    console.log(songObject);
     if (returnData[i] == null) {
       songObject.danceability = -1;
       songObject.energy = -1;
@@ -427,7 +459,6 @@ let getSongAudioInformation = async function (songArray) {
       songObject.valence = -1;
       songObject.speechiness = -1;
       songObject.tempo = -1;
-      i++;
     } else {
       songObject.danceability = returnData[i].danceability;
       songObject.energy = returnData[i].energy;
@@ -437,13 +468,20 @@ let getSongAudioInformation = async function (songArray) {
       songObject.valence = returnData[i].valence;
       songObject.speechiness = returnData[i].speechiness;
       songObject.tempo = returnData[i].tempo;
-      i++;
+      songObject.instrumentalness = returnData[i].instrumentalness;
     }
-  });
+    i++;
 
-  //waits till promise is resolved (this maintains order)
-  console.log("done");
+    if (songArray == top100Hits)
+      await databaseTable.addSongToDatabase(songObject, decade, i);
+    //indexing will change rank by 1 (index 0 has rank 1, but we need it saved to the db as rank 1)
+    else await databaseTable.addUserSongToDatabase(songObject, i); //works differentl
+  }
 };
+
+//add songs to database here... (one by 1....)
+
+//waits till promise is resolved (this maintains order)
 
 /**
  * Usess spotify API to get the top tracks for the current user and creates object with the information returned and adds it to the array of tophits
@@ -537,9 +575,11 @@ exports.getMusicInformation = async (comparator) => {
   //only called when it is a decade...
   //need to check if database has the data...
   decade = comparator; //need this for user data, not emptied out after operations are complete
-  databaseTable = determineDatabaseTable(comparator);
-  const amount = await databaseTable.count();
+  // databaseTable = determineDatabaseTable(comparator);
+  //const amount = await databaseTable.count();
+  const amount = 0; //TODO test will have to fix later
   console.log(amount);
+  //databaseTable.test();
   if (amount > 0) {
     //already in database...we can load from there else
     //load data from DB...
@@ -559,16 +599,13 @@ exports.getMusicInformation = async (comparator) => {
         return getSongInformation();
       })
       .then((data) => {
-        //console.log(data);
+        // console.log(fullInfoHitArray);
 
         return getSongAudioInformation(fullInfoHitArray);
       })
       .then((data) => {
         // console.log(fullInfoHitArray);
-
-        return saveToDatabase(fullInfoHitArray, "");
-      })
-      .then(() => {
+        //eturn saveToDatabase(fullInfoHitArray, "");
         databaseTable = {};
         fullInfoHitArray = [];
         top100Hits = [];

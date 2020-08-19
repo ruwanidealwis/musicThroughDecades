@@ -1,31 +1,29 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("tempUsers", {
+    await queryInterface.createTable("Songs", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      sessionID: {
-        type: Sequelize.STRING,
-        allowNull: false,
+      //association with decade
+      decadeId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Decades", // name of Target model
+          key: "id", // key in Target model that we're referencing
+        },
       },
-      song: {
+      name: {
         type: Sequelize.STRING,
-      },
-      artists: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
       },
       imageUrl: {
         type: Sequelize.STRING,
       },
       yearOfRelease: {
         type: Sequelize.INTEGER,
-      },
-      genre: {
-        type: Sequelize.STRING,
       },
       valence: {
         type: Sequelize.REAL,
@@ -37,7 +35,7 @@ module.exports = {
         type: Sequelize.REAL,
       },
       mode: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER,
       },
       key: {
         type: Sequelize.INTEGER,
@@ -51,16 +49,24 @@ module.exports = {
       acousticness: {
         type: Sequelize.REAL,
       },
+      popularity: {
+        type: Sequelize.INTEGER,
+      },
+      instrumentalness: {
+        type: Sequelize.REAL,
+      },
       rank: {
         type: Sequelize.INTEGER,
       },
-      popularity: {
-        type: Sequelize.INTEGER,
+      temp: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
       },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
       },
+
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE,
@@ -68,6 +74,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("tempUsers");
+    await queryInterface.dropTable("Songs");
   },
 };

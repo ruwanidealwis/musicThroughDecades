@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class eighties extends Model {
+  class Songs extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -9,15 +9,25 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.decade = this.belongsTo(models.Decade, { foreignKey: "decadeId" }); //each song belongs to 1 decade
+
+      this.belongsToMany(models.Artist, {
+        through: models.SongArtists,
+        foreignKey: "songId",
+      });
+
+      //songs can have many users who listen to it
+      this.belongsToMany(models.tempUser, {
+        through: models.UserSongs,
+        foreignKey: "songId",
+      });
     }
   }
-  eighties.init(
+  Songs.init(
     {
-      song: DataTypes.STRING,
-      artists: DataTypes.ARRAY(DataTypes.STRING),
+      name: DataTypes.STRING,
       imageUrl: DataTypes.STRING,
       yearOfRelease: DataTypes.INTEGER,
-
       valence: DataTypes.REAL,
       danceability: DataTypes.REAL,
       energy: DataTypes.REAL,
@@ -26,13 +36,16 @@ module.exports = (sequelize, DataTypes) => {
       speechiness: DataTypes.REAL,
       tempo: DataTypes.REAL,
       acousticness: DataTypes.REAL,
-      rank: DataTypes.INTEGER,
       popularity: DataTypes.INTEGER,
+      instrumentalness: DataTypes.REAL,
+      rank: DataTypes.INTEGER,
+      decadeId: DataTypes.INTEGER,
+      temp: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
       sequelize,
-      modelName: "eighties",
+      modelName: "Songs",
     }
   );
-  return eighties;
+  return Songs;
 };
