@@ -217,6 +217,7 @@ let getUserStatistics = async (req) => {
  * @return {Promise} returns the data (or error)
  */
 
+//Adapted from :https://www.npmjs.com/package/python-shell
 let runPy = (decade) => {
   return new Promise(function (success, nosuccess) {
     let options = {
@@ -588,23 +589,32 @@ let saveToDatabase = async (songArray, id) => {
  * @param {string} comparator - the decade to get the top hits for
  * @return {Array} Array of all relevant information about the specific decade (top hits, artists, audio statistics)
  */
-exports.getMusicInformation = async (comparator) => {
+exports.getMusicInformation = async (comparator, req) => {
   //only called when it is a decade...
   //need to check if database has the data...
   decade = comparator; //need this for user data, not emptied out after operations are complete
-  // databaseTable = determineDatabaseTable(comparator);
-  //const amount = await databaseTable.count();
-  const amount = 0; //TODO test will have to fix later
+
+  amount = await databaseTable.getAmount(decade);
   console.log(amount);
-  databaseTable.test();
   if (amount > 0) {
+    data = await databaseTable.getDecadeStatistics(decade);
+
+    return data;
     //already in database...we can load from there else
     //load data from DB...
-    return getDecadeStatistics(comparator);
+    //what do we need:
+    //average feature value for each year...done
+    //song distribution by year---done
+    //get top 3 highest/lowest for each year---done
+    //get 3 top from the decade for each feature (and popularity)---done
+    //top 7 artists (most hits)----done
+    //most common genres
+    //get key distribution---done
+    //het mode distribution----done
   } else {
     //need to run python script and get spotify authentication...
     console.log(comparator);
-    runPy(comparator)
+    return runPy(comparator)
       .then((data) => {
         top100Hits = formatData(data);
 
@@ -623,10 +633,15 @@ exports.getMusicInformation = async (comparator) => {
       .then((data) => {
         // console.log(fullInfoHitArray);
         //eturn saveToDatabase(fullInfoHitArray, "");
+
+        return databaseTable.getDecadeStatistics(decade);
+      })
+      .then((data) => {
         databaseTable = {};
         fullInfoHitArray = [];
         top100Hits = [];
         spotifyApi = {}; //empty object again...
+        return data;
       });
   }
 };

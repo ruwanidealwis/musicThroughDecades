@@ -41,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       instrumentalness: DataTypes.REAL,
       rank: DataTypes.INTEGER,
       decadeId: DataTypes.INTEGER,
-      spotifyId: DataTypes.INTEGER,
+      spotifyId: DataTypes.STRING,
       temp: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {

@@ -54,14 +54,18 @@ router.get("/callback", (req, res) => {
   spotifyController.getUserListeningHabbits(req);
 });
 
-router.get("/:comparators", (req, res) => {
+router.get("/:comparators", async (req, res) => {
   let comparators = req.params.comparators.split("-"); //getting properly formatted comparators
   console.log(comparators);
   let userSpotify = ["allTime", "6Months", "1Month"];
   if (!userSpotify.includes(comparators[0], req, res)) {
     //this means the comparator is a decade (does not need user authentication)
     //call spotify controller method to get year data
-    spotifyController.getMusicInformation(comparators[0], req);
+    req.session.data = await spotifyController.getMusicInformation(
+      comparators[0],
+      req
+    );
+    res.send(req.session.data);
   } else {
     let url = spotifyController.getAuthorizationURL(comparators[0]);
     res.redirect(url); //now redirects user to authorization... (after successful should return to callback...)

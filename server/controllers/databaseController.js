@@ -1,5 +1,8 @@
 //manipulate DB
 /** @global */ const db = require("../../models/index.js");
+const { get } = require("../routes/index.js");
+const { Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 
 exports.test = async () => {
   let ans = await db.Songs.findAll({
@@ -10,6 +13,7 @@ exports.test = async () => {
   console.log(ans);
 };
 
+/***************************** METHODS FOR CREATING/REMOVING FROM DB */
 exports.createTempUser = async (sessionId) => {
   await db.tempUser.create({
     sessionId: sessionId,
@@ -273,4 +277,347 @@ let deleteUserArtistsFromDatabase = async (artist, sessionId) => {
       }
     }
   }
+};
+
+let getSongDistributionByYear = (decade, year) => {
+  return db.Decade.findOne({
+    where: { name: decade },
+    include: [{ model: db.Songs, where: { yearOfRelease: year } }],
+  }).then((data) => {
+    console.log(data);
+    console.log(data.Songs);
+    return data.Songs.length;
+  });
+};
+
+/********************************* METHODS FOR QUERYING DATABASE */
+exports.getAmount = async (decade) => {
+  let decadeInfo = await db.Decade.findOne({
+    where: { name: decade },
+    include: [{ model: db.Songs }],
+  }); //only have one, name is unique
+
+  console.log(decadeInfo.Songs.length);
+  return decadeInfo.Songs.length;
+};
+
+let getDecadeId = async (decade) => {
+  return db.Decade.findOne({
+    attributes: ["id"],
+    raw: true,
+    where: { name: decade },
+  }).then((data) => {
+    return data.id;
+  });
+};
+
+getAverageValue = async (feature, decade, start, end) => {
+  const { Sequelize } = require("sequelize");
+
+  return getDecadeId(decade)
+    .then((id) => {
+      return db.Songs.findOne({
+        attributes: [[Sequelize.fn("AVG", Sequelize.col(feature)), "average"]],
+        where: {
+          decadeId: id,
+          yearOfRelease: { [Op.between]: [start, end] },
+        },
+        raw: true,
+      });
+    })
+    .then((data) => {
+      console.log(data);
+      return data.average;
+    });
+  //console.log(decadeInfo.Songs);
+};
+getTopFeaturesForDecade = async (
+  feature,
+  ordering,
+  limit,
+  decade,
+  start,
+  end
+) => {
+  let objArray = [];
+  const { Op } = require("sequelize");
+  let decadeInfo = await db.Decade.findOne({
+    where: { name: decade },
+    include: [
+      {
+        attributes: ["name", feature, "yearOfRelease", "rank", "id"],
+        required: false,
+        model: db.Songs,
+        order: [[feature, ordering]],
+        limit: limit,
+        where: { yearOfRelease: { [Op.between]: [start, end] } },
+      },
+    ],
+  }); //only have one, name is unique
+
+  for (const songs of decadeInfo.Songs) {
+    // console.log(songs);
+    //cant do it in original query, breaks it
+    let songArtists = await db.Songs.findByPk(songs.id, {
+      include: [{ model: db.Artist }],
+    });
+    let artistsArray = [];
+    songArtists.Artists.forEach((artist) =>
+      artistsArray.push({ name: artist.name, genres: artist.genres })
+    );
+
+    let obj = {
+      name: songs.name,
+      year: songs.yearOfRelease,
+      rank: songs.rank,
+      [feature]: songs[feature],
+      artists: artistsArray,
+    };
+    objArray.push(obj);
+  }
+  return objArray;
+};
+
+//get the top 10 songs of the decade....
+let getTopSongs = (decade) => {
+  let TopArray = [];
+  return getDecadeId(decade).then((id) => {
+    return db.Songs.findAll({
+      attributes: ["name", "rank"],
+      where: { decadeId: id },
+      include: { model: db.Artist },
+      limit: 10,
+    })
+      .then((songs) => {
+        for (const song of songs) {
+          console.log(song);
+          let artists = [];
+
+          for (const artist of song.Artists) {
+            artists.push(artist.name);
+          }
+          TopArray.push({
+            name: song.name,
+            rank: song.rank,
+            artists: artists,
+          });
+        }
+      })
+      .then(() => {
+        return TopArray;
+      });
+  });
+};
+
+let getFeatureDistribution = async (decade, feature) => {
+  return getDecadeId(decade).then((id) => {
+    return db.Songs.findAll({
+      where: { decadeId: id, [feature]: { [Op.or]: { [Op.ne]: -1 } } },
+      attributes: [
+        feature,
+        [Sequelize.fn("COUNT", Sequelize.col(feature)), "count"],
+      ],
+      group: feature, //group by feature
+      raw: true, //get raw data
+    });
+  });
+};
+
+let getMostCommonGenres = async (decade) => {
+  //couldnt get sequelize query to work //TODO check later
+  return getDecadeId(decade).then((id) => {
+    return db.sequelize
+      .query(
+        `select
+   count(x.genre),
+   genre 
+from
+   (
+      select
+         unnest(genres) as genre,
+         name 
+      from
+         "Artists" 
+         inner join
+            "DecadeArtists" 
+            on "DecadeArtists"."artistId" = "Artists"."id" 
+      where
+         "decadeId" = ${id}
+   )
+   as x 
+group by
+   x.genre 
+order by count desc
+limit 10`,
+        {
+          model: db.Decade,
+          mapToModel: true, // pass true here if you have any mapped fields
+          raw: true,
+        }
+      )
+      .then((data) => {
+        return data;
+      });
+  });
+};
+
+let getTopArtists = async (decade, limit) => {
+  const { Sequelize } = require("sequelize");
+
+  //couldnt get sequelize query to work //TODO check later
+  return getDecadeId(decade)
+    .then((id) => {
+      return db.sequelize.query(
+        `SELECT
+   "Decade"."id",
+   "Artists"."name" AS "Artists.name",
+   COUNT("Artists -> Songs"."id") AS "Artists.Songs.count" 
+FROM
+   "Decades" AS "Decade" 
+   LEFT OUTER JOIN
+      (
+( "DecadeArtists" AS "Artists -> DecadeArtists" 
+         INNER JOIN
+            "Artists" AS "Artists" 
+            ON "Artists"."id" = "Artists -> DecadeArtists"."artistId") 
+         INNER JOIN
+            (
+               "SongArtists" AS "Artists -> Songs -> SongArtists" 
+               INNER JOIN
+                  "Songs" AS "Artists -> Songs" 
+                  ON "Artists -> Songs"."id" = "Artists -> Songs -> SongArtists"."songId"
+            )
+            ON "Artists"."id" = "Artists -> Songs -> SongArtists"."artistId" 
+            AND "Artists -> Songs"."decadeId" = ${id}
+      )
+      ON "Decade"."id" = "Artists -> DecadeArtists"."decadeId" 
+WHERE
+   "Decade"."id" = ${id}
+GROUP BY
+   "Decade"."id",
+   "Artists"."id" 
+ORDER BY
+   "Artists.Songs.count" desc
+   LIMIT ${limit}`,
+        {
+          model: db.Decade,
+          mapToModel: true, // pass true here if you have any mapped fields
+          raw: true,
+        }
+      );
+    })
+    .then((data) => {
+      //console.log(data);
+      let topArtists = [];
+      for (const artist of data) {
+        console.log(artist);
+        topArtists.push({
+          name: artist["Artists.name"],
+          hits: artist["Artists.Songs.count"],
+        });
+      }
+      return topArtists;
+    });
+};
+
+exports.getDecadeStatistics = async (decade) => {
+  let fullStatsObject = {};
+  let featureArray = [
+    "valence",
+    "danceability",
+    "instrumentalness",
+    "energy",
+    "speechiness",
+    "tempo",
+    "acousticness",
+  ];
+
+  for (const feature of featureArray) {
+    let yearArrayTop = [];
+    let yearlyAverage = [];
+    let yearArrayBottom = [];
+    let songDistributionByYear = [];
+
+    let year = parseInt(decade); //decade is the first year of decade (ex:1980)
+    for (let i = 0; i < 10; i++) {
+      //will return for each year in the decade, the top/lowest song of each feature (ex: valence), and the average value for that feature
+      await getAverageValue(feature, decade, year, year);
+      yearArrayBottom.push(
+        await getTopFeaturesForDecade(feature, "ASC", 1, decade, year, year)
+      );
+
+      yearArrayTop.push(
+        await getTopFeaturesForDecade(feature, "DESC", 1, decade, year, year)
+      );
+
+      yearlyAverage.push(await getAverageValue(feature, decade, year, year));
+
+      year++;
+    }
+    fullStatsObject[`lowest_${feature}`] = await getTopFeaturesForDecade(
+      feature,
+      "ASC",
+      3,
+      decade,
+      parseInt(decade),
+      parseInt(decade) + 9
+    );
+    fullStatsObject[`highest_${feature}`] = await getTopFeaturesForDecade(
+      feature,
+      "DESC",
+      3,
+      decade,
+      parseInt(decade),
+      parseInt(decade) + 9
+    );
+    fullStatsObject[`yearly_highest_${feature}`] = yearArrayTop;
+    fullStatsObject[`yearly_lowest_${feature}`] = yearArrayBottom;
+    fullStatsObject[`yearly_average_${feature}`] = yearlyAverage;
+
+    fullStatsObject[`average_${feature}`] = await getAverageValue(
+      feature,
+      decade,
+      parseInt(decade),
+      parseInt(decade) + 9
+    );
+  }
+  //get most popular songs of the decade (as of August 2020)
+  fullStatsObject[`most_popular`] = await getTopFeaturesForDecade(
+    "popularity",
+    "DESC",
+    10,
+    decade,
+    parseInt(decade),
+    parseInt(decade) + 9
+  );
+
+  //get top songs and artists
+  fullStatsObject[`top_10_songs`] = await getTopSongs(decade);
+  fullStatsObject[`top_10_artists`] = await getTopArtists(decade, 10);
+  fullStatsObject[`mode_distribution`] = await getFeatureDistribution(
+    decade,
+    "mode"
+  );
+  fullStatsObject[`key_distribution`] = await getFeatureDistribution(
+    decade,
+    "key"
+  );
+
+  //console.log(modeD);
+  //get Key distributions
+  let songDistributionByYear = [];
+  let year = parseInt(decade);
+  for (let i = 0; i < 10; i++) {
+    songDistributionByYear.push(await getSongDistributionByYear(decade, year));
+    year++;
+  }
+
+  fullStatsObject[`distribution_by_year`] = songDistributionByYear;
+  fullStatsObject[`most_popular_genres`] = await getMostCommonGenres(decade);
+
+  console.log(fullStatsObject);
+  return fullStatsObject;
+  //console.log(fullStatsObject);
+
+  //get overll adecade stats
 };
