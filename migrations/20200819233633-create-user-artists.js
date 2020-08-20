@@ -1,25 +1,30 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Artists", {
+    await queryInterface.createTable("UserArtists", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      name: {
+      sessionId: {
         type: Sequelize.STRING,
+        references: {
+          model: "tempUsers",
+          key: "sessionId",
+        },
+        onDelete: "cascade",
+        onUpdate: "cascade",
       },
-      genres: {
-        type: Sequelize.ARRAY(Sequelize.STRING),
-      },
-      imageURL: {
-        type: Sequelize.STRING,
-      },
-      temp: {
-        type: Sequelize.BOOLEAN,
-        defaultValue: false,
+      artistId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Artists",
+          key: "id",
+        },
+        onDelete: "cascade",
+        onUpdate: "cascade",
       },
       createdAt: {
         allowNull: false,
@@ -32,6 +37,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("Artists");
+    await queryInterface.dropTable("UserArtists");
   },
 };

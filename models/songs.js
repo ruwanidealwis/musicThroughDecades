@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsToMany(models.tempUser, {
         through: models.UserSongs,
         foreignKey: "songId",
+        targetKey: "sessionId",
       });
     }
   }
@@ -40,6 +41,7 @@ module.exports = (sequelize, DataTypes) => {
       instrumentalness: DataTypes.REAL,
       rank: DataTypes.INTEGER,
       decadeId: DataTypes.INTEGER,
+      spotifyId: DataTypes.INTEGER,
       temp: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {

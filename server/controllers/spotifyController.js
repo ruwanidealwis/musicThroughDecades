@@ -290,11 +290,12 @@ let formatData = (data) => {
     let artists = [];
     let splitHit = hit.replace("'", "").split(" - ");
     if (splitHit[1] != null) artists = splitHit[1].split("&") || "";
+    if (splitHit[2] == null) splitHit[2] = "";
     //console.log(splitHit[0]);
     allHitsArray.push({
       track: splitHit[0] || hit,
       artist: artists[0],
-      year: splitHit[2].replace("'", "") || "",
+      year: splitHit[2].replace("'", ""),
     }); //because of the way the website is structured (this may not be exactly correc t)
   });
 
@@ -383,14 +384,21 @@ var getBasicSongInfo = async (trackObject) => {
           let artistInfo = await getArtistInfo(artistsId); //get
           await delay(170); //waits 100ms (gets around spotify api rate limiting)
           let object = {
-            id: data.id,
+            spotifyId: data.id,
             albumId: data.album.id,
-            name: trackObject.track.trim(),
+            name: data.name
+              .split("-")[0]
+              .replace(/ *\([^)]*\) */g, "")
+              .trim(), //taken from: https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
             release: trackObject.year,
             image: data.album.images[0].url,
             artists: artistInfo,
             popularity: data.popularity,
           };
+          if (object.release == "") {
+            object.release = data.album.release_date;
+          }
+          console.log(data.album.release_date);
           fullInfoHitArray.push(object);
           songIdArray.push(data.id);
         }
@@ -441,7 +449,7 @@ let getAudioInfo = async function () {
  * @param {Array} songArray - array with the top songs (can either be the users top songs, or the top songs of the decade)
  */
 
-let getSongAudioInformation = async function (songArray) {
+let getSongAudioInformation = async function (songArray, sessionId) {
   let returnData = await getAudioInfo(); //await until
 
   //åconsole.log(returnData);
@@ -472,10 +480,13 @@ let getSongAudioInformation = async function (songArray) {
     }
     i++;
 
-    if (songArray == top100Hits)
+    if (songArray == fullInfoHitArray)
       await databaseTable.addSongToDatabase(songObject, decade, i);
     //indexing will change rank by 1 (index 0 has rank 1, but we need it saved to the db as rank 1)
-    else await databaseTable.addUserSongToDatabase(songObject, i); //works differentl
+    else {
+      console.log(databaseTable);
+      await databaseTable.addUserSongToDatabase(songObject, i, sessionId);
+    } //works differentl
   }
 };
 
@@ -487,31 +498,37 @@ let getSongAudioInformation = async function (songArray) {
  * Usess spotify API to get the top tracks for the current user and creates object with the information returned and adds it to the array of tophits
  * @return {Array} Array with the information on the users top hits
  */
-let getUserTopTracks = () => {
+let getUserTopTracks = async () => {
   return spotifyApi
     .getMyTopTracks({
       time_range: userTopRead,
       limit: 50,
     })
-    .then((data) => {
-      data.body.items.forEach((songObject) => {
+    .then(async (data) => {
+      for (var songObject of data.body.items) {
         songIdArray.push(songObject.id); //push to array to get audio features...
-
+        let artistsId = [];
         //get all artists
-        let artist = [];
         songObject.artists.forEach((songArtists) => {
-          artist.push(songArtists.name);
+          artistsId.push(songArtists.id);
         });
+
+        let artistInfo = await getArtistInfo(artistsId); //get
+
         //create object with information
         object = {
-          name: songObject.name,
+          spotifyId: songObject.id,
+          name: songObject.name
+            .split("-")[0]
+            .replace(/ *\([^)]*\) */g, "")
+            .trim(),
           popularity: songObject.popularity,
           release: songObject.album.release_date,
-          artists: artist,
+          artists: artistInfo,
           imageUrl: songObject.album.images[0].url,
         };
         myTopHits.push(object); //push it to the array
-      });
+      }
       return myTopHits;
     });
 };
@@ -530,7 +547,7 @@ let saveToDatabase = async (songArray, id) => {
         song: songObjects.name,
         artists: songObjects.artists,
         yearOfRelease: dateArray[0],
-        imageUrl: songObjects.image,
+        imageUrl: songObjects.imageUrl,
         valence: songObjects.valence,
         danceability: songObjects.danceability,
         popularity: songObjects.popularity,
@@ -579,7 +596,7 @@ exports.getMusicInformation = async (comparator) => {
   //const amount = await databaseTable.count();
   const amount = 0; //TODO test will have to fix later
   console.log(amount);
-  //databaseTable.test();
+  databaseTable.test();
   if (amount > 0) {
     //already in database...we can load from there else
     //load data from DB...
@@ -645,7 +662,7 @@ exports.getAuthorizationURL = (timeRange) => {
  */
 
 exports.getUserListeningHabbits = async (req) => {
-  databaseTable = determineDatabaseTable(""); //should be users
+  // databaseTable = determineDatabaseTable(""); //should be users
   console.log(databaseTable);
   spotifyApi
     .authorizationCodeGrant(req.query.code)
@@ -663,13 +680,18 @@ exports.getUserListeningHabbits = async (req) => {
         console.log("Something went wrong!", err);
       }
     )
-    .then((data) => {
+    .then(async (data) => {
+      await databaseTable.createTempUser(req.session.id);
       return getUserTopTracks(); //gets the top tracks for the user
     })
     .then((data) => {
-      return getSongAudioInformation(myTopHits); //gets the audio info each of the top hits
+      return getSongAudioInformation(myTopHits, req.session.id); //gets the audio info each of the top hits
     })
     .then((data) => {
-      saveToDatabase(myTopHits, req.session.id);
+      //need to get the stats for the data...
+      //need to get reccomendations...
+    })
+    .then((data) => {
+      databaseTable.deleteUserSongsFromDatabase(req.session.id);
     });
 };

@@ -16,6 +16,9 @@ module.exports = {
           key: "id", // key in Target model that we're referencing
         },
       },
+      spotifyId: {
+        type: Sequelize.STRING,
+      },
       name: {
         type: Sequelize.STRING,
       },

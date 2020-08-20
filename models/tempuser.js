@@ -15,12 +15,16 @@ module.exports = (sequelize, DataTypes) => {
         through: models.UserSongs,
         foreignKey: "sessionId",
       });
+
+      this.belongsToMany(models.Artist, {
+        through: models.UserArtists,
+        foreignKey: "sessionId",
+      });
     }
   }
   tempUser.init(
     {
       sessionId: DataTypes.STRING,
-      songId: DataTypes.INTEGER,
     },
     {
       sequelize,

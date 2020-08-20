@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         through: models.DecadeArtists,
         foreignKey: "artistId",
       });
+      this.belongsToMany(models.tempUser, {
+        through: models.UserArtists,
+        foreignKey: "artistId",
+        targetKey: "sessionId",
+      });
     }
   }
   Artist.init(
@@ -27,6 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       name: DataTypes.STRING,
       genres: DataTypes.ARRAY(DataTypes.STRING),
       imageURL: DataTypes.STRING,
+      temp: { type: DataTypes.BOOLEAN, defaultValue: false }, //TODO uncomment later
     },
     {
       sequelize,
