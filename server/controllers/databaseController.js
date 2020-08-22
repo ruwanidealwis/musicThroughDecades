@@ -741,6 +741,49 @@ let getUserDistribution = async (sessionId, feature) => {
     });
 };
 
+let getSongReccomendations = (decadeId, infoObj) => {
+  return getDecadeId(decadeId).then((id) => {
+    return db.Songs.findAll({
+      attributes: ["name", "imageUrl", "spotifyId"],
+      include: [{ model: db.Artist }],
+      where: {
+        decadeId: id,
+
+        [Op.and]: {
+          valence: {
+            [Op.between]: [infoObj.valence - 0.2, infoObj.valence + 0.2],
+          },
+          energy: {
+            [Op.between]: [infoObj.energy - 0.2, infoObj.energy + 0.2],
+          },
+          danceability: {
+            [Op.between]: [
+              infoObj.danceability - 0.2,
+              infoObj.danceability + 0.2,
+            ],
+          },
+          tempo: { [Op.between]: [infoObj.tempo - 30, infoObj.tempo + 30] },
+        },
+      },
+    }).then((data) => {
+      let reccomendationsArray = [];
+      console.log(data);
+      for (const song of data) {
+        let artists = [];
+        for (const artist of song.Artists) {
+          artists.push(artist.name);
+        }
+        reccomendationsArray.push({
+          name: song.name,
+          artists: artists,
+          image: song.imageUrl,
+          spotifyId: song.spotifyId,
+        });
+      }
+      return reccomendationsArray;
+    });
+  });
+};
 let userMostPopularGenres = (sessionId) => {
   return db.sequelize
     .query(
@@ -784,7 +827,7 @@ let getMostHits = (sessionId) => {
         {
           model: db.Artist,
           as: "Artists",
-          attributes: ["name"],
+          attributes: ["name", "imageURL"],
           include: [
             {
               model: db.Songs,
@@ -806,21 +849,26 @@ let getMostHits = (sessionId) => {
       //console.log(data);
       for (const artists of data[0].Artists) {
         for (const songs of artists.Songs) {
-          console.log(songs.name);
+          //console.log(songs.name);
         }
         console.log();
-        artistArray.push({ name: artists.name, hits: artists.Songs.length });
+        artistArray.push({
+          name: artists.name,
+          hits: artists.Songs.length,
+          image: artists.imageURL,
+        });
       }
+      //have to manually sort //TODO find postgres workaround
       artistArray.sort((a, b) => {
         return b.hits - a.hits;
       });
-      console.log(artistArray);
+      return artistArray;
     });
 };
 
 exports.getUserStatistics = async (sessionId) => {
   let topSongs = await getUserTopFeatures(sessionId, "rank", "ASC", 10);
-
+  let avgObj = {};
   let fullStatsObject = {};
   let featureArray = [
     "valence",
@@ -845,10 +893,10 @@ exports.getUserStatistics = async (sessionId) => {
       "ASC",
       3
     );
-    fullStatsObject[`average_${feature}`] = await getUserAverageFeature(
-      sessionId,
-      feature
-    );
+    let val = await getUserAverageFeature(sessionId, feature);
+    fullStatsObject[`average_${feature}`] = val;
+
+    avgObj[feature] = val;
   }
 
   //get top features
@@ -887,13 +935,26 @@ exports.getUserStatistics = async (sessionId) => {
   fullStatsObject[`favourte_genres`] = await userMostPopularGenres(sessionId);
   // console.log(fullStatsObject);
   let ans = await getMostHits(sessionId);
-  console.log(ans);
+  fullStatsObject[`top_10_artists_by_hits`] = await userMostPopularGenres(
+    sessionId
+  );
+
+  let reccomendations = await getSongReccomendations("1970", avgObj);
+
+  console.log(reccomendations);
   //TODO get user top tracks--done
   //TODO get user top artists (get it from the API)
   //TODO get user song popularity---dine
   //TODO get user average feature value---donw
   //TODO get user top songs for each feature--done
   //TODO get user distribution---done
-  //TODO get user most popular genres
+  //TODO get user most popular genres--done
   //TODO get song reccomendations
 };
+
+//to get top artists
+//topDecadeArtist
+//1 decade has many top Artists
+//artists can have many artists
+//exactly like DecadeArtists --> but has rank
+//get top artists, order by rank....
