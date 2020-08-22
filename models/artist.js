@@ -22,8 +22,9 @@ module.exports = (sequelize, DataTypes) => {
       });
       this.belongsToMany(models.tempUser, {
         through: models.UserArtists,
+        sourceKey: "id",
         foreignKey: "artistId",
-        targetKey: "sessionId",
+        otherKey: "sessionId",
       });
     }
   }

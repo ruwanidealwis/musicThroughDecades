@@ -387,10 +387,7 @@ var getBasicSongInfo = async (trackObject) => {
           let object = {
             spotifyId: data.id,
             albumId: data.album.id,
-            name: data.name
-              .split("-")[0]
-              .replace(/ *\([^)]*\) */g, "")
-              .trim(), //taken from: https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
+            name: data.name.split("-")[0].trim(), //taken from: https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
             release: trackObject.year,
             image: data.album.images[0].url,
             artists: artistInfo,
@@ -485,7 +482,8 @@ let getSongAudioInformation = async function (songArray, sessionId) {
       await databaseTable.addSongToDatabase(songObject, decade, i);
     //indexing will change rank by 1 (index 0 has rank 1, but we need it saved to the db as rank 1)
     else {
-      console.log(databaseTable);
+      //console.log(songObject);
+      //console.log(databaseTable);
       await databaseTable.addUserSongToDatabase(songObject, i, sessionId);
     } //works differentl
   }
@@ -519,10 +517,7 @@ let getUserTopTracks = async () => {
         //create object with information
         object = {
           spotifyId: songObject.id,
-          name: songObject.name
-            .split("-")[0]
-            .replace(/ *\([^)]*\) */g, "")
-            .trim(),
+          name: songObject.name.replace("-[^-]*$").trim(),
           popularity: songObject.popularity,
           release: songObject.album.release_date,
           artists: artistInfo,
@@ -700,13 +695,15 @@ exports.getUserListeningHabbits = async (req) => {
       return getUserTopTracks(); //gets the top tracks for the user
     })
     .then((data) => {
+      //console.log(myTopHits);
       return getSongAudioInformation(myTopHits, req.session.id); //gets the audio info each of the top hits
     })
     .then((data) => {
       //need to get the stats for the data...
       //need to get reccomendations...
+      return databaseTable.getUserStatistics(req.session.id);
     })
     .then((data) => {
-      databaseTable.deleteUserSongsFromDatabase(req.session.id);
+      //databaseTable.deleteUserSongsFromDatabase(req.session.id);
     });
 };

@@ -57,6 +57,7 @@ exports.addSongToDatabase = async (songObjects, decade, index) => {
 //TODO delete every migration, make a tempUser table, add a many to many decade association with artists
 
 exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
+  console.log(songObjects);
   //we first have to check if this song exists...
   let dateArray = songObjects.release.split("-"); //get the date (we only care about year, not exact date)
   let song = await db.Songs.findOne({
@@ -400,6 +401,7 @@ let getTopSongs = (decade) => {
             name: song.name,
             rank: song.rank,
             artists: artists,
+            image: song.imageUrl,
           });
         }
       })
@@ -471,6 +473,7 @@ let getTopArtists = async (decade, limit) => {
         `SELECT
    "Decade"."id",
    "Artists"."name" AS "Artists.name",
+   "Artists"."imageURL" AS "Artists.imageURL",
    COUNT("Artists -> Songs"."id") AS "Artists.Songs.count" 
 FROM
    "Decades" AS "Decade" 
@@ -514,6 +517,7 @@ ORDER BY
         topArtists.push({
           name: artist["Artists.name"],
           hits: artist["Artists.Songs.count"],
+          image: artist["Artists.imageURL"],
         });
       }
       return topArtists;
@@ -593,7 +597,7 @@ exports.getDecadeStatistics = async (decade) => {
 
   //get top songs and artists
   fullStatsObject[`top_10_songs`] = await getTopSongs(decade);
-  fullStatsObject[`top_10_artists`] = await getTopArtists(decade, 10);
+  fullStatsObject[`top_10_artists_by_hits`] = await getTopArtists(decade, 10);
   fullStatsObject[`mode_distribution`] = await getFeatureDistribution(
     decade,
     "mode"
@@ -620,4 +624,276 @@ exports.getDecadeStatistics = async (decade) => {
   //console.log(fullStatsObject);
 
   //get overll adecade stats
+};
+
+let getUserTopFeatures = async (sessionId, feature, order, limit) => {
+  let orderArray = [Sequelize.literal(`"Songs"."${feature}" ${order}`)];
+  let attributes = `Songs.${feature}`;
+  if (feature == "rank")
+    orderArray = [
+      Sequelize.literal(`"Songs->UserSongs"."${feature}" ${order}`),
+    ];
+  attributes = `Songs->UserSongs"."${feature}`;
+  return db.tempUser
+    .findAll({
+      attributes: ["sessionId", attributes],
+      where: { sessionId: sessionId },
+      include: [
+        {
+          model: db.Songs,
+
+          raw: true,
+          include: [{ model: db.Artist }],
+        },
+      ],
+
+      order: [orderArray],
+
+      //order: [[db.UserSongs, "createdAt", "DESC"]],
+    })
+    .then((data) => {
+      // console.log(data);
+      let topSongs = [];
+      //console.log(data);
+      let i = 1;
+      //console.log(data);
+      for (const song of data[0].Songs) {
+        console.log(song);
+        let artists = [];
+        for (const artist of song.Artists) {
+          artists.push(artist.name);
+        }
+        topSongs.push({
+          name: song.name,
+          artists: artists,
+          [feature]: song[feature] || i,
+          image: song.imageUrl,
+        });
+        if (i == limit) break;
+        i++;
+      }
+      return topSongs;
+    });
+};
+
+let getUserAverageFeature = async (sessionId, feature) => {
+  return db.tempUser
+    .findAll({
+      attributes: [
+        "sessionId",
+        [Sequelize.fn("AVG", Sequelize.col(`Songs.${feature}`)), "average"],
+      ],
+
+      where: { sessionId: sessionId },
+      include: {
+        model: db.Songs,
+        as: "Songs",
+        raw: true,
+        attributes: [],
+        through: { attributes: [] },
+      },
+      group: ["tempUser.id"],
+      raw: true,
+
+      //order: [[db.UserSongs, "createdAt", "DESC"]],
+    })
+    .then((data) => {
+      // console.log(data);
+      return data[0].average;
+    });
+};
+
+let getUserDistribution = async (sessionId, feature) => {
+  return db.tempUser
+    .findAll({
+      attributes: [
+        `Songs.${feature}`,
+        [Sequelize.fn("Count", Sequelize.col(`Songs.${feature}`)), "count"],
+      ],
+
+      where: { sessionId: sessionId },
+      include: {
+        model: db.Songs,
+        as: "Songs",
+        raw: true,
+        attributes: [],
+        through: { attributes: [] },
+      },
+      group: [`Songs.${feature}`],
+      raw: true,
+
+      //order: [[db.UserSongs, "createdAt", "DESC"]],
+    })
+    .then((data) => {
+      let decadeDistribution = data;
+      console.log(data);
+      for (const key of data) {
+        if (feature == "yearOfRelease") {
+          decadeDistribution = {};
+          for (const key of data) {
+            decadeDistribution[key.yearOfRelease - (key.yearOfRelease % 10)] =
+              decadeDistribution[key.yearOfRelease - (key.yearOfRelease % 10)] +
+                key.count || key.count;
+          }
+        }
+      }
+      return decadeDistribution;
+    });
+};
+
+let userMostPopularGenres = (sessionId) => {
+  return db.sequelize
+    .query(
+      `
+select
+   genre,
+   count(x.genre) 
+From
+   (
+      SELECT
+         unnest(genres) as genre 
+      from
+         "Artists" 
+         inner join
+            "UserArtists" 
+            on "UserArtists"."artistId" = "Artists"."id" 
+      where
+         "sessionId" ='${sessionId}'
+   )
+   as x 
+group by
+   x.genre 
+order by
+   count desc limit 10`,
+      {
+        model: db.UserArtists,
+        mapToModel: true, // pass true here if you have any mapped fields
+        raw: true,
+      }
+    )
+    .then((data) => {
+      return data;
+    });
+};
+
+let getMostHits = (sessionId) => {
+  db.tempUser
+    .findAll({
+      where: { sessionId: sessionId },
+      include: [
+        {
+          model: db.Artist,
+          as: "Artists",
+          attributes: ["name"],
+          include: [
+            {
+              model: db.Songs,
+              attributes: ["name"],
+              include: [
+                {
+                  model: db.tempUser,
+                  where: { sessionId: sessionId },
+                  through: { attributes: [] },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+    .then((data) => {
+      let artistArray = [];
+      //console.log(data);
+      for (const artists of data[0].Artists) {
+        for (const songs of artists.Songs) {
+          console.log(songs.name);
+        }
+        console.log();
+        artistArray.push({ name: artists.name, hits: artists.Songs.length });
+      }
+      artistArray.sort((a, b) => {
+        return b.hits - a.hits;
+      });
+      console.log(artistArray);
+    });
+};
+
+exports.getUserStatistics = async (sessionId) => {
+  let topSongs = await getUserTopFeatures(sessionId, "rank", "ASC", 10);
+
+  let fullStatsObject = {};
+  let featureArray = [
+    "valence",
+    "danceability",
+    "instrumentalness",
+    "energy",
+    "speechiness",
+    "tempo",
+    "acousticness",
+  ];
+
+  for (const feature of featureArray) {
+    fullStatsObject[`highest_${feature}`] = await getUserTopFeatures(
+      sessionId,
+      feature,
+      "DESC",
+      3
+    );
+    fullStatsObject[`lowest_${feature}`] = await getUserTopFeatures(
+      sessionId,
+      feature,
+      "ASC",
+      3
+    );
+    fullStatsObject[`average_${feature}`] = await getUserAverageFeature(
+      sessionId,
+      feature
+    );
+  }
+
+  //get top features
+  fullStatsObject[`top_10_songs`] = await getUserTopFeatures(
+    sessionId,
+    "rank",
+    "DESC",
+    10
+  );
+
+  //all require rank
+  fullStatsObject[`most_popular`] = await getUserTopFeatures(
+    sessionId,
+    "popularity",
+    "DESC",
+    3
+  );
+
+  //get distribution (all these involve count)
+
+  fullStatsObject[`songs_by_decade`] = await getUserDistribution(
+    sessionId,
+    "yearOfRelease"
+  );
+
+  fullStatsObject[`mode_distribution`] = await getUserDistribution(
+    sessionId,
+    "mode"
+  );
+
+  fullStatsObject[`key_distribution`] = await getUserDistribution(
+    sessionId,
+    "key"
+  );
+
+  fullStatsObject[`favourte_genres`] = await userMostPopularGenres(sessionId);
+  // console.log(fullStatsObject);
+  let ans = await getMostHits(sessionId);
+  console.log(ans);
+  //TODO get user top tracks--done
+  //TODO get user top artists (get it from the API)
+  //TODO get user song popularity---dine
+  //TODO get user average feature value---donw
+  //TODO get user top songs for each feature--done
+  //TODO get user distribution---done
+  //TODO get user most popular genres
+  //TODO get song reccomendations
 };

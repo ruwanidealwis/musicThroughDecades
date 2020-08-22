@@ -37,6 +37,9 @@ def getDecadeInfo(decade):
                 for s in soup.find_all(class_="yer")]
         for i in range(100):
             finalList.append(songs[i] + " - " + artists[i] + " - " + year[i])
+
+        # get top artists of the decade...
+
     if(decade == "2010"):
         # CSV TAKE FROM: http://chart2000.com/about.htm
         with open('/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/webScraperPython/files/2010scharts.csv') as csv_file:

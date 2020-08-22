@@ -19,8 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       //songs can have many users who listen to it
       this.belongsToMany(models.tempUser, {
         through: models.UserSongs,
+        sourceKey: "id",
         foreignKey: "songId",
-        targetKey: "sessionId",
+        otherKey: "sessionId",
       });
     }
   }

@@ -11,6 +11,7 @@ module.exports = {
       sessionId: {
         type: Sequelize.STRING,
         unique: true,
+        allowNull: false,
       },
 
       createdAt: {
