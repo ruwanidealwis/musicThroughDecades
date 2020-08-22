@@ -18,6 +18,7 @@ router.get("/music/createPlaylist", (req, res) => {
 });
 
 router.get("/music", (req, res) => {
+  console.log(req.session.userTopRead);
   console.log(req.session.id);
   console.log(req.session.type);
   console.log(req.session.userId);
@@ -48,7 +49,7 @@ router.get("/compare/:comparators", async (req, res) => {
 
   if (userSpotify.includes(comparators[1])) {
     req.session.type = "user";
-    let url = spotifyController.getAuthorizationURL(comparators[0], req);
+    let url = spotifyController.getAuthorizationURL(comparators[1], req);
     res.redirect(url); //now redirects user to authorization... (after successful should return to callback...)
   } else {
     req.session.type = "decade";

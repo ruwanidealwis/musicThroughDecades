@@ -183,7 +183,7 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
         //where: { name: artist.name, imageURL: artist.imageURL },
         name: artist.name,
         imageURL: artist.imageURL,
-        genres: artist.genres, //TODO CHANGE THIS
+        genres: artist.genres,
         temp: true,
       });
       //create an association with decade
@@ -270,7 +270,7 @@ let deleteUserArtistsFromDatabase = async (artist, sessionId) => {
   });
   //if there is only one user that is associated with it and that user is current user (then delete it from DB)
   console.log("Other Users.....");
-  console.log(otherUsers);
+  //console.log(otherUsers);
 
   //if its null it means that the artist was also in another song and was already deleted
   //has to be false otherwise the artist is one of the artists of the decade....
@@ -648,7 +648,7 @@ exports.getDecadeStatistics = async (decade) => {
 let getUserTopFeatures = async (sessionId, feature, order, limit) => {
   let orderArray = [Sequelize.literal(`"Songs"."${feature}" ${order}`)];
   let attributes = `Songs.${feature}`;
-  if (feature == "rank")
+  if (feature === "rank")
     orderArray = [
       Sequelize.literal(`"Songs->UserSongs"."${feature}" ${order}`),
     ];
@@ -924,7 +924,7 @@ exports.getUserStatistics = async (sessionId, decade) => {
   fullStatsObject[`top10Songs`] = await getUserTopFeatures(
     sessionId,
     "rank",
-    "DESC",
+    "ASC",
     10
   );
 
@@ -985,4 +985,3 @@ exports.getUserStatistics = async (sessionId, decade) => {
 //TODO scrape to get top decade artists
 //TODO add topDecadeArtistTable
 //TODO  add topUserArtists
-//TODO add create playlist functionality

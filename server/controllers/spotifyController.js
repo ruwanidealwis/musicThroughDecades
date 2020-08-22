@@ -218,7 +218,7 @@ let getUserStatistics = async (req) => {
  */
 
 //Adapted from :https://www.npmjs.com/package/python-shell
-let runPy = (decade) => {
+let runPy = (req) => {
   return new Promise(function (success, nosuccess) {
     let options = {
       mode: "text",
@@ -447,7 +447,7 @@ let getAudioInfo = async function () {
  * @param {Array} songArray - array with the top songs (can either be the users top songs, or the top songs of the decade)
  */
 
-let getSongAudioInformation = async function (songArray, sessionId) {
+let getSongAudioInformation = async function (songArray, sessionId, decade) {
   let returnData = await getAudioInfo(); //await until
 
   //åconsole.log(returnData);
@@ -479,7 +479,7 @@ let getSongAudioInformation = async function (songArray, sessionId) {
     i++;
 
     if (songArray == fullInfoHitArray)
-      await databaseTable.addSongToDatabase(songObject, req.session.decade, i);
+      await databaseTable.addSongToDatabase(songObject, decade, i);
     //indexing will change rank by 1 (index 0 has rank 1, but we need it saved to the db as rank 1)
     else {
       //console.log(songObject);
@@ -620,7 +620,7 @@ exports.getMusicInformation = async (comparator, req, res) => {
   } else {
     //need to run python script and get spotify authentication...
     console.log(comparator);
-    return runPy(comparator)
+    return runPy(req)
       .then((data) => {
         top100Hits = formatData(data);
 
@@ -634,12 +634,15 @@ exports.getMusicInformation = async (comparator, req, res) => {
       .then((data) => {
         // console.log(fullInfoHitArray);
 
-        return getSongAudioInformation(fullInfoHitArray);
+        return getSongAudioInformation(
+          fullInfoHitArray,
+          "",
+          req.session.decade
+        );
       })
       .then((data) => {
         // console.log(fullInfoHitArray);
         //eturn saveToDatabase(fullInfoHitArray, "");
-
         return databaseTable.getDecadeStatistics(req.session.decade);
       })
       .then((data) => {
@@ -712,7 +715,11 @@ exports.getUserListeningHabbits = async (req, userTopRead, decade) => {
     })
     .then((data) => {
       console.log(myTopHits);
-      return getSongAudioInformation(myTopHits, req.session.id); //gets the audio info each of the top hits
+      return getSongAudioInformation(
+        myTopHits,
+        req.session.id,
+        req.session.decade
+      ); //gets the audio info each of the top hits
     })
     .then((data) => {
       //need to get the stats for the data...
