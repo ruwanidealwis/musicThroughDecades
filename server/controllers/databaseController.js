@@ -13,6 +13,11 @@ exports.test = async () => {
   console.log(ans);
 };
 
+//allow camel case, function taken from: https://dzone.com/articles/capitalize-first-letter-string-javascript
+function jsUcfirst(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 /***************************** METHODS FOR CREATING/REMOVING FROM DB */
 exports.createTempUser = async (sessionId) => {
   await db.tempUser.create({
@@ -346,7 +351,14 @@ getTopFeaturesForDecade = async (
     where: { name: decade },
     include: [
       {
-        attributes: ["name", feature, "yearOfRelease", "rank", "id"],
+        attributes: [
+          "name",
+          feature,
+          "yearOfRelease",
+          "rank",
+          "id",
+          "imageUrl",
+        ],
         required: false,
         model: db.Songs,
         order: [[feature, ordering]],
@@ -372,6 +384,7 @@ getTopFeaturesForDecade = async (
       year: songs.yearOfRelease,
       rank: songs.rank,
       [feature]: songs[feature],
+      image: songs.imageUrl,
       artists: artistsArray,
     };
     objArray.push(obj);
@@ -558,7 +571,10 @@ exports.getDecadeStatistics = async (decade) => {
 
       year++;
     }
-    fullStatsObject[`lowest_${feature}`] = await getTopFeaturesForDecade(
+    featureFormatted = jsUcfirst(feature);
+    fullStatsObject[
+      `lowest${featureFormatted}`
+    ] = await getTopFeaturesForDecade(
       feature,
       "ASC",
       3,
@@ -566,7 +582,9 @@ exports.getDecadeStatistics = async (decade) => {
       parseInt(decade),
       parseInt(decade) + 9
     );
-    fullStatsObject[`highest_${feature}`] = await getTopFeaturesForDecade(
+    fullStatsObject[
+      `highest${featureFormatted}`
+    ] = await getTopFeaturesForDecade(
       feature,
       "DESC",
       3,
@@ -574,11 +592,12 @@ exports.getDecadeStatistics = async (decade) => {
       parseInt(decade),
       parseInt(decade) + 9
     );
-    fullStatsObject[`yearly_highest_${feature}`] = yearArrayTop;
-    fullStatsObject[`yearly_lowest_${feature}`] = yearArrayBottom;
-    fullStatsObject[`yearly_average_${feature}`] = yearlyAverage;
 
-    fullStatsObject[`average_${feature}`] = await getAverageValue(
+    fullStatsObject[`yearlyHighest${featureFormatted}`] = yearArrayTop;
+    fullStatsObject[`yearlyLowest${featureFormatted}`] = yearArrayBottom;
+    fullStatsObject[`yearlyAverage${featureFormatted}`] = yearlyAverage;
+
+    fullStatsObject[`average${featureFormatted}`] = await getAverageValue(
       feature,
       decade,
       parseInt(decade),
@@ -586,7 +605,7 @@ exports.getDecadeStatistics = async (decade) => {
     );
   }
   //get most popular songs of the decade (as of August 2020)
-  fullStatsObject[`most_popular`] = await getTopFeaturesForDecade(
+  fullStatsObject[`mostPopular`] = await getTopFeaturesForDecade(
     "popularity",
     "DESC",
     10,
@@ -596,13 +615,13 @@ exports.getDecadeStatistics = async (decade) => {
   );
 
   //get top songs and artists
-  fullStatsObject[`top_10_songs`] = await getTopSongs(decade);
-  fullStatsObject[`top_10_artists_by_hits`] = await getTopArtists(decade, 10);
-  fullStatsObject[`mode_distribution`] = await getFeatureDistribution(
+  fullStatsObject[`top10Songs`] = await getTopSongs(decade);
+  fullStatsObject[`top10ArtistsByHits`] = await getTopArtists(decade, 10);
+  fullStatsObject[`modeDistribution`] = await getFeatureDistribution(
     decade,
     "mode"
   );
-  fullStatsObject[`key_distribution`] = await getFeatureDistribution(
+  fullStatsObject[`keyDistribution`] = await getFeatureDistribution(
     decade,
     "key"
   );
@@ -751,15 +770,15 @@ let getSongReccomendations = (decadeId, infoObj) => {
 
         [Op.and]: {
           valence: {
-            [Op.between]: [infoObj.valence - 0.2, infoObj.valence + 0.2],
+            [Op.between]: [infoObj.valence - 0.22, infoObj.valence + 0.22],
           },
           energy: {
-            [Op.between]: [infoObj.energy - 0.2, infoObj.energy + 0.2],
+            [Op.between]: [infoObj.energy - 0.22, infoObj.energy + 0.22],
           },
           danceability: {
             [Op.between]: [
-              infoObj.danceability - 0.2,
-              infoObj.danceability + 0.2,
+              infoObj.danceability - 0.22,
+              infoObj.danceability + 0.22,
             ],
           },
           tempo: { [Op.between]: [infoObj.tempo - 30, infoObj.tempo + 30] },
@@ -866,7 +885,7 @@ let getMostHits = (sessionId) => {
     });
 };
 
-exports.getUserStatistics = async (sessionId) => {
+exports.getUserStatistics = async (sessionId, decade) => {
   let topSongs = await getUserTopFeatures(sessionId, "rank", "ASC", 10);
   let avgObj = {};
   let fullStatsObject = {};
@@ -881,26 +900,28 @@ exports.getUserStatistics = async (sessionId) => {
   ];
 
   for (const feature of featureArray) {
-    fullStatsObject[`highest_${feature}`] = await getUserTopFeatures(
+    let featureFormatted = jsUcfirst(feature);
+    fullStatsObject[`highest${featureFormatted}`] = await getUserTopFeatures(
       sessionId,
       feature,
       "DESC",
       3
     );
-    fullStatsObject[`lowest_${feature}`] = await getUserTopFeatures(
+    fullStatsObject[`lowest${featureFormatted}`] = await getUserTopFeatures(
       sessionId,
       feature,
       "ASC",
       3
     );
     let val = await getUserAverageFeature(sessionId, feature);
-    fullStatsObject[`average_${feature}`] = val;
+    fullStatsObject[`average${featureFormatted}`] = val;
 
     avgObj[feature] = val;
   }
 
+  //need the features to be in lowercase, but want to convert to camelcase
   //get top features
-  fullStatsObject[`top_10_songs`] = await getUserTopFeatures(
+  fullStatsObject[`top10Songs`] = await getUserTopFeatures(
     sessionId,
     "rank",
     "DESC",
@@ -908,7 +929,7 @@ exports.getUserStatistics = async (sessionId) => {
   );
 
   //all require rank
-  fullStatsObject[`most_popular`] = await getUserTopFeatures(
+  fullStatsObject[`mostPopular`] = await getUserTopFeatures(
     sessionId,
     "popularity",
     "DESC",
@@ -917,31 +938,33 @@ exports.getUserStatistics = async (sessionId) => {
 
   //get distribution (all these involve count)
 
-  fullStatsObject[`songs_by_decade`] = await getUserDistribution(
+  fullStatsObject[`songsByDecade`] = await getUserDistribution(
     sessionId,
     "yearOfRelease"
   );
 
-  fullStatsObject[`mode_distribution`] = await getUserDistribution(
+  fullStatsObject[`modeDistribution`] = await getUserDistribution(
     sessionId,
     "mode"
   );
 
-  fullStatsObject[`key_distribution`] = await getUserDistribution(
+  fullStatsObject[`keyDistribution`] = await getUserDistribution(
     sessionId,
     "key"
   );
 
-  fullStatsObject[`favourte_genres`] = await userMostPopularGenres(sessionId);
+  fullStatsObject[`favourteGenres`] = await userMostPopularGenres(sessionId);
   // console.log(fullStatsObject);
   let ans = await getMostHits(sessionId);
-  fullStatsObject[`top_10_artists_by_hits`] = await userMostPopularGenres(
-    sessionId
+  fullStatsObject[`topArtistsByHits`] = await userMostPopularGenres(sessionId);
+
+  fullStatsObject[`userReccomendations`] = await getSongReccomendations(
+    decade,
+    avgObj
   );
 
-  let reccomendations = await getSongReccomendations("1970", avgObj);
+  return fullStatsObject;
 
-  console.log(reccomendations);
   //TODO get user top tracks--done
   //TODO get user top artists (get it from the API)
   //TODO get user song popularity---dine
@@ -958,3 +981,8 @@ exports.getUserStatistics = async (sessionId) => {
 //artists can have many artists
 //exactly like DecadeArtists --> but has rank
 //get top artists, order by rank....
+
+//TODO scrape to get top decade artists
+//TODO add topDecadeArtistTable
+//TODO  add topUserArtists
+//TODO add create playlist functionality

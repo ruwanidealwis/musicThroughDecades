@@ -227,7 +227,7 @@ let runPy = (decade) => {
       pythonOptions: ["-u"], // get print results in real-time
       scriptPath:
         "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/webScraperPython", //should update to local path...
-      args: [decade],
+      args: [req.session.decade],
     };
     console.log(decade);
     PythonShell.run("./webScraper.py", options, function (err, results) {
@@ -479,7 +479,7 @@ let getSongAudioInformation = async function (songArray, sessionId) {
     i++;
 
     if (songArray == fullInfoHitArray)
-      await databaseTable.addSongToDatabase(songObject, decade, i);
+      await databaseTable.addSongToDatabase(songObject, req.session.decade, i);
     //indexing will change rank by 1 (index 0 has rank 1, but we need it saved to the db as rank 1)
     else {
       //console.log(songObject);
@@ -497,7 +497,7 @@ let getSongAudioInformation = async function (songArray, sessionId) {
  * Usess spotify API to get the top tracks for the current user and creates object with the information returned and adds it to the array of tophits
  * @return {Array} Array with the information on the users top hits
  */
-let getUserTopTracks = async () => {
+let getUserTopTracks = async (userTopRead) => {
   return spotifyApi
     .getMyTopTracks({
       time_range: userTopRead,
@@ -527,6 +527,17 @@ let getUserTopTracks = async () => {
       }
       return myTopHits;
     });
+};
+let getUserId = (req) => {
+  spotifyApi.getMe().then(
+    function (data) {
+      req.session.userId = data.body.id;
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+      return err;
+    }
+  );
 };
 /**
  *
@@ -584,17 +595,17 @@ let saveToDatabase = async (songArray, id) => {
  * @param {string} comparator - the decade to get the top hits for
  * @return {Array} Array of all relevant information about the specific decade (top hits, artists, audio statistics)
  */
-exports.getMusicInformation = async (comparator, req) => {
+exports.getMusicInformation = async (comparator, req, res) => {
   //only called when it is a decade...
   //need to check if database has the data...
   decade = comparator; //need this for user data, not emptied out after operations are complete
 
-  amount = await databaseTable.getAmount(decade);
+  amount = await databaseTable.getAmount(req.session.decade);
   console.log(amount);
   if (amount > 0) {
-    data = await databaseTable.getDecadeStatistics(decade);
-
+    data = await databaseTable.getDecadeStatistics(req.session.decade);
     return data;
+
     //already in database...we can load from there else
     //load data from DB...
     //what do we need:
@@ -629,10 +640,9 @@ exports.getMusicInformation = async (comparator, req) => {
         // console.log(fullInfoHitArray);
         //eturn saveToDatabase(fullInfoHitArray, "");
 
-        return databaseTable.getDecadeStatistics(decade);
+        return databaseTable.getDecadeStatistics(req.session.decade);
       })
       .then((data) => {
-        databaseTable = {};
         fullInfoHitArray = [];
         top100Hits = [];
         spotifyApi = {}; //empty object again...
@@ -650,7 +660,7 @@ exports.getMusicInformation = async (comparator, req) => {
  * @return {String} returns the authorization URL for current user
  */
 
-exports.getAuthorizationURL = (timeRange) => {
+exports.getAuthorizationURL = (timeRange, req) => {
   state = "some-state-of-my-choice"; //change later
   spotifyApi = new SpotifyWebApi({
     clientId: clientId,
@@ -658,8 +668,11 @@ exports.getAuthorizationURL = (timeRange) => {
     redirectUri: redirectUri, //this time we need user to authorize access
   });
 
-  let authorizeURL = spotifyApi.createAuthorizeURL(["user-top-read"], state); //generated
-  userTopRead = getReadChoice(timeRange); //what data should be queried for...
+  let authorizeURL = spotifyApi.createAuthorizeURL(
+    ["user-top-read", "playlist-modify-public"],
+    state
+  ); //generated
+  req.session.userTopRead = getReadChoice(timeRange); //what data should be queried for...
   return authorizeURL;
 };
 
@@ -671,10 +684,10 @@ exports.getAuthorizationURL = (timeRange) => {
  * @return {Array} Array of object containing all the relevant information for the user top tracks
  */
 
-exports.getUserListeningHabbits = async (req) => {
+exports.getUserListeningHabbits = async (req, userTopRead, decade) => {
   // databaseTable = determineDatabaseTable(""); //should be users
   console.log(databaseTable);
-  spotifyApi
+  return spotifyApi
     .authorizationCodeGrant(req.query.code)
     .then(
       (data) => {
@@ -691,19 +704,75 @@ exports.getUserListeningHabbits = async (req) => {
       }
     )
     .then(async (data) => {
+      getUserId(req);
+    })
+    .then(async (data) => {
       await databaseTable.createTempUser(req.session.id);
-      return getUserTopTracks(); //gets the top tracks for the user
+      return getUserTopTracks(req.session.userTopRead); //gets the top tracks for the user
     })
     .then((data) => {
-      //console.log(myTopHits);
+      console.log(myTopHits);
       return getSongAudioInformation(myTopHits, req.session.id); //gets the audio info each of the top hits
     })
     .then((data) => {
       //need to get the stats for the data...
       //need to get reccomendations...
-      return databaseTable.getUserStatistics(req.session.id);
+      return databaseTable.getUserStatistics(
+        req.session.id,
+        req.session.decade
+      );
     })
-    .then((data) => {
-      //databaseTable.deleteUserSongsFromDatabase(req.session.id);
+    .then(async (data) => {
+      await databaseTable.deleteUserSongsFromDatabase(req.session.id);
+      return data;
     });
+};
+
+exports.createPlaylist = (req) => {
+  //might have to refresh
+  spotifyApi
+    .refreshAccessToken()
+    .then(
+      (data) => {
+        console.log(data.body);
+        return data;
+      },
+      (err) => {
+        console.log(err);
+      }
+    )
+    .then((data) => {
+      return spotifyApi.createPlaylist(
+        req.session.userId,
+        `My ${req.session.decade}'s reccomendations!`,
+        {
+          public: true,
+        }
+      );
+    })
+    .then(
+      (data) => {
+        console.log(data.body);
+        req.session.playlistId = data.body.id;
+        reccomendationIdArray = [];
+        req.session.comparator["userReccomendations"].forEach((song) => {
+          reccomendationIdArray.push(`spotify:track:${song.spotifyId}`);
+        });
+        return reccomendationIdArray;
+      },
+      (err) => {
+        console.log(err);
+      }
+    )
+    .then((data) => {
+      spotifyApi.addTracksToPlaylist(req.session.playlistId, data);
+    })
+    .then(
+      () => {
+        console.log("added tracks");
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
 };
