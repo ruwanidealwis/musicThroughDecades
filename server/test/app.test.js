@@ -23,6 +23,8 @@ describe("Test Entry", () => {
   it("Tests two valid decades", (done) => {
     agent.get("/compare/1990-2010").end((err, res) => {
       expect(res).to.have.status(200);
+      //expect(res).to.have.cookie("type", "decade");
+      //expect(res).to.redirectTo("/music");
       if (err) return done(err);
       done();
     });
@@ -31,6 +33,8 @@ describe("Test Entry", () => {
   it("Tests valid decade vs user", (done) => {
     agent.get("/compare/1990-6Months").end((err, res) => {
       expect(res).to.have.status(200);
+      //expect(res).to.have.cookie("type", "user");
+      //expect(res).to.redirectTo("/music");
       if (err) return done(err);
       done();
     });

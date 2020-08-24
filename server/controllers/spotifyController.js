@@ -448,14 +448,14 @@ let getUserTopArtists = (timeRange) => {
  * @return {Object} Obj of all relevant information about the specific decade (top hits, artists, audio statistics)
  */
 
-exports.getMusicInformation = async (req) => {
+exports.getMusicInformation = async (req, decade) => {
   //only called when it is a decade...
   //need to check if database has the data...
 
-  amount = await databaseTable.getAmount(req.session.decade);
+  amount = await databaseTable.getAmount(decade);
   console.log(amount);
   if (amount > 0) {
-    data = await databaseTable.getDecadeStatistics(req.session.decade);
+    data = await databaseTable.getDecadeStatistics(decade);
     return data;
   } else {
     //need to run python script and get spotify authentication...
@@ -477,14 +477,14 @@ exports.getMusicInformation = async (req) => {
         return getSongAudioInformation(
           fullInfoHitArray,
           "",
-          req.session.decade,
+          decade,
           req.session.retries
         );
       })
       .then((data) => {
         // console.log(fullInfoHitArray);
         //eturn saveToDatabase(fullInfoHitArray, "");
-        return databaseTable.getDecadeStatistics(req.session.decade);
+        return databaseTable.getDecadeStatistics(decade);
       })
       .then((data) => {
         fullInfoHitArray = [];

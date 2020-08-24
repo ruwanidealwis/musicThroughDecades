@@ -65,7 +65,10 @@ router.get("/compare/:comparators", async (req, res) => {
   if (validated === true) {
     req.session.decade = comparators[0];
 
-    req.session.decadeStats = await spotifyController.getMusicInformation(req);
+    req.session.decadeStats = await spotifyController.getMusicInformation(
+      req,
+      req.session.decade
+    );
 
     if (userSpotify.includes(comparators[1])) {
       req.session.type = "user";
@@ -76,8 +79,10 @@ router.get("/compare/:comparators", async (req, res) => {
       req.session.type = "decade";
       let validateSecondComparator = validateValues(comparators[1]);
       if (validateSecondComparator == true) {
+        req.session.decade2 = comparators[1];
         req.session.comparator = await spotifyController.getMusicInformation(
-          req
+          req,
+          req.session.decade2
         );
         res.status(200).redirect("/music");
       } else {
