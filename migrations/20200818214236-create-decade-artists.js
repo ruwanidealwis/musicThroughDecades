@@ -31,6 +31,10 @@ module.exports = {
         onDelete: "cascade",
         onUpdate: "cascade",
       },
+      rank: {
+        allowNull: true,
+        type: Sequelize.INTEGER,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

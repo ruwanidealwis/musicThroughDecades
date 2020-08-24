@@ -26,7 +26,6 @@ module.exports = (sequelize, DataTypes) => {
     {
       sessionId: DataTypes.STRING,
       artistId: DataTypes.INTEGER,
-      rankId: DataTypes.Integer,
     },
     {
       sequelize,

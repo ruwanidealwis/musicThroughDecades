@@ -292,11 +292,13 @@ let formatData = (data) => {
     let splitHit = hit.replace("'", "").split(" - ");
     if (splitHit[1] != null) artists = splitHit[1].split("&") || "";
     if (splitHit[2] == null) splitHit[2] = "";
+    if (splitHit[3] == null) splitHit[3] = 101;
     //console.log(splitHit[0]);
     allHitsArray.push({
       track: splitHit[0] || hit,
       artist: artists[0],
       year: splitHit[2].replace("'", ""),
+      artistRank: parseInt(splitHit[3]),
     }); //because of the way the website is structured (this may not be exactly correc t)
   });
 
@@ -313,7 +315,7 @@ let formatData = (data) => {
 var getArtistInfo = async (ids) => {
   let artistArray = [];
   return spotifyApi.getArtists(ids).then(
-    function (data) {
+    (data) => {
       //console.log("Artist information", data.body.artists);
       data.body.artists.forEach((artistObject) => {
         //console.log(artistObject);
@@ -329,8 +331,17 @@ var getArtistInfo = async (ids) => {
 
       return artistArray;
     },
-    function (err) {
-      console.error(err.body);
+    async (err) => {
+      //taken from:https://github.com/thelinmichael/spotify-web-api-node/issues/217
+      if (retries > 0) {
+        console.error(e);
+        await asyncTimeout(
+          e.headers["retry-after"]
+            ? parseInt(e.headers["retry-after"]) * 1000
+            : RETRY_INTERVAL
+        );
+        return getArtistInfo(ids, retries - 1);
+      }
 
       return err;
     }
@@ -341,20 +352,6 @@ var getBasicSongInfo = async (trackObject) => {
     .searchTracks((trackObject.track || "") + " " + (trackObject.artist || ""))
     .then(
       function (data) {
-        if (data.body.tracks.items === []) {
-          //console.log(trackObject.track);
-        }
-        //console.log(trackObject);
-        //console.log(data.body.tracks.items || trackObject.track);
-
-        if (
-          trackObject.track == "Careless Whisper" ||
-          trackObject.artist == "Careless Whisper"
-        ) {
-          //console.log(data.body);
-          //console.log(data.body.tracks.items);
-        }
-        //console.log(data.body);
         return data.body.tracks.items[0];
       },
       function (err) {
@@ -369,11 +366,12 @@ var getBasicSongInfo = async (trackObject) => {
           let object = {
             id: "",
             albumId: "",
-            name: "",
+            name: trackObject.track,
             release: trackObject.year,
             image: "",
-            artists: [],
+            artists: [{ name: trackObject.artist, imageURL: "" }],
             popularity: -1,
+            artistRank: trackObject.artistRank,
           };
           fullInfoHitArray.push(object);
           songIdArray.push("");
@@ -392,6 +390,7 @@ var getBasicSongInfo = async (trackObject) => {
             image: data.album.images[0].url,
             artists: artistInfo,
             popularity: data.popularity,
+            artistRank: trackObject.artistRank,
           };
           if (object.release == "") {
             object.release = data.album.release_date;
@@ -428,15 +427,25 @@ let getSongInformation = async function () {
  * @summary traverses the list of all top 100 songs to get the audio features for the track using the spotify API
  * @return {Promise} resolves to the audio features for the track or the error
  */
-let getAudioInfo = async function () {
+let getAudioInfo = async function (retries) {
   return spotifyApi.getAudioFeaturesForTracks(songIdArray).then(
-    function (data) {
-      //console.log(data.body);
+    (data) => {
+      console.log(songIdArray);
+
       return data.body.audio_features;
     },
-    function (err) {
+    async (err) => {
       console.error(err);
-      return err;
+      if (retries > 0) {
+        console.error(e);
+        await asyncTimeout(
+          e.headers["retry-after"]
+            ? parseInt(e.headers["retry-after"]) * 1000
+            : RETRY_INTERVAL
+        );
+        return getAudioInfo(retries - 1);
+      }
+      throw err;
     }
   );
 };
@@ -447,8 +456,13 @@ let getAudioInfo = async function () {
  * @param {Array} songArray - array with the top songs (can either be the users top songs, or the top songs of the decade)
  */
 
-let getSongAudioInformation = async function (songArray, sessionId, decade) {
-  let returnData = await getAudioInfo(); //await until
+let getSongAudioInformation = async function (
+  songArray,
+  sessionId,
+  decade,
+  retries
+) {
+  let returnData = await getAudioInfo(retries); //await until
 
   //åconsole.log(returnData);
   let i = 0;
@@ -497,36 +511,51 @@ let getSongAudioInformation = async function (songArray, sessionId, decade) {
  * Usess spotify API to get the top tracks for the current user and creates object with the information returned and adds it to the array of tophits
  * @return {Array} Array with the information on the users top hits
  */
-let getUserTopTracks = async (userTopRead) => {
+let getUserTopTracks = async (userTopRead, retries) => {
   return spotifyApi
     .getMyTopTracks({
       time_range: userTopRead,
       limit: 50,
     })
-    .then(async (data) => {
-      for (var songObject of data.body.items) {
-        songIdArray.push(songObject.id); //push to array to get audio features...
-        let artistsId = [];
-        //get all artists
-        songObject.artists.forEach((songArtists) => {
-          artistsId.push(songArtists.id);
-        });
+    .then(
+      async (data) => {
+        for (var songObject of data.body.items) {
+          songIdArray.push(songObject.id); //push to array to get audio features...
+          let artistsId = [];
+          //get all artists
+          songObject.artists.forEach((songArtists) => {
+            artistsId.push(songArtists.id);
+          });
 
-        let artistInfo = await getArtistInfo(artistsId); //get
+          let artistInfo = await getArtistInfo(artistsId, req.session.retries); //get
 
-        //create object with information
-        object = {
-          spotifyId: songObject.id,
-          name: songObject.name.replace("-[^-]*$").trim(),
-          popularity: songObject.popularity,
-          release: songObject.album.release_date,
-          artists: artistInfo,
-          imageUrl: songObject.album.images[0].url,
-        };
-        myTopHits.push(object); //push it to the array
+          //create object with information
+          object = {
+            spotifyId: songObject.id,
+            name: songObject.name.replace("-[^-]*$").trim(),
+            popularity: songObject.popularity,
+            release: songObject.album.release_date,
+            artists: artistInfo,
+            imageUrl: songObject.album.images[0].url,
+          };
+          myTopHits.push(object); //push it to the array
+        }
+        return myTopHits;
+      },
+      async (err) => {
+        if (retries > 0) {
+          console.error(err);
+          await asyncTimeout(
+            err.headers["retry-after"]
+              ? parseInt(err.headers["retry-after"]) * 1000
+              : RETRY_INTERVAL
+          );
+          return getUserTopTracks(userTopRead, retries - 1);
+
+          //taken from:https://github.com/thelinmichael/spotify-web-api-node/issues/217
+        }
       }
-      return myTopHits;
-    });
+    );
 };
 let getUserId = (req) => {
   spotifyApi.getMe().then(
@@ -538,6 +567,25 @@ let getUserId = (req) => {
       return err;
     }
   );
+};
+
+let getUserTopArtists = (userTopRead) => {
+  return spotifyApi
+    .getMyTopArtists({
+      time_range: userTopRead,
+      limit: 10,
+    })
+    .then(async (data) => {
+      console.log(data);
+      let topArtists = [];
+      for (var ArtistObject of data.body.items) {
+        topArtists.push({
+          name: ArtistObject.name,
+          image: ArtistObject.images[0].url,
+        });
+      }
+      return topArtists;
+    });
 };
 /**
  *
@@ -637,7 +685,8 @@ exports.getMusicInformation = async (comparator, req, res) => {
         return getSongAudioInformation(
           fullInfoHitArray,
           "",
-          req.session.decade
+          req.session.decade,
+          req.session.retries
         );
       })
       .then((data) => {
@@ -711,14 +760,16 @@ exports.getUserListeningHabbits = async (req, userTopRead, decade) => {
     })
     .then(async (data) => {
       await databaseTable.createTempUser(req.session.id);
-      return getUserTopTracks(req.session.userTopRead); //gets the top tracks for the user
+      return getUserTopTracks(req.session.userTopRead, req.session.retries); //gets the top tracks for the user
     })
-    .then((data) => {
+    .then(async (data) => {
       console.log(myTopHits);
+      await delay(230); //waits 230ms (gets around spotify api rate limiting)
       return getSongAudioInformation(
         myTopHits,
         req.session.id,
-        req.session.decade
+        req.session.decade,
+        req.session.retries
       ); //gets the audio info each of the top hits
     })
     .then((data) => {
@@ -730,7 +781,10 @@ exports.getUserListeningHabbits = async (req, userTopRead, decade) => {
       );
     })
     .then(async (data) => {
+      console.log(songIdArray);
       await databaseTable.deleteUserSongsFromDatabase(req.session.id);
+      data["topArtists"] = await getUserTopArtists(req.session.userTopRead);
+      myTopHits = [];
       return data;
     });
 };

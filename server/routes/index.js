@@ -29,11 +29,14 @@ router.get("/music", (req, res) => {
 });
 
 router.get("/callback", async (req, res) => {
+  //loaded after the user authenticates
   //should be loading page...
+  req.session.retries = 3; //each request gets 3 tries
   req.session.comparator = await spotifyController.getUserListeningHabbits(
     req,
     req.session.userTopRead,
-    req.session.decade
+    req.session.decade,
+    req.session.retries
   );
   res.redirect("/music");
 });
@@ -49,6 +52,7 @@ router.get("/compare/:comparators", async (req, res) => {
 
   if (userSpotify.includes(comparators[1])) {
     req.session.type = "user";
+
     let url = spotifyController.getAuthorizationURL(comparators[1], req);
     res.redirect(url); //now redirects user to authorization... (after successful should return to callback...)
   } else {

@@ -15,13 +15,16 @@ config.password = process.env.PASSWORD || configVar.password;
 require("pg").defaults.parseInt8 = true; //makes integers ints
 let sequelize;
 if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  sequelize = new Sequelize(process.env[config.use_env_variable], config, {
+    logging: false,
+  });
 } else {
   sequelize = new Sequelize(
     config.database,
     config.username,
     config.password,
-    config
+    config,
+    { logging: false }
   );
 }
 

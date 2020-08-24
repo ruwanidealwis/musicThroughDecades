@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       decadeId: DataTypes.INTEGER,
       artistId: DataTypes.INTEGER,
+      rank: DataTypes.INTEGER, //each artist has a rank based on officiallyity
     },
     {
       sequelize,
