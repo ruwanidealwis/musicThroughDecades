@@ -1,6 +1,7 @@
 //set up routes
 let express = require("express");
 let spotifyController = require("../controllers/spotifyController");
+var path = require("path");
 var router = express.Router();
 /**
  * Validate entered values (not very relevant when the front end is implemented)
@@ -96,6 +97,12 @@ router.get("/compare/:comparators", async (req, res) => {
   }
 
   //call spotify controller here and from there determine how the database/everything works
+});
+router.get("*", (req, res) => {
+  //taken from: https://stackoverflow.com/questions/16750524/remove-last-directory-in-url
+  let rootPath = __dirname.split(path.sep);
+  rootPath.pop();
+  res.sendFile(path.join(rootPath.join(path.sep) + "/client/build/index.html"));
 });
 
 module.exports = router;
