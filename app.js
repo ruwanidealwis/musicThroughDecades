@@ -2,6 +2,7 @@
 let express = require("express");
 let index = require("./routes/index");
 let session = require("express-session"); //allowing user sessions
+var path = require("path");
 let cors = require("cors");
 //require created modules
 let app = express();
@@ -15,7 +16,8 @@ app.use(
   })
 );
 //require node module for the spotify api
-app.use(express.static(__dirname + "client/build"));
+app.use(express.static(path.join(__dirname + "client/build")));
+
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
