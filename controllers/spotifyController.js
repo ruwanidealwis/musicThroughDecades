@@ -1,6 +1,6 @@
 /************* module imports  *******************************/
 let SpotifyWebApi = require("spotify-web-api-node");
-config = require("../../variableConfig.js");
+config = require("../variableConfig.js");
 var { PythonShell } = require("python-shell");
 
 /********* variable declaration */
@@ -61,7 +61,7 @@ let runPy = (req) => {
         "/Library/Frameworks/Python.framework/Versions/3.8/bin/python3",
       pythonOptions: ["-u"], // get print results in real-time
       scriptPath:
-        "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/webScraperPython", //should update to local path...
+        "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/webScraperPython", //should update to local path...
       args: [req.session.decade],
     };
 
@@ -369,7 +369,7 @@ let getUserTopTracks = async (timeRange, retries) => {
             artistsId.push(songArtists.id);
           });
 
-          let artistInfo = await getArtistInfo(artistsId, req.session.retries); //get
+          let artistInfo = await getArtistInfo(artistsId, retries); //get
 
           //create object with information
           object = {

@@ -1,5 +1,5 @@
 //manipulate DB
-/** @global */ const db = require("../../models/index.js");
+/** @global */ const db = require("../models/index.js");
 const { get } = require("../routes/index.js");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
