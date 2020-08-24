@@ -3,28 +3,36 @@
 const { get } = require("../routes/index.js");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
-
-exports.test = async () => {
-  let ans = await db.Songs.findAll({
-    attributes: ["popularity"],
-    where: { name: "Sunflower " },
-    include: [{ model: db.tempUser }],
-  });
-  //console.log(ans);
-};
-
-//allow camel case, function taken from: https://dzone.com/articles/capitalize-first-letter-string-javascript
+/**
+ * converts first letter to capital (hi==>Hi)
+ *taken from:https://dzone.com/articles/capitalize-first-letter-string-javascript
+ * @summary If the description is long, write your summary here. Otherwise, feel free to remove this.
+ * @param {String} string - string to convert to capital
+ * @return {String} String with first letter capital
+ */
+//allow camel case, function taken from:
 function jsUcfirst(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-/***************************** METHODS FOR CREATING/REMOVING FROM DB */
+/***************************** METHODS FOR CREATING/REMOVING FROM DB **************************/
+/**
+ * Creates a temporary user for the duration of session
+ * @param {sessionId} sessionID - id of the current session
+ */
+
 exports.createTempUser = async (sessionId) => {
   await db.tempUser.create({
     sessionId: sessionId,
   });
 };
-/********* FUNC */
+
+/**
+ * Adds the song to the database
+ * @param {Object} songObjects an Object containing the details of the song
+ * @param {Number} decade specifies the decade the song was created in
+ * @param {Number} index specifies the rank
+ */
 exports.addSongToDatabase = async (songObjects, decade, index) => {
   let decadeId = await db.Decade.findOne({
     attributes: ["id"],
@@ -59,8 +67,14 @@ exports.addSongToDatabase = async (songObjects, decade, index) => {
     await addPermanantArtists(artist, decadeId.id, song, songObjects);
   }
 };
-//TODO delete every migration, make a tempUser table, add a many to many decade association with artists
 
+/**
+ * Adds the user song to the database. In this case the song is temporary, will be deleted after all the relevant data is collect.
+ * Also a possibility that the song already exists (user top song is also a top song of the decade)
+ * @param {Object} songObjects an Object containing the details of the song
+ * @param {Number} index specifies the rank the song was created in
+ * @param {String} sessionId the id of the current session
+ */
 exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
   //console.log(songObjects);
   //we first have to check if this song exists...
@@ -96,8 +110,11 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
   }
 };
 
+/**
+ * Deletes all temporary user songs from database (means these songs are not the top songs of the decade, but top  songs of the user)
+ * @param {String} sessionId the id of the current session
+ */
 exports.deleteUserSongsFromDatabase = async (sessionId) => {
-  const { Sequelize } = require("sequelize");
   //after we get all the nescessary information...the song will be deleted
   let possibleSongs = await db.Songs.findAll({
     attributes: ["name", "id"],
@@ -107,13 +124,10 @@ exports.deleteUserSongsFromDatabase = async (sessionId) => {
       { model: db.Artist }, //this will return all the artists associated with this song (that are temporary, becasuse songs could have artists with other perm entries)
     ],
   });
-  ////console.log(possibleSongs);
-  // //console.log(possibleSongs);
+
   //console.log(possibleSongs);
   let count = 0;
   for (const song of possibleSongs) {
-    //if
-
     let songId = song.id;
 
     //this avoids the case where two users are using the app at the same time, and both have the same top song
@@ -146,9 +160,13 @@ exports.deleteUserSongsFromDatabase = async (sessionId) => {
   //console.log(count);
 };
 
-//get all temps, get associations with just 1 currently (and delete it from the database if the id is equal to user)
-
-//HELPER METHODS
+/**
+ * Creates the specific user song (helper method in addUserSongs) (and artist)
+ * @param {Object} songObjects an Object containing the details of the song
+ * @param {Array} dateArray array containing the date the song was released
+ * @param {Number} index specifies the rank the song was created in
+ * @param {String} sessionId the id of the current session
+ */
 let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
   let userSong = await db.Songs.create({
     name: songObjects.name,
@@ -214,7 +232,20 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
     rank: index,
   }); //add this to user and session ID to the associated table
 };
+/**
+ * @typedef {Object} Artist
+ * @property {String} name - Name of the artist
+ * @property {number} imageURL - picture of the artist
+ *  @property {Array} genres - the genres of the artist
+ */
 
+/**
+ * creates a permanant artist in the database (this artist had a top song in one of the decades)
+ * @param {Artist} artist an Object containing informatin about the artist
+ * @param {int} decadeID the decade that the artist belongs to
+ *  @param {Object} song the song that was created in the database that the artist sang
+ * @param {Object} songObj information about the song
+ */
 let addPermanantArtists = async (artist, decadeId, song, songObj) => {
   let artist_id = await db.Artist.findOne({
     attributes: ["id"],
