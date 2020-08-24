@@ -1,0 +1,231 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 7,
+    "passes": 3,
+    "pending": 0,
+    "failures": 4,
+    "start": "2020-08-24T21:35:33.832Z",
+    "end": "2020-08-24T21:35:41.923Z",
+    "duration": 8091,
+    "testsRegistered": 7,
+    "passPercent": 42.857142857142854,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "1151ad9d-a02c-4ad2-a0d2-39ffd6362917",
+      "title": "",
+      "fullFile": "",
+      "file": "",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "84309c21-f885-4bdb-922d-140ac071cbac",
+          "title": "Test Entry",
+          "fullFile": "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js",
+          "file": "/app.test.js",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Tests Server Working",
+              "fullTitle": "Test Entry Tests Server Working",
+              "timedOut": false,
+              "duration": 20,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "agent.get(\"/\").end((err, res) => {\n  expect(res).to.have.status(200);\n  expect(res.body.message).to.equals(\n    \"Welcome to Music Through The Decades\"\n  );\n  done();\n});",
+              "err": {},
+              "uuid": "728b8704-b81f-49b6-bc4d-6d308e06f3ae",
+              "parentUUID": "84309c21-f885-4bdb-922d-140ac071cbac",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Tests two valid decades",
+              "fullTitle": "Test Entry Tests two valid decades",
+              "timedOut": true,
+              "duration": 2008,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "agent.get(\"/compare/1990-2010\").end((err, res) => {\n  expect(res).to.have.status(200);\n  if (err) return done(err);\n  done();\n});",
+              "err": {
+                "message": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)",
+                "estack": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)\n    at listOnTimeout (internal/timers.js:549:17)\n    at processTimers (internal/timers.js:492:7)",
+                "diff": null
+              },
+              "uuid": "018e1c74-c466-4bac-a32b-1b17459427f1",
+              "parentUUID": "84309c21-f885-4bdb-922d-140ac071cbac",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Tests valid decade vs user",
+              "fullTitle": "Test Entry Tests valid decade vs user",
+              "timedOut": true,
+              "duration": 2000,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "agent.get(\"/compare/1990-6Months\").end((err, res) => {\n  expect(res).to.have.status(200);\n  if (err) return done(err);\n  done();\n});",
+              "err": {
+                "message": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)",
+                "estack": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)\n    at listOnTimeout (internal/timers.js:549:17)\n    at processTimers (internal/timers.js:492:7)",
+                "diff": null
+              },
+              "uuid": "7cfee43d-0ecc-473a-a2c1-9ea6b6ca64d6",
+              "parentUUID": "84309c21-f885-4bdb-922d-140ac071cbac",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Tests invalid second decade",
+              "fullTitle": "Test Entry Tests invalid second decade",
+              "timedOut": true,
+              "duration": 2011,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "agent.get(\"/compare/1990-1920\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 2nd comparator\"\n  );\n  done();\n});",
+              "err": {
+                "message": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)",
+                "estack": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)\n    at listOnTimeout (internal/timers.js:549:17)\n    at processTimers (internal/timers.js:492:7)",
+                "diff": null
+              },
+              "uuid": "c345517a-5c73-4c04-99c8-fec29ca6cd9c",
+              "parentUUID": "84309c21-f885-4bdb-922d-140ac071cbac",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Tests invalid first decade",
+              "fullTitle": "Test Entry Tests invalid first decade",
+              "timedOut": false,
+              "duration": 5,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "agent.get(\"/compare/1920-2000\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 1st comparator\"\n  );\n  done();\n});",
+              "err": {},
+              "uuid": "2ecd1f11-f3da-4bd2-aad4-8f4872d760f7",
+              "parentUUID": "84309c21-f885-4bdb-922d-140ac071cbac",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Tests invalid user time range",
+              "fullTitle": "Test Entry Tests invalid user time range",
+              "timedOut": true,
+              "duration": 2009,
+              "state": "failed",
+              "speed": null,
+              "pass": false,
+              "fail": true,
+              "pending": false,
+              "context": null,
+              "code": "agent.get(\"/compare/1970-lastWeek\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 2nd comparator\"\n  );\n  done();\n});",
+              "err": {
+                "message": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)",
+                "estack": "Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure \"done()\" is called; if returning a Promise, ensure it resolves. (/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/test/app.test.js)\n    at listOnTimeout (internal/timers.js:549:17)\n    at processTimers (internal/timers.js:492:7)",
+                "diff": null
+              },
+              "uuid": "d85d0ddb-dd68-44fd-80b8-c78843697c42",
+              "parentUUID": "84309c21-f885-4bdb-922d-140ac071cbac",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Inserts user time range as first comparator",
+              "fullTitle": "Test Entry Inserts user time range as first comparator",
+              "timedOut": false,
+              "duration": 9,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "agent.get(\"/compare/allTime-1980\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 1st comparator\"\n  );\n  done();\n});",
+              "err": {},
+              "uuid": "52fd304a-da7a-4f4d-84f8-d786cf1a06a2",
+              "parentUUID": "84309c21-f885-4bdb-922d-140ac071cbac",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "728b8704-b81f-49b6-bc4d-6d308e06f3ae",
+            "2ecd1f11-f3da-4bd2-aad4-8f4872d760f7",
+            "52fd304a-da7a-4f4d-84f8-d786cf1a06a2"
+          ],
+          "failures": [
+            "018e1c74-c466-4bac-a32b-1b17459427f1",
+            "7cfee43d-0ecc-473a-a2c1-9ea6b6ca64d6",
+            "c345517a-5c73-4c04-99c8-fec29ca6cd9c",
+            "d85d0ddb-dd68-44fd-80b8-c78843697c42"
+          ],
+          "pending": [],
+          "skipped": [],
+          "duration": 8062,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "8.1.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "6.1.1"
+    },
+    "marge": {
+      "options": null,
+      "version": "5.1.0"
+    }
+  }
+}

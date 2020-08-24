@@ -28,3 +28,4 @@ if (port == null || port == "") {
   port = 8000;
 }
 app.listen(port, () => console.log(`app listening on port ${port}`)); //app is now listening on port
+module.exports = app;
