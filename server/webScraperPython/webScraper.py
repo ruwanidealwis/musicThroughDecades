@@ -29,14 +29,37 @@ def getDecadeInfo(decade):
                  for s in soup.find_all(class_="tit")]
 
         artists = [s.get_text().replace("'", "").replace("$", "s")
-
                    for s in soup.find_all(class_="art")]
 
+        songTable = soup.findAll("table", {"class": "linkitem"})
+
+        topArtists = []
+        count = 0
+
+        for song in songTable[1].findAll("tr"):
+            if(count != 0):
+                songRow = song.find("td")
+                if(songRow != None):
+                    text = songRow.find("a")
+
+                    topArtists.append(text.get_text().replace(
+                        "'", "").replace("$", "s"))
+
+            count += 1
+       # print(topArtists)
         year = [s.get_text().replace("'", "")
 
                 for s in soup.find_all(class_="yer")]
+
         for i in range(100):
-            finalList.append(songs[i] + " - " + artists[i] + " - " + year[i])
+            rank = 101
+            if(artists[i] in topArtists):
+                rank = topArtists.index(artists[i]) + 1
+            finalList.append(songs[i] + " - " +
+                             artists[i] + " - " + year[i] + " - " + str(rank))
+
+        # get top artists of the decade...
+
     if(decade == "2010"):
         # CSV TAKE FROM: http://chart2000.com/about.htm
         with open('/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/webScraperPython/files/2010scharts.csv') as csv_file:
@@ -148,3 +171,4 @@ def getYearInfo(year):
 
 
 print(getDecadeInfo(sys.argv[1]))
+# print(getDecadeInfo("1990"))
