@@ -587,11 +587,12 @@ exports.getUserListeningHabbits = async (req) => {
  *
  * @summary creates a spotify playlist for the user
  * @param {req} Object - contains the information about the reccomended songs for user (based on decade)
- *
+ * @return {Promise}
  */
 exports.createPlaylist = (req) => {
   //might have to refresh because the user does not immediately click create playlist
-  spotifyApi
+  let playlistURL = "";
+  return spotifyApi
     .refreshAccessToken()
     .then(
       (data) => {
@@ -599,7 +600,7 @@ exports.createPlaylist = (req) => {
         return data;
       },
       (err) => {
-        console.log(err);
+        throw err;
       }
     )
     .then((data) => {
@@ -609,6 +610,7 @@ exports.createPlaylist = (req) => {
         `My ${req.session.decade}'s reccomendations!`,
         {
           public: true,
+          description: `Some tracks from the ${req.session.decade}'s I might love`,
         }
       );
     })
@@ -617,6 +619,7 @@ exports.createPlaylist = (req) => {
         console.log(data.body);
         //use the req.comparator object to get the user reccomended songs and add them to playlist
         req.session.playlistId = data.body.id;
+        playlistURL = data.body.external_urls.spotify;
         reccomendationIdArray = [];
         req.session.comparator["userReccomendations"].forEach((song) => {
           reccomendationIdArray.push(`spotify:track:${song.spotifyId}`);
@@ -624,7 +627,7 @@ exports.createPlaylist = (req) => {
         return reccomendationIdArray;
       },
       (err) => {
-        console.log(err);
+        throw err;
       }
     )
     .then((data) => {
@@ -632,10 +635,10 @@ exports.createPlaylist = (req) => {
     })
     .then(
       () => {
-        console.log("added tracks");
+        return playlistURL;
       },
       (err) => {
-        console.log(err);
+        throw err;
       }
     );
 };
