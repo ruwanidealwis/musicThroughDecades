@@ -298,7 +298,11 @@ let addPermanantArtists = async (artist, decadeId, song, songObj) => {
     }
   }
 };
-
+/**
+ * Deletes all temporary user artists from database (means these artists are not the top artists of the decade, but top  songs of the user)
+ * @param {Artist} artist Object containing information about artist
+ * @param {String} sessionId the id of the current session
+ */
 let deleteUserArtistsFromDatabase = async (artist, sessionId) => {
   let otherUsers = await db.Artist.findByPk(artist.id, {
     include: [{ model: db.tempUser }, { model: db.Songs }],
@@ -1030,24 +1034,4 @@ exports.getUserStatistics = async (sessionId, decade) => {
   );
 
   return fullStatsObject;
-
-  //TODO get user top tracks--done
-  //TODO get user top artists (get it from the API)
-  //TODO get user song popularity---dine
-  //TODO get user average feature value---donw
-  //TODO get user top songs for each feature--done
-  //TODO get user distribution---done
-  //TODO get user most popular genres--done
-  //TODO get song reccomendations
 };
-
-//to get top artists
-//topDecadeArtist
-//1 decade has many top Artists
-//artists can have many artists
-//exactly like DecadeArtists --> but has rank
-//get top artists, order by rank....
-
-//TODO scrape to get top decade artists
-//TODO add topDecadeArtistTable
-//TODO  add topUserArtists
