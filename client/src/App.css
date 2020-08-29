@@ -1,38 +1,95 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto + Sans + JP:wght@500&display=swap");
 .App {
   text-align: center;
+  margin-top: 3%;
+  padding-left: 8%;
+  padding-right: 8%;
+  background-color: #f4edee;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+h3 {
+  margin: 0;
+}
+#root,
+html,
+.App {
+  background-color: #f4edee;
+}
+.title {
+  font-family: "Noto Sans JP", sans-serif;
+  font-weight: 800 !important;
+}
+/*https://stackoverflow.com/questions/40306105/how-can-i-stack-bootstrap-buttons-on-mobile*/
+@media only screen and (max-width: 767px) {
+  .btn-group {
+    display: block;
+    align-content: center;
+    justify-content: flex;
+  }
+}
+.compareButton {
+  margin: 6% !important;
+  font-family: "Noto Sans JP", sans-serif !important;
+  background-color: #0b5029 !important;
+  border: #0b5029 !important;
+  font-size: 30px !important;
+  padding-left: 4% !important;
+  padding-right: 4% !important;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+  .soundWave {
+    animation: scaleY 2s infinite ease-in-out;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.btn-success {
+  background-color: #2e8b57;
+  border: #2e8b57;
+}
+.buttonGroup {
   align-items: center;
+  align-content: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+}
+.buttonToggle {
+  margin: 3% !important;
+  white-space: nowrap;
+  padding-right: 15% !important;
+  padding-left: 15% !important;
+  border-radius: 4% !important;
 }
 
 .App-link {
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes scaleX {
+  0% {
+    transform: scaleX(1);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: scaleX(1.2);
+  }
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes scaleY {
+  0% {
+    transform: scaleY(1);
+    transform: scaleX(1);
+  }
+
+  50% {
+    transform: scaleY(1.5), scaleX(1.2), translate(100px, 200px);
+    translate: ();
+    transform: scaleX(1.2);
+  }
+
+  100% {
+    transform: scaleY(1);
+    transform: scaleX(1);
   }
 }

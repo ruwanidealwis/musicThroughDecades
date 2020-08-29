@@ -3,6 +3,7 @@ let express = require("express");
 let spotifyController = require("../controllers/spotifyController");
 var path = require("path");
 var router = express.Router();
+var clientURL = "http://localhost:3000"; //need to change...(for later)
 /**
  * Validate entered values (not very relevant when the front end is implemented)
  * @param {String} comparator - decade being compared
@@ -39,23 +40,35 @@ router.get("/music", (req, res) => {
   console.log(req.session.id);
   console.log(req.session.type);
   console.log(req.session.userId);
+
+  //logic from :https://github.com/finallyayo/music-history/blob/master/server.js
+  //res.redirect(`${clientURL}/?authorized=true`);
   res.status(200).json({
     decade: req.session.decadeStats,
     comparator: req.session.comparator,
   });
 });
 
+router.get("/login", (req, res) => {
+  console.log("logging in");
+  timeRange = req.query.timeRange;
+  let url = spotifyController.getAuthorizationURL(req);
+  res.status(200).send({ url: url }); //now redirects user to authorization... (after successful should return to callback...)
+});
 router.get("/callback", async (req, res) => {
+  console.log("redirecting to: " + `${clientURL}/?authorized=true`);
+  res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
   //loaded after the user authenticates
   //should be loading page...
-  req.session.retries = 3; //each request gets 3 tries
+  /* req.session.retries = 3; //each request gets 3 tries
   req.session.comparator = await spotifyController.getUserListeningHabbits(
     req,
     req.session.userTopRead,
     req.session.decade,
     req.session.retries
   );
-  res.redirect("/music");
+  req.session.completed == true;
+  res.redirect("/music");*/
 });
 
 router.get("/compare/:comparators", async (req, res) => {
@@ -73,9 +86,17 @@ router.get("/compare/:comparators", async (req, res) => {
 
     if (userSpotify.includes(comparators[1])) {
       req.session.type = "user";
-
-      let url = spotifyController.getAuthorizationURL(comparators[1], req);
-      res.redirect(url); //now redirects user to authorization... (after successful should return to callback...)
+      req.session.completed = false;
+      req.session.retries = 3; //each request gets 3 tries
+      req.session.userTopRead = comparators[1];
+      req.session.comparator = await spotifyController.getUserListeningHabbits(
+        req,
+        req.session.userTopRead,
+        req.session.decade,
+        req.session.retries
+      );
+      req.session.completed == true;
+      res.redirect("/music"); //et url = spotifyController.getAuthorizationURL(comparators[1], req);
     } else {
       req.session.type = "decade";
       let validateSecondComparator = validateValues(comparators[1]);
@@ -85,6 +106,7 @@ router.get("/compare/:comparators", async (req, res) => {
           req,
           req.session.decade2
         );
+        req.session.completed == true;
         res.status(200).redirect("/music");
       } else {
         res
@@ -102,7 +124,9 @@ router.get("*", (req, res) => {
   //taken from: https://stackoverflow.com/questions/16750524/remove-last-directory-in-url
   let rootPath = __dirname.split(path.sep);
   rootPath.pop();
-  res.sendFile(path.join(rootPath.join(path.sep) + "/client/build/index.html"));
+  console.log(req.path);
+  console.log("hi");
+  //res.sendFile(path.join(rootPath.join(path.sep) + "/client/build/index.html"));
 });
 
 module.exports = router;

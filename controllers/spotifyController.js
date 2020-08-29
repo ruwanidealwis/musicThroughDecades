@@ -278,7 +278,7 @@ let getAudioInfo = async function (retries) {
     async (err) => {
       console.error(err);
       if (retries > 0) {
-        console.error(e);
+        console.error(err);
         await asyncTimeout(
           e.headers["retry-after"]
             ? parseInt(e.headers["retry-after"]) * 1000
@@ -516,7 +516,7 @@ exports.getAuthorizationURL = (timeRange, req) => {
     ["user-top-read", "playlist-modify-public"],
     state
   ); //generated
-  req.session.userTopRead = getReadChoice(timeRange); //what data should be queried for...
+
   return authorizeURL;
 };
 
@@ -543,6 +543,7 @@ exports.getUserListeningHabbits = async (req) => {
         // Set the access token on the API object to use it in later calls
         spotifyApi.setAccessToken(data.body["access_token"]);
         spotifyApi.setRefreshToken(data.body["refresh_token"]);
+        req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
       },
       (err) => {
         console.log("Something went wrong!", err);
