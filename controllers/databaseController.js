@@ -1,6 +1,5 @@
 //manipulate DB
 /** @global */ const db = require("../models/index.js");
-const { get } = require("../routes/index.js");
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
 /**
@@ -90,6 +89,7 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
   //console.log(song);
   if (song == null) {
     //wecreate the song.... but we make it temporary (after we get all the data the song is deleted from the database)
+    console.log(dateArray[0]);
     await createUserEntry(songObjects, dateArray, sessionId, index);
   } else {
     //create a manual association with UserSong and for all the artists aswell
@@ -363,7 +363,7 @@ let getTopArtistsByRank = (decade) => {
     include: [
       {
         model: db.Artist,
-        attributes: ["name", "imageURL"],
+        attributes: ["name", "imageURL", "genres"],
 
         group: ["name", "imageURL"],
         through: { attributes: [] },
@@ -376,7 +376,11 @@ let getTopArtistsByRank = (decade) => {
     for (const artist of data[0].Artists) {
       //console.log(artist);
       if (limit < 10)
-        topArtistsArray.push({ name: artist.name, image: artist.imageURL });
+        topArtistsArray.push({
+          name: artist.name,
+          image: artist.imageURL,
+          genres: artist.genres,
+        });
       else {
         break;
       }
@@ -465,10 +469,11 @@ let getTopSongs = (decade) => {
   let TopArray = [];
   return getDecadeId(decade).then((id) => {
     return db.Songs.findAll({
-      attributes: ["name", "rank"],
+      attributes: ["name", "rank", "imageUrl", "yearOfRelease"],
       where: { decadeId: id },
       include: { model: db.Artist },
-      limit: 10,
+      limit: 20,
+      order: [["rank", "ASC"]],
     })
       .then((songs) => {
         for (const song of songs) {
@@ -481,6 +486,8 @@ let getTopSongs = (decade) => {
           TopArray.push({
             name: song.name,
             rank: song.rank,
+            year: song.yearOfRelease,
+            image: song.imageUrl,
             artists: artists,
             image: song.imageUrl,
           });
@@ -555,6 +562,7 @@ let getTopArtists = async (decade, limit) => {
    "Decade"."id",
    "Artists"."name" AS "Artists.name",
    "Artists"."imageURL" AS "Artists.imageURL",
+    "Artists"."genres" AS "Artists.genres",
    COUNT("Artists -> Songs"."id") AS "Artists.Songs.count" 
 FROM
    "Decades" AS "Decade" 
@@ -599,6 +607,7 @@ ORDER BY
           name: artist["Artists.name"],
           hits: artist["Artists.Songs.count"],
           image: artist["Artists.imageURL"],
+          genres: artist["Artists.genres"],
         });
       }
       return topArtists;
@@ -754,6 +763,7 @@ let getUserTopFeatures = async (sessionId, feature, order, limit) => {
         }
         topSongs.push({
           name: song.name,
+          year: song.yearOfRelease,
           artists: artists,
           [feature]: song[feature] || i,
           image: song.imageUrl,
@@ -909,14 +919,14 @@ order by
 };
 
 let getMostHits = (sessionId) => {
-  db.tempUser
+  return db.tempUser
     .findAll({
       where: { sessionId: sessionId },
       include: [
         {
           model: db.Artist,
           as: "Artists",
-          attributes: ["name", "imageURL"],
+          attributes: ["name", "imageURL", "genres"],
           include: [
             {
               model: db.Songs,
@@ -945,6 +955,7 @@ let getMostHits = (sessionId) => {
           name: artists.name,
           hits: artists.Songs.length,
           image: artists.imageURL,
+          genres: artists.genres,
         });
       }
       //have to manually sort //TODO find postgres workaround
@@ -1025,8 +1036,8 @@ exports.getUserStatistics = async (sessionId, decade) => {
 
   fullStatsObject[`favourteGenres`] = await userMostPopularGenres(sessionId);
   // //console.log(fullStatsObject);
-  let ans = await getMostHits(sessionId);
-  fullStatsObject[`topArtistsByHits`] = await userMostPopularGenres(sessionId);
+
+  fullStatsObject[`top10ArtistsByHits`] = await getMostHits(sessionId);
 
   fullStatsObject[`userReccomendations`] = await getSongReccomendations(
     decade,

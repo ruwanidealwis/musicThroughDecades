@@ -170,5 +170,5 @@ def getYearInfo(year):
     return finalList'''
 
 
-print(getDecadeInfo(sys.argv[1]))
-# print(getDecadeInfo("1990"))
+# print(getDecadeInfo(sys.argv[1]))
+print(getDecadeInfo("2000"))

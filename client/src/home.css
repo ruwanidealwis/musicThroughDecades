@@ -4,17 +4,24 @@
   margin-top: 3%;
   padding-left: 8%;
   padding-right: 8%;
-  background-color: #f4edee;
+  background-color: whitesmoke;
+  align-items: center;
 }
-
+.animation {
+  justify-content: center;
+  margin: auto;
+  display: flex;
+  padding: 4%;
+}
 h3 {
   margin: 0;
 }
 #root,
-html,
-.App {
-  background-color: #f4edee;
+html {
+  background-color: whitesmoke;
+  text-align: center;
 }
+
 .title {
   font-family: "Noto Sans JP", sans-serif;
   font-weight: 800 !important;

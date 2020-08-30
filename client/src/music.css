@@ -1,0 +1,23 @@
+.infoContainer {
+  margin-top: 5% !important;
+  margin-bottom: 5% !important;
+  margin: auto;
+  text-align: center;
+  justify-content: center;
+  height: 80% !important;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: black;
+  width: 90%;
+}
+
+.loader {
+  justify-content: center;
+  margin: 8% !important;
+}
+.recievedData {
+  background-color: white;
+  padding: 2% 1% 2% 1%;
+}
