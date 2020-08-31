@@ -444,12 +444,10 @@ getTopFeaturesForDecade = async (
     // //console.log(songs);
     //cant do it in original query, breaks it
     let songArtists = await db.Songs.findByPk(songs.id, {
-      include: [{ model: db.Artist }],
+      include: [{ model: db.Artist, attributes: ["name"] }],
     });
     let artistsArray = [];
-    songArtists.Artists.forEach((artist) =>
-      artistsArray.push({ name: artist.name, genres: artist.genres })
-    );
+    songArtists.Artists.forEach((artist) => artistsArray.push(artist.name));
 
     let obj = {
       name: songs.name,
@@ -686,6 +684,13 @@ exports.getDecadeStatistics = async (decade) => {
     "popularity",
     "DESC",
     10,
+    decade,
+    parseInt(decade),
+    parseInt(decade) + 9
+  );
+
+  fullStatsObject[`averagePopularity`] = await getAverageValue(
+    "popularity",
     decade,
     parseInt(decade),
     parseInt(decade) + 9
@@ -1014,9 +1019,12 @@ exports.getUserStatistics = async (sessionId, decade) => {
     sessionId,
     "popularity",
     "DESC",
-    3
+    10
   );
-
+  fullStatsObject[`averagePopularity`] = await getUserAverageFeature(
+    sessionId,
+    "popularity"
+  );
   //get distribution (all these involve count)
 
   fullStatsObject[`songsByDecade`] = await getUserDistribution(
@@ -1034,7 +1042,7 @@ exports.getUserStatistics = async (sessionId, decade) => {
     "key"
   );
 
-  fullStatsObject[`favourteGenres`] = await userMostPopularGenres(sessionId);
+  fullStatsObject[`mostPopularGenres`] = await userMostPopularGenres(sessionId);
   // //console.log(fullStatsObject);
 
   fullStatsObject[`top10ArtistsByHits`] = await getMostHits(sessionId);

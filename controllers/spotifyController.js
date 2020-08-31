@@ -434,6 +434,7 @@ let getUserTopArtists = (timeRange) => {
         topArtists.push({
           name: ArtistObject.name,
           image: ArtistObject.images[0].url,
+          genres: ArtistObject.genres,
         });
       }
       return topArtists;

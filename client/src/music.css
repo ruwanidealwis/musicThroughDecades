@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap");
 .infoContainer {
   margin-top: 5% !important;
   margin-bottom: 5% !important;
@@ -9,15 +10,30 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: black;
+  background-color: white !important;
   width: 90%;
 }
 
 .loader {
   justify-content: center;
+  background-color: rgb(46, 45, 45);
   margin: 8% !important;
+  color: white;
 }
 .recievedData {
   background-color: white;
-  padding: 2% 1% 2% 1%;
+  padding: 0% 0% 0% 0%;
+  color: rgb(31, 30, 30);
+  font-family: "Roboto", sans-serif;
+}
+a.MuiTypography-colorTextSecondary {
+  color: #2e8b57;
+}
+.typgoraphyText {
+  padding-left: 2%;
+}
+.divider {
+  height: 5px !important;
+  background-color: rgb(31, 30, 30) !important;
+  margin-right: 40% !important;
 }

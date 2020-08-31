@@ -11,7 +11,7 @@ import "./top20.css";
 class TopTwentySongs extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
+    //g(props);
   }
 
   render() {
@@ -22,13 +22,18 @@ class TopTwentySongs extends React.Component {
         <Grid class="grid" container width="50vh" spacing={2}>
           {array.map((arrItem) => {
             return (
-              <Grid container width="50vh" spacing={2}>
+              <Grid container width="50vh" spacing={3}>
                 {this.props.data
                   .slice(arrItem, arrItem + 2)
                   .map((item, index) => {
-                    console.log(item);
+                    //console.log(item);
                     return (
-                      <Card className="infoCard" bgcolor="grey.700" width="50%">
+                      <Card
+                        elevation={15}
+                        className="infoCard"
+                        bgcolor="grey.700"
+                        width="50%"
+                      >
                         <CardContent className="cardContent">
                           <Grid container wrap="nowrap" spacing={2}>
                             <Grid className="coverGrid" item>
@@ -49,14 +54,16 @@ class TopTwentySongs extends React.Component {
                                   {item.name.replace(/ *\([^)]*\) */g, "")}
                                 </strong>
                               </Typography>
-                              <Typography
-                                align="left"
-                                className="text"
-                                variant="subtitle2"
-                                color="textSecondary"
-                              >
-                                {item.year}
-                              </Typography>
+                              {this.props.popularity ? null : (
+                                <Typography
+                                  align="left"
+                                  className="text"
+                                  variant="subtitle2"
+                                  color="textSecondary"
+                                >
+                                  {item.year}
+                                </Typography>
+                              )}
                               <Typography
                                 align="left"
                                 className="text"
@@ -65,6 +72,28 @@ class TopTwentySongs extends React.Component {
                               >
                                 {item.artists.toString()}
                               </Typography>
+                              {this.props.popularity ? (
+                                <div>
+                                  <Typography
+                                    align="left"
+                                    className="text"
+                                    variant="subtitle2"
+                                    color="textSecondary"
+                                  >
+                                    <strong>
+                                      popularity: {item.popularity}
+                                    </strong>
+                                  </Typography>
+                                  <Typography
+                                    align="left"
+                                    className="text"
+                                    variant="subtitle2"
+                                    color="textSecondary"
+                                  >
+                                    <strong> original rank: {item.rank}</strong>
+                                  </Typography>
+                                </div>
+                              ) : null}
                             </Grid>
                           </Grid>
                         </CardContent>

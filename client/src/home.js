@@ -290,7 +290,7 @@ class Home extends React.Component {
         <h1 className="title"> Music Through Decades </h1>
 
         <div className="animation">
-          <WaveSpinner color="black" size={100} loading={true}></WaveSpinner>
+          <WaveSpinner color="#2e8b57" size={100} loading={true}></WaveSpinner>
         </div>
         <h5>
           Click on two decades to compare how different the top 100 hits of the
@@ -306,7 +306,7 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: fifties ? "#BCCD46" : "",
+                    backgroundColor: fifties ? "#6987bd" : "",
                   }}
                   variant="success"
                   id={"1950s"}
@@ -322,7 +322,7 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: sixties ? "#BCCD46" : "",
+                    backgroundColor: sixties ? "#6987bd" : "",
                   }}
                   variant="success"
                   id={"1960s"}
@@ -338,7 +338,7 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: seventies ? "#BCCD46" : "",
+                    backgroundColor: seventies ? "#6987bd" : "",
                   }}
                   variant="success"
                   id={"1970s"}
@@ -353,7 +353,7 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: eighties ? "#BCCD46" : "",
+                    backgroundColor: eighties ? "#6987bd" : "",
                   }} //={this.style(eighties)}
                   id={"1980s"}
                   variant="success"
@@ -378,7 +378,7 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: nineties ? "#BCCD46" : "",
+                    backgroundColor: nineties ? "#6987bd" : "",
                   }}
                   variant="success"
                   id={"1990s"}
@@ -393,7 +393,7 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: twothousands ? "#BCCD46" : "",
+                    backgroundColor: twothousands ? "#6987bd" : "",
                   }}
                   variant="success"
                   className="buttonToggle"
@@ -410,7 +410,7 @@ class Home extends React.Component {
                 <ToggleButton
                   id={"2010s"}
                   style={{
-                    backgroundColor: twenty10s ? "#BCCD46" : "",
+                    backgroundColor: twenty10s ? "#6987bd" : "",
                   }}
                   variant="success"
                   className="buttonToggle"
@@ -439,7 +439,7 @@ class Home extends React.Component {
           <ToggleButtonGroup type="checkbox" className=" buttonGroup">
             <ToggleButton
               style={{
-                backgroundColor: allTime ? "#BCCD46" : "",
+                backgroundColor: allTime ? "#6987bd" : "",
               }}
               variant="success"
               size="lg"
@@ -457,7 +457,7 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: sixMonths ? "#BCCD46" : "",
+                backgroundColor: sixMonths ? "#6987bd" : "",
               }}
               variant="success"
               id={"Last 6 Months"}
@@ -476,9 +476,10 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: oneMonth ? "#BCCD46" : "",
+                backgroundColor: oneMonth ? "#6987bd" : "",
               }}
               variant="success"
+              id={"Last Month"}
               className="buttonToggle"
               size="lg"
               disabled={
