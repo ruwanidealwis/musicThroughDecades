@@ -21,7 +21,7 @@ class PieChart extends React.Component {
     let labelArray = [];
     let valueArray = [];
     this.props.data.forEach((object) => {
-      labelArray.push(object.genre);
+      labelArray.push(object[this.props.searchKey]);
       valueArray.push(object.count);
     });
 
@@ -34,16 +34,20 @@ class PieChart extends React.Component {
           {
             label: ` The Most Popular Genres`,
             backgroundColor: [
-              "#435951",
               "#9FC195",
+
+              "#408A9E",
+              "#B6C8DC",
+              "#435951",
               "#F7F2D3",
               "#EDAF7A",
               "#F26D79",
               "#7B7D88",
               "#B08E9E",
-              "#408A9E",
-              "#B6C8DC",
+
               "#5F5E72",
+              "#736374",
+              "#EBC459",
             ],
 
             hoverBackgroundColor: ["#8894b6cc", "#8e6692cc"],
@@ -57,7 +61,33 @@ class PieChart extends React.Component {
         animation: {
           duration: 3000,
         },
+        legend: {
+          position: "right",
+        },
+        tooltips: {
+          //function taken from: https://stackoverflow.com/questions/37257034/chart-js-2-0-doughnut-tooltip-percentages
+          callbacks: {
+            label: function (tooltipItem, data) {
+              //get the concerned dataset
+              var dataset = data.datasets[tooltipItem.datasetIndex];
+              //calculate the total of this data set
+              var total = dataset.data.reduce(function (
+                previousValue,
+                currentValue,
+                currentIndex,
+                array
+              ) {
+                return previousValue + currentValue;
+              });
+              //get the current items value
+              var currentValue = dataset.data[tooltipItem.index];
+              //calculate the precentage based on the total and current item, also this does a rough rounding to give a whole number
+              var percentage = Math.floor((currentValue / total) * 100 + 0.5);
 
+              return percentage + "%";
+            },
+          },
+        },
         plugins: {
           deferred: {
             xOffset: 150, // defer until 150px of the canvas width are inside the viewport
@@ -78,8 +108,8 @@ class PieChart extends React.Component {
         <Doughnut
           data={this.state.data}
           options={this.state.options}
-          width={400}
-          height={400}
+          width={320}
+          height={320}
         />
       </div>
     );

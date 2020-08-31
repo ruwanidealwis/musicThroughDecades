@@ -703,11 +703,9 @@ exports.getDecadeStatistics = async (decade) => {
     decade,
     "mode"
   );
-  fullStatsObject[`keyDistribution`] = await getFeatureDistribution(
-    decade,
-    "key"
-  );
-
+  let keyDistribution = await getFeatureDistribution(decade, "key");
+  keyDistribution = keyDistribution.sort((a, b) => a.key - b.key);
+  fullStatsObject[`keyDistribution`] = keyDistribution;
   ////console.log(modeD);
   //get Key distributions
   let songDistributionByYear = [];
@@ -1037,10 +1035,9 @@ exports.getUserStatistics = async (sessionId, decade) => {
     "mode"
   );
 
-  fullStatsObject[`keyDistribution`] = await getUserDistribution(
-    sessionId,
-    "key"
-  );
+  let keyDistribution = await getUserDistribution(sessionId, "key");
+  keyDistribution = keyDistribution.sort((a, b) => a.key - b.key);
+  fullStatsObject[`keyDistribution`] = keyDistribution;
 
   fullStatsObject[`mostPopularGenres`] = await userMostPopularGenres(sessionId);
   // //console.log(fullStatsObject);

@@ -231,6 +231,7 @@ class Music extends React.Component {
                   <TitleText text={`Most Popular Genres of ${decade}'s`} />
                   <PieChart
                     data={this.state.decadeData.mostPopularGenres}
+                    searchKey={"genre"}
                   ></PieChart>
                 </Grid>
                 <Grid item md={6} xs={12}>
@@ -239,6 +240,43 @@ class Music extends React.Component {
                   />
                   <PieChart
                     data={this.state.compareValueData.mostPopularGenres}
+                    searchKey={"genre"}
+                  ></PieChart>
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <TitleText
+                    text={`Most Popular Genres of ${compareValue}'s`}
+                  />
+                  <PieChart
+                    data={this.state.decadeData.keyDistribution}
+                    searchKey={"key"}
+                  ></PieChart>
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <TitleText
+                    text={`Most Popular Genres of ${compareValue}'s`}
+                  />
+                  <PieChart
+                    data={this.state.compareValueData.keyDistribution}
+                    searchKey={"key"}
+                  ></PieChart>
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <TitleText
+                    text={`Most Popular Genres of ${compareValue}'s`}
+                  />
+                  <PieChart
+                    data={this.state.decadeData.modeDistribution}
+                    searchKey={"mode"}
+                  ></PieChart>
+                </Grid>
+                <Grid item md={6} xs={12}>
+                  <TitleText
+                    text={`Most Popular Genres of ${compareValue}'s`}
+                  />
+                  <PieChart
+                    data={this.state.compareValueData.modeDistribution}
+                    searchKey={"mode"}
                   ></PieChart>
                 </Grid>
               </Grid>
