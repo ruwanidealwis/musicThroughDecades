@@ -5,6 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
 import { motion } from "framer-motion";
 import "./intro.css";
 var Scroll = require("react-scroll");
@@ -27,16 +28,18 @@ class Intro extends React.Component {
         <Grid container spacing={2}>
           <Grid item md={5} xs={12}>
             <Card className="decadeCard" elevation={14}>
-              <Typography align="center" variant="h2">
-                {this.props.decade}'s
-              </Typography>
-              <br /> <br />
-              <Typography align="center" variant="subtitle1">
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat.
-              </Typography>
+              <CardContent>
+                <Typography align="center" variant="h2">
+                  {this.props.decade}'s
+                </Typography>
+                <br /> <br />
+                <Typography align="center" variant="subtitle1">
+                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
+                </Typography>
+              </CardContent>
             </Card>
           </Grid>
           <Grid
@@ -54,16 +57,18 @@ class Intro extends React.Component {
           </Grid>
           <Grid item md={5} xs={12}>
             <Card className="decadeCard" id="card2" elevation={14}>
-              <Typography align="center" variant="h2">
-                {this.props.comparator}'s
-              </Typography>
-              <br /> <br />
-              <Typography align="center" variant="subtitle1">
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat.
-              </Typography>
+              <CardContent>
+                <Typography align="center" variant="h2">
+                  {this.props.comparator}'s
+                </Typography>
+                <br /> <br />
+                <Typography align="center" variant="subtitle1">
+                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
+                  do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                  Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                  laboris nisi ut aliquip ex ea commodo consequat.
+                </Typography>
+              </CardContent>
             </Card>
           </Grid>
           <Grid className="basicInfo" item md={12} xs={12}>

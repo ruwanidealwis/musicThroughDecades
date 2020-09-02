@@ -21,8 +21,13 @@ class PieChart extends React.Component {
     let labelArray = [];
     let valueArray = [];
     this.props.data.forEach((object) => {
-      labelArray.push(object[this.props.searchKey]);
-      valueArray.push(object.count);
+      if (this.props.searchKey === "mode") {
+        labelArray = ["minor", "major"];
+        valueArray.push(object.count);
+      } else {
+        labelArray.push(object[this.props.searchKey]);
+        valueArray.push(object.count);
+      }
     });
 
     this.state = {
@@ -35,7 +40,6 @@ class PieChart extends React.Component {
             label: ` The Most Popular Genres`,
             backgroundColor: [
               "#9FC195",
-
               "#408A9E",
               "#B6C8DC",
               "#435951",
@@ -44,14 +48,31 @@ class PieChart extends React.Component {
               "#F26D79",
               "#7B7D88",
               "#B08E9E",
+              "#5F5E72",
+              "#736374",
+              "#EBC459",
+            ],
+
+            hoverBackgroundColor: [
+              "#9FC195cc",
+
+              "#408A9Ecc",
+              "#B6C8DCcc",
+              "#435951cc",
+              "#F7F2D3cc",
+              "#EDAF7Acc",
+              "#F26D79cc",
+              "#7B7D88cc",
+              "#B08E9Ecc",
+              "#5F5E72cc",
+              "#736374cc",
+              "#EBC459cc",
 
               "#5F5E72",
               "#736374",
               "#EBC459",
             ],
 
-            hoverBackgroundColor: ["#8894b6cc", "#8e6692cc"],
-            hoverBorderColor: "rgba(255,99,132,1)",
             data: valueArray,
           },
         ],
@@ -108,8 +129,8 @@ class PieChart extends React.Component {
         <Doughnut
           data={this.state.data}
           options={this.state.options}
-          width={320}
-          height={320}
+          width={270}
+          height={270}
         />
       </div>
     );

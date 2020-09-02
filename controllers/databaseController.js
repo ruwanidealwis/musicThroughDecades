@@ -699,12 +699,20 @@ exports.getDecadeStatistics = async (decade) => {
   //get top songs and artists
   fullStatsObject[`top10Songs`] = await getTopSongs(decade);
   fullStatsObject[`top10ArtistsByHits`] = await getTopArtists(decade, 10);
-  fullStatsObject[`modeDistribution`] = await getFeatureDistribution(
-    decade,
-    "mode"
-  );
+  let mode = await getFeatureDistribution(decade, "mode");
+  fullStatsObject[`modeDistribution`] = mode.sort((a, b) => a.mode - b.mode);
   let keyDistribution = await getFeatureDistribution(decade, "key");
+
+  if (keyDistribution.length != 12) {
+    for (let i = 1; i < 12; i++) {
+      if (keyDistribution.findIndex((item) => item.key == i) == -1) {
+        //check which key is non existant
+        keyDistribution.push({ key: i, count: 0 });
+      }
+    }
+  }
   keyDistribution = keyDistribution.sort((a, b) => a.key - b.key);
+
   fullStatsObject[`keyDistribution`] = keyDistribution;
   ////console.log(modeD);
   //get Key distributions
@@ -764,11 +772,12 @@ let getUserTopFeatures = async (sessionId, feature, order, limit) => {
         for (const artist of song.Artists) {
           artists.push(artist.name);
         }
+        console.log(song[feature]);
         topSongs.push({
           name: song.name,
           year: song.yearOfRelease,
           artists: artists,
-          [feature]: song[feature] || i,
+          [feature]: song[feature] == null ? i : song[feature],
           image: song.imageUrl,
         });
         if (i == limit) break;

@@ -29,6 +29,9 @@
 a.MuiTypography-colorTextSecondary {
   color: #2e8b57;
 }
+.musicInfo {
+  margin: 1.5%;
+}
 .typgoraphyText {
   padding-left: 2%;
 }
@@ -36,4 +39,5 @@ a.MuiTypography-colorTextSecondary {
   height: 5px !important;
   background-color: rgb(31, 30, 30) !important;
   margin-right: 40% !important;
+  margin-bottom: 0 !important;
 }
