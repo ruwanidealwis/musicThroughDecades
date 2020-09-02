@@ -1,4 +1,4 @@
-import { Doughnut } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 import { defaults } from "react-chartjs-2";
 import React from "react";
 import "chartjs-plugin-deferred";
@@ -20,10 +20,13 @@ class PieChart extends React.Component {
     super(props);
     let labelArray = [];
     let valueArray = [];
-    this.props.data.forEach((object) => {
+    this.props.data.forEach((object, index) => {
       if (this.props.searchKey === "mode") {
         labelArray = ["minor", "major"];
         valueArray.push(object.count);
+      } else if (this.props.searchKey === "year") {
+        labelArray.push(parseInt(this.props.decade) + index);
+        valueArray.push(object);
       } else {
         labelArray.push(object[this.props.searchKey]);
         valueArray.push(object.count);
@@ -126,7 +129,7 @@ class PieChart extends React.Component {
         <Typography color="textSecondary" variant="h5">
           Average Popularity
         </Typography>
-        <Doughnut
+        <Pie
           data={this.state.data}
           options={this.state.options}
           width={270}

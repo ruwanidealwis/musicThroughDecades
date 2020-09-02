@@ -11,13 +11,33 @@ class LineChart extends React.Component {
     super(props);
     console.log(props);
     let dataArray = [];
+    let decadeDataArray = [];
+
     if (this.props.user) {
-      for (let i = 0; i < 19; i++) {
-        dataArray.push(this.props.compareValueData);
+      dataArray = [];
+      if (this.props.feature != "Tempo") {
+        for (let i = 0; i < 10; i++) {
+          dataArray.push(this.props.compareValueData * 100);
+          decadeDataArray = this.props.decadeData.map((x) => x * 100);
+        }
+      } else {
+        for (let i = 0; i < 10; i++) {
+          dataArray.push(this.props.compareValueData);
+        }
+
+        decadeDataArray = this.props.decadeData;
       }
     } else {
-      dataArray = this.props.compareValueData;
+      if (this.props.feature != "Tempo") {
+        //taken from: https://stackoverflow.com/questions/8454977/how-do-i-multiply-each-member-of-an-array-by-a-scalar-in-javascript
+        dataArray = this.props.compareValueData.map((x) => x * 100);
+        decadeDataArray = this.props.decadeData.map((x) => x * 100);
+      } else {
+        dataArray = this.props.compareValueData;
+        decadeDataArray = this.props.decadeData;
+      }
     }
+
     this.state = {
       data: {
         labels: [
@@ -51,20 +71,20 @@ class LineChart extends React.Component {
             pointHoverBorderWidth: 2,
             pointRadius: 1,
             pointHitRadius: 10,
-            data: this.props.decadeData,
+            data: decadeDataArray,
           },
           {
             label: `${this.props.compare}'s`,
             fill: false,
             lineTension: 0.1,
-            backgroundColor: "#8e6692",
-            borderColor: "#8e6692",
+            backgroundColor: "#E28497",
+            borderColor: "#E28497",
 
-            pointBorderColor: "#8e6692",
-            pointBackgroundColor: "#8e6692",
+            pointBorderColor: "#E28497",
+            pointBackgroundColor: "#E28497",
             pointBorderWidth: 3,
             pointHoverRadius: 5,
-            pointHoverBackgroundColor: "#8e6692",
+            pointHoverBackgroundColor: "#E28497",
             pointHoverBorderColor: "rgba(220,220,220,1)",
             pointHoverBorderWidth: 2,
             pointRadius: 1,
@@ -94,7 +114,7 @@ class LineChart extends React.Component {
           yAxes: [
             {
               ticks: {
-                suggestedMax: this.props.max || 1,
+                suggestedMax: this.props.max || 100,
                 suggestedMin: this.props.min || 0,
                 display: true,
               },
@@ -131,7 +151,7 @@ class LineChart extends React.Component {
           data={this.state.data}
           options={this.state.options}
           width={300}
-          height={300}
+          height={400}
         />
       </div>
     );

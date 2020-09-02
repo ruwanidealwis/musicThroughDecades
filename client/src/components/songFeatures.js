@@ -6,6 +6,7 @@ import Grid from "@material-ui/core/Grid";
 import SubTitleText from "./subTitleText";
 import Typography from "@material-ui/core/Typography";
 import TitleText from "./titleText";
+import FeatureChipBadges from "./featureChipBadges";
 
 const style = {
   margin: "auto",
@@ -14,10 +15,73 @@ class SongFeatures extends React.Component {
   constructor(props) {
     super(props);
     console.log(props);
+    let minYear = "";
+    let maxYear = "";
     console.log(this.props.compareValueData[`average${this.props.feature}`]);
+
+    if (!this.props.user) {
+      console.log("hi");
+      let decadeMin = Math.min(
+        ...this.props.decadeData[`yearlyAverage${this.props.feature}`]
+      );
+      let compareMin = Math.min(
+        ...this.props.compareValueData[`yearlyAverage${this.props.feature}`]
+      );
+
+      let decadeMax = Math.max(
+        ...this.props.decadeData[`yearlyAverage${this.props.feature}`]
+      );
+      let compareMax = Math.max(
+        ...this.props.compareValueData[`yearlyAverage${this.props.feature}`]
+      );
+
+      let min = Math.min(compareMin, decadeMin);
+      if (min == compareMin) {
+        minYear =
+          parseInt(this.props.compareValue) +
+          parseInt(
+            this.props.compareValueData[
+              `yearlyAverage${this.props.feature}`
+            ].indexOf(compareMin)
+          );
+      } else {
+        minYear =
+          parseInt(this.props.decade) +
+          parseInt(
+            this.props.decadeData[`yearlyAverage${this.props.feature}`].indexOf(
+              decadeMin
+            )
+          );
+      }
+      let max = Math.max(compareMax, decadeMax);
+
+      if (max == compareMax) {
+        maxYear =
+          parseInt(this.props.compareValue) +
+          parseInt(
+            this.props.compareValueData[
+              `yearlyAverage${this.props.feature}`
+            ].indexOf(compareMax)
+          );
+      } else {
+        maxYear =
+          parseInt(this.props.decade) +
+          parseInt(
+            this.props.decadeData[`yearlyAverage${this.props.feature}`].indexOf(
+              decadeMax
+            )
+          );
+      }
+    }
+    this.state = {
+      minYear: minYear,
+      maxYear: maxYear,
+    };
+    console.log(this.state);
   }
 
   render() {
+    const { minYear, maxYear } = this.state;
     return (
       <Grid container spacing={4}>
         <Grid item md={12} xs={12}>
@@ -38,6 +102,18 @@ class SongFeatures extends React.Component {
             defention={this.props.defention}
             explanation={this.props.explanation}
           />
+          {this.props.user ? null : (
+            <div>
+              {" "}
+              <br />
+              <FeatureChipBadges
+                min={minYear}
+                max={maxYear}
+                searchKey={this.props.feature}
+                title={"Fast Facts"}
+              />
+            </div>
+          )}
         </Grid>
         <Grid item md={9} xs={12}>
           <LineChart
@@ -61,6 +137,7 @@ class SongFeatures extends React.Component {
             user={this.props.user}
           />
         </Grid>
+
         <Grid item md={6} xs={12}>
           <TitleText text={`${this.props.decade}'s`} />
         </Grid>

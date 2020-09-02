@@ -19,6 +19,11 @@ import PieChart from "./components/pieChart";
 import SubTitleText from "./components/subTitleText";
 import ModeDescription from "./components/modeDescription";
 import SongFeatures from "./components/songFeatures";
+import RadarChart from "./components/radarChart";
+import OverallBarChart from "./components/overallBarChart";
+import ChipBadges from "./components/chipBadges";
+import VerticalBarChart from "./components/verticalBarChart";
+import FeatureChipBadges from "./components/featureChipBadges";
 var Scroll = require("react-scroll");
 var Element = Scroll.Element;
 const override = css`
@@ -252,27 +257,83 @@ class Music extends React.Component {
                       searchKey={"genre"}
                     ></PieChart>
                   </Grid>
+                  {this.state.user ? null : (
+                    <Grid container style={{ margin: "1%" }} spacing={4}>
+                      <Grid item md={12} xs={12}>
+                        <LargeTitleText
+                          text={"Which Years Had the Most Influence?"}
+                        />
+                        <Typography variant="h6">
+                          Not All Years are equal, so which were the most
+                          influential in determining the top 100...
+                        </Typography>
+                      </Grid>
+                      <Grid item md={9} xs={12}>
+                        <VerticalBarChart
+                          decadeData={this.state.decadeData.distributionByYear}
+                          compareValueData={
+                            this.state.compareValueData.distributionByYear
+                          }
+                          decade={decade}
+                          compareValue={compareValue}
+                          searchKey={"year"}
+                        ></VerticalBarChart>
+                      </Grid>
+                      <Grid style={{ margin: "auto" }} item md={3} xs={12}>
+                        <FeatureChipBadges
+                          min={
+                            parseInt(
+                              this.state.decadeData.distributionByYear.indexOf(
+                                Math.min(
+                                  ...this.state.decadeData.distributionByYear
+                                )
+                              )
+                            ) + parseInt(decade)
+                          }
+                          max={
+                            parseInt(
+                              this.state.decadeData.distributionByYear.indexOf(
+                                Math.max(
+                                  ...this.state.decadeData.distributionByYear
+                                )
+                              )
+                            ) + parseInt(decade)
+                          }
+                          searchKey={"Contribution"}
+                          title={decade}
+                        />
+                        <FeatureChipBadges
+                          min={
+                            parseInt(
+                              this.state.compareValueData.distributionByYear.indexOf(
+                                Math.min(
+                                  ...this.state.compareValueData
+                                    .distributionByYear
+                                )
+                              )
+                            ) + parseInt(compareValue)
+                          }
+                          max={
+                            parseInt(
+                              this.state.compareValueData.distributionByYear.indexOf(
+                                Math.max(
+                                  ...this.state.compareValueData
+                                    .distributionByYear
+                                )
+                              )
+                            ) + parseInt(compareValue)
+                          }
+                          searchKey={"Contribution"}
+                          title={compareValue}
+                        />
+                      </Grid>
+                    </Grid>
+                  )}
+
                   <Grid item md={12} xs={12}>
                     <LargeTitleText text={"What Did The Music Sound Like?"} />
                   </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText
-                      text={`Most Popular Genres of ${compareValue}'s`}
-                    />
-                    <PieChart
-                      data={this.state.decadeData.keyDistribution}
-                      searchKey={"key"}
-                    ></PieChart>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText
-                      text={`Most Popular Genres of ${compareValue}'s`}
-                    />
-                    <PieChart
-                      data={this.state.compareValueData.keyDistribution}
-                      searchKey={"key"}
-                    ></PieChart>
-                  </Grid>
+
                   <Grid item md={12} xs={12}>
                     <SubTitleText text={`Spotlight: Mode`} />
                     <ModeDescription />
@@ -334,7 +395,6 @@ class Music extends React.Component {
                       user={this.state.user}
                     />
                   </Grid>
-
                   <Grid item md={12} xs={12}>
                     <SongFeatures
                       decade={decade}
@@ -348,9 +408,9 @@ class Music extends React.Component {
                       defention={`	Speechiness detects the presence of spoken words in a track. `}
                       explanation={`Values above 0.66 describe tracks that are probably made entirely of spoken words. Values between 0.33 and 0.66 describe tracks that may contain both music and speech, either in sections or layered, including such cases as rap music. `}
                       user={this.state.user}
+                      max={60}
                     />
                   </Grid>
-
                   <Grid item md={12} xs={12}>
                     <SongFeatures
                       decade={decade}
@@ -367,7 +427,6 @@ class Music extends React.Component {
                       user={this.state.user}
                     />
                   </Grid>
-
                   <Grid item md={12} xs={12}>
                     <SongFeatures
                       decade={decade}
@@ -395,10 +454,41 @@ class Music extends React.Component {
                       searchKey={"instrumentalness"}
                       defention={`	Predicts whether a track contains no vocals. “Ooh” and “aah” sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly “vocal”. `}
                       explanation={`The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content.`}
-                      max={0.5}
+                      max={50}
                       user={this.state.user}
                     />
                   </Grid>
+                  <Grid item md={12} xs={12}>
+                    <LargeTitleText
+                      text={`${decade}'s vs ${compareValue}'s: Head to Head`}
+                    />
+                  </Grid>
+                  <Grid item md={9} xs={12}>
+                    <OverallBarChart
+                      decade={decade}
+                      compareValue={compareValue}
+                      decadeData={this.state.decadeData}
+                      compareValueData={this.state.compareValueData}
+                    />
+                  </Grid>
+                  <Grid item md={3} xs={12}>
+                    <ChipBadges
+                      decade={decade}
+                      firstValue={this.state.decadeData}
+                      secondValue={this.state.compareValueData}
+                    />
+
+                    <ChipBadges
+                      decade={compareValue}
+                      firstValue={this.state.compareValueData}
+                      secondValue={this.state.decadeData}
+                    />
+                  </Grid>
+                  {this.state.user ? (
+                    <TopTwentySongs
+                      data={this.state.compareValueData.userReccomendations}
+                    />
+                  ) : null}
                 </Grid>
               </Element>
             </div>
@@ -410,3 +500,18 @@ class Music extends React.Component {
 }
 
 export default Music;
+/* <Grid item md={12} xs={12}>
+                    <SubTitleText text={`Spotlight: Key`} />
+                  </Grid>
+                  <Grid item md={6} xs={12}>
+                    <PieChart
+                      data={this.state.decadeData.keyDistribution}
+                      searchKey={"key"}
+                    ></PieChart>
+                  </Grid>
+                  <Grid item md={6} xs={12}>
+                    <PieChart
+                      data={this.state.compareValueData.keyDistribution}
+                      searchKey={"key"}
+                    ></PieChart>
+                  </Grid>*/

@@ -27,10 +27,10 @@ class BarChart extends React.Component {
         datasets: [
           {
             label: ` average ${this.props.feature} score`,
-            backgroundColor: ["#8894b6", "#8e6692"],
-            borderColor: "#8e6692",
+            backgroundColor: ["#8894b6", "#E28497"],
+            borderColor: "#E28497",
 
-            hoverBackgroundColor: ["#8894b6cc", "#8e6692cc"],
+            hoverBackgroundColor: ["#8894b6cc", "#E28497cc"],
             hoverBorderColor: "rgba(255,99,132,1)",
             data: [this.props.decadeValue, this.props.compareValue],
           },

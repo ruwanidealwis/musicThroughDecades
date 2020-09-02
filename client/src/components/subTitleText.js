@@ -3,7 +3,7 @@ import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 
 const textStyle = {
-  color: "#8e6692",
+  color: "#E28497",
   paddingLeft: "3%",
 };
 
