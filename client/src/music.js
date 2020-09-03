@@ -11,7 +11,7 @@ import TopTwentySongs from "./components/top20Songs";
 import TopTwentyArtists from "./components/top20Artists";
 import TitleText from "./components/titleText";
 import LargeTitleText from "./components/largeTitleText";
-import Intro from "./components/intro";
+import Intro from "./intro";
 import Grid from "@material-ui/core/Grid";
 import Link from "@material-ui/core/Link";
 import Switch from "@material-ui/core/Switch";
