@@ -28,7 +28,7 @@ class TopTwentyArtists extends React.Component {
                 {this.props.data
                   .slice(arrItem, arrItem + 2)
                   .map((item, index) => {
-                    //console.log(item);
+                    console.log(item);
                     return (
                       <Card
                         elevation={15}
@@ -77,7 +77,9 @@ class TopTwentyArtists extends React.Component {
                                 className="text"
                                 variant="subtitle1"
                                 color="textSecondary"
-                              ></Typography>
+                              >
+                                {item.genres.slice(0, 4).toString()}
+                              </Typography>
                             </Grid>
                           </Grid>
                         </CardContent>
