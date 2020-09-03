@@ -91,9 +91,7 @@ router.get("/compare/:comparators", async (req, res) => {
       req.session.userTopRead = comparators[1];
       req.session.comparator = await spotifyController.getUserListeningHabbits(
         req,
-        req.session.userTopRead,
-        req.session.decade,
-        req.session.retries
+        res
       );
       req.session.completed == true;
       res.redirect("/music"); //et url = spotifyController.getAuthorizationURL(comparators[1], req);

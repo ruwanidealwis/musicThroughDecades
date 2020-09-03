@@ -873,7 +873,7 @@ let getSongReccomendations = (decadeId, infoObj) => {
               infoObj.danceability + 0.22,
             ],
           },
-          tempo: { [Op.between]: [infoObj.tempo - 30, infoObj.tempo + 30] },
+          tempo: { [Op.between]: [infoObj.tempo - 34, infoObj.tempo + 34] },
         },
       },
     }).then((data) => {

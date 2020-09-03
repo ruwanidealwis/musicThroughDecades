@@ -530,8 +530,11 @@ exports.getAuthorizationURL = (timeRange, req) => {
  * @return {Object} Object containing the relevant stats for the users listening habbits
  */
 
-exports.getUserListeningHabbits = async (req) => {
+exports.getUserListeningHabbits = async (req, res) => {
   // databaseTable = determineDatabaseTable(""); //should be users
+  if (spotifyApi === undefined) {
+    res.redirect("/login");
+  }
   console.log(databaseTable);
   return spotifyApi
     .authorizationCodeGrant(req.query.code)

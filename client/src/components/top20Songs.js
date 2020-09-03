@@ -15,96 +15,106 @@ class TopTwentySongs extends React.Component {
   }
 
   render() {
-    let array = [0, 2, 4, 6, 8];
+    let array = [0, 5];
+    let size = 6;
+    let addValue = 5;
+    if (this.props.size != undefined) {
+      size = this.props.size;
+      addValue =
+        Math.floor(this.props.length / 4) + (4 - (this.props.length % 4));
+      array = [];
+      let i = 0;
+      while (i < this.props.length) {
+        array.push(i);
+        i = i + addValue;
+      }
+    }
+
     //regex taken from:https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
     return (
-      <div>
-        <Grid class="grid" container width="50vh" spacing={2}>
-          {array.map((arrItem) => {
-            return (
-              <Grid container width="50vh" spacing={3}>
-                {this.props.data
-                  .slice(arrItem, arrItem + 2)
-                  .map((item, index) => {
-                    //console.log(item);
-                    return (
-                      <Card
-                        elevation={15}
-                        className="infoCard"
-                        bgcolor="grey.700"
-                        width="50%"
-                      >
-                        <CardContent className="cardContent">
-                          <Grid container wrap="nowrap" spacing={2}>
-                            <Grid className="coverGrid" item>
-                              <CardMedia
-                                className="cover"
-                                image={item.image}
-                              ></CardMedia>
-                            </Grid>
-                            <Grid wrap="nowrap" item xs>
-                              {" "}
-                              <Typography
-                                className="text"
-                                component="h5"
-                                variant="h5"
-                              >
-                                <strong>
-                                  {index + arrItem + 1}.{" "}
-                                  {item.name.replace(/ *\([^)]*\) */g, "")}
-                                </strong>
-                              </Typography>
-                              {this.props.popularity ? null : (
-                                <Typography
-                                  align="left"
-                                  className="text"
-                                  variant="subtitle2"
-                                  color="textSecondary"
-                                >
-                                  {item.year}
-                                </Typography>
-                              )}
+      <Grid container spacing={4}>
+        {array.map((arrItem) => {
+          return (
+            <Grid item md={size} xs={12}>
+              {this.props.data
+                .slice(arrItem, arrItem + addValue)
+                .map((item, index) => {
+                  //console.log(item);
+                  return (
+                    <Card
+                      elevation={15}
+                      className="infoCard"
+                      bgcolor="grey.700"
+                      width="50%"
+                    >
+                      <CardContent className="cardContent">
+                        <Grid container wrap="nowrap" spacing={2}>
+                          <Grid className="coverGrid" item>
+                            <CardMedia
+                              className="cover"
+                              image={item.image}
+                            ></CardMedia>
+                          </Grid>
+                          <Grid wrap="nowrap" item xs>
+                            {" "}
+                            <Typography
+                              className="text"
+                              component="h5"
+                              variant="h5"
+                            >
+                              <strong>
+                                {index + arrItem + 1}.{" "}
+                                {item.name.replace(/ *\([^)]*\) */g, "")}
+                              </strong>
+                            </Typography>
+                            {this.props.popularity ? null : (
                               <Typography
                                 align="left"
                                 className="text"
                                 variant="subtitle2"
                                 color="textSecondary"
                               >
-                                {item.artists.toString()}
+                                {item.year}
                               </Typography>
-                              {this.props.popularity ? (
-                                <div>
-                                  <Typography
-                                    align="left"
-                                    className="text"
-                                    variant="subtitle2"
-                                    color="textSecondary"
-                                  >
-                                    <strong>
-                                      popularity: {item.popularity}
-                                    </strong>
-                                  </Typography>
-                                  <Typography
-                                    align="left"
-                                    className="text"
-                                    variant="subtitle2"
-                                    color="textSecondary"
-                                  >
-                                    <strong> original rank: {item.rank}</strong>
-                                  </Typography>
-                                </div>
-                              ) : null}
-                            </Grid>
+                            )}
+                            <Typography
+                              align="left"
+                              className="text"
+                              variant="subtitle2"
+                              color="textSecondary"
+                            >
+                              {item.artists.toString()}
+                            </Typography>
+                            {this.props.popularity ? (
+                              <div>
+                                <Typography
+                                  align="left"
+                                  className="text"
+                                  variant="subtitle2"
+                                  color="textSecondary"
+                                >
+                                  <strong>popularity: {item.popularity}</strong>
+                                </Typography>
+                                <Typography
+                                  align="left"
+                                  className="text"
+                                  variant="subtitle2"
+                                  color="textSecondary"
+                                >
+                                  <strong> original rank: {item.rank}</strong>
+                                </Typography>
+                              </div>
+                            ) : null}
                           </Grid>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}{" "}
-              </Grid>
-            );
-          })}
-        </Grid>
-      </div>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  );
+                })}{" "}
+            </Grid>
+          );
+        })}
+      </Grid>
     );
   }
 }

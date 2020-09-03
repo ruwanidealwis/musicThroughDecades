@@ -4,6 +4,8 @@ import ScaleLoader from "react-spinners/ScaleLoader";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
+import Button from "@material-ui/core/Button";
+import PlaylistAddIcon from "@material-ui/icons/PlaylistAdd";
 import "./music.css";
 import TopTwentySongs from "./components/top20Songs";
 import TopTwentyArtists from "./components/top20Artists";
@@ -485,9 +487,38 @@ class Music extends React.Component {
                     />
                   </Grid>
                   {this.state.user ? (
-                    <TopTwentySongs
-                      data={this.state.compareValueData.userReccomendations}
-                    />
+                    <Grid container spacing={4}>
+                      <Grid item md={12} xs={12}>
+                        <LargeTitleText
+                          text={"We Think You Might Love These Tracks...."}
+                        />
+                      </Grid>
+                      <Grid item md={8} xs={12}>
+                        <Typography variant="h6">
+                          These songs fit your average listening habits.
+                        </Typography>
+                      </Grid>
+                      <Grid item md={4} xs={12}>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          startIcon={<PlaylistAddIcon />}
+                        >
+                          Make Me a Playlist
+                        </Button>
+                      </Grid>
+                      <Grid item md={12} xs={12}>
+                        <TopTwentySongs
+                          data={this.state.compareValueData.userReccomendations}
+                          popularity={false}
+                          length={
+                            this.state.compareValueData.userReccomendations
+                              .length
+                          }
+                          size={3}
+                        />
+                      </Grid>
+                    </Grid>
                   ) : null}
                 </Grid>
               </Element>
