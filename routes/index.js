@@ -3,7 +3,7 @@ let express = require("express");
 let spotifyController = require("../controllers/spotifyController");
 var path = require("path");
 var router = express.Router();
-var clientURL = proccess.env.CLIENTURL;
+var clientURL = process.env.CLIENTURL;
 
 //running locally
 if (clientURL == null) clientURL = "http://localhost:3000"; //need to change...(for later)
