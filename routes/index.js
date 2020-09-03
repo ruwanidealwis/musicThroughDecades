@@ -3,7 +3,10 @@ let express = require("express");
 let spotifyController = require("../controllers/spotifyController");
 var path = require("path");
 var router = express.Router();
-var clientURL = "http://localhost:3000"; //need to change...(for later)
+var clientURL = proccess.env.CLIENTURL;
+
+//running locally
+if (clientURL == null) clientURL = "http://localhost:3000"; //need to change...(for later)
 /**
  * Validate entered values (not very relevant when the front end is implemented)
  * @param {String} comparator - decade being compared
