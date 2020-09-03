@@ -77,9 +77,7 @@ class TopTwentyArtists extends React.Component {
                                 className="text"
                                 variant="subtitle1"
                                 color="textSecondary"
-                              >
-                                {item.genres.slice(0, 4).toString()}
-                              </Typography>
+                              ></Typography>
                             </Grid>
                           </Grid>
                         </CardContent>
