@@ -1,36 +1,27 @@
 import React from "react";
+
 import { css } from "@emotion/core";
-import ScaleLoader from "react-spinners/ScaleLoader";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Typography from "@material-ui/core/Typography";
+import ClockLoader from "react-spinners/ClockLoader";
+
 import Paper from "@material-ui/core/Paper";
-import Button from "@material-ui/core/Button";
-import PlaylistAddIcon from "@material-ui/icons/PlaylistAdd";
+
 import "./music.css";
-import TopTwentySongs from "./components/top20Songs";
-import TopTwentyArtists from "./components/top20Artists";
-import TitleText from "./components/titleText";
-import LargeTitleText from "./components/largeTitleText";
+
 import Intro from "./components/intro";
 import Grid from "@material-ui/core/Grid";
-import Link from "@material-ui/core/Link";
-import Switch from "@material-ui/core/Switch";
-import Divider from "@material-ui/core/Divider";
-import BarChart from "./components/barChart";
-import PieChart from "./components/pieChart";
-import SubTitleText from "./components/subTitleText";
-import ModeDescription from "./components/modeDescription";
-import SongFeatures from "./components/songFeatures";
-import RadarChart from "./components/radarChart";
-import OverallBarChart from "./components/overallBarChart";
-import ChipBadges from "./components/chipBadges";
-import VerticalBarChart from "./components/verticalBarChart";
-import FeatureChipBadges from "./components/featureChipBadges";
+
+import AllSongFeatures from "./components/AllSongFeatures";
+import UserReccomendations from "./components/UserReccomendations";
+import TopSongs from "./components/topSongs";
+import MostPopularSongs from "./components/MostPopularSongs";
+import TimeBreakdown from "./components/TimeBreakdown";
+import GenreBreakdown from "./components/GenreBreakdown";
+import TopArtists from "./components/TopArtists";
 var Scroll = require("react-scroll");
 var Element = Scroll.Element;
 const override = css`
   display: wrap;
-  margin: 5% 5%;
+  margin: "20%";
   border-color: red;
 `;
 
@@ -38,59 +29,40 @@ class Music extends React.Component {
   constructor(props) {
     super(props);
     console.log(props);
-    this.state = {
-      loading: true,
-      user: props.location.state.user,
-      query: props.location.state.values,
-      decade: props.location.state.values.split("-")[0],
-      compareValue: props.location.state.values.split("-")[1],
-      code: props.location.state.code,
-      decadeData: [],
-      compareValueData: [],
-      toggleDecadeOn: false,
-      toggleComparatorOn: false,
-      populartyInView: false,
-    };
+    console.log(window.performance);
+    if (
+      props.location.state == undefined ||
+      props.location.state.values == undefined
+    ) {
+      this.props.history.replace("/");
+    } else {
+      let compareValue = props.location.state.values.split("-")[1];
+      if (props.location.state.user) {
+        if (compareValue === "6Months") {
+          compareValue = "the last 6 months";
+        } else if (compareValue === "1Month") {
+          compareValue = "the last month";
+        }
+      }
+      this.state = {
+        loading: true,
+        user: props.location.state.user,
+        query: props.location.state.values,
+        decade: props.location.state.values.split("-")[0],
+        compareValue: compareValue,
+        code: props.location.state.code,
+        decadeData: [],
+        compareValueData: [],
 
-    this.changeToggle = this.changeToggle.bind(this);
-    this.switchControl = this.switchControl.bind(this);
+        populartyInView: false,
+      };
+    }
   }
 
   componentDidMount() {
-    if (this.state.query == null) {
-      this.props.history.replace({
-        pathname: `/`,
-      });
-    }
-    this.getData(this.state.query);
+    if (this.state != null) this.getData(this.state.query);
   }
-  switchControl(value) {
-    let toggle;
-    let key = "";
-    if (value === "toggleDecadeOn") {
-      toggle = this.state.toggleDecadeOn;
-      key = "toggleDecadeOn";
-    } else {
-      toggle = this.state.toggleComparatorOn;
-      key = "toggleComparatorOn";
-    }
 
-    return (
-      <FormControlLabel
-        control={
-          <Switch
-            checked={toggle}
-            onChange={() => this.changeToggle(key, toggle)}
-            color="primary"
-            name="checkedB"
-            inputProps={{ "aria-label": "primary checkbox" }}
-            label="primary"
-          />
-        }
-        label="By Hits"
-      />
-    );
-  }
   getData(values) {
     fetch(`/compare/${values}?code=${this.state.code}`)
       .then((res) => res.json())
@@ -104,429 +76,98 @@ class Music extends React.Component {
         localStorage.clear();
       });
   }
-  changeToggle(key, value) {
-    console.log(key);
-    this.setState({ [key]: !value });
-  }
 
   render() {
-    const {
-      decade,
-      compareValue,
-      toggleDecadeOn,
-      toggleComparatorOn,
-    } = this.state;
-    //switch code adapted from:https://material-ui.com/components/switches/#switch
-    return (
-      <Paper className="infoContainer" elevation={4}>
-        <ScaleLoader
-          css={override}
-          height={70}
-          width={10}
-          radius={300}
-          margin={3}
-          color={"#2e8b57"}
-          loading={this.state.loading}
-          text
-        />
-
-        {this.state.loading ? (
-          <div> Getting Data....</div>
-        ) : (
-          <div class="recievedData">
-            <Intro decade={decade} comparator={compareValue}></Intro>
-            <br />
-            <div class="musicInfo">
-              <Element name="allInfo">
-                <Grid container spacing={5}>
-                  <Grid item md={12} xs={12}>
-                    <LargeTitleText text={"Which Songs Had The Most Love?"} />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText text={`Top 10 Songs of the ${decade}'s`} />
-                    <TopTwentySongs
-                      data={this.state.decadeData.top10Songs}
-                      popularity={false}
-                    />
-                    <br /> <br />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText text={`Top 10 Songs of the ${compareValue}'s`} />
-                    <TopTwentySongs
-                      data={this.state.compareValueData.top10Songs}
-                      popularity={false}
-                    />
-                    <br /> <br />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <LargeTitleText text={"Which Artists Ruled The Decade?"} />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText text={`Top 10 Artists of the ${decade}'s`} />
-                    <Grid container spacing={6}>
-                      <Grid item md={9} xs={0}></Grid>
-                      <Grid item alignItems="flex-start" md={3} xs={12}>
-                        {this.switchControl("toggleDecadeOn")}
-                      </Grid>
-                    </Grid>
-                    {toggleDecadeOn ? (
-                      <TopTwentyArtists
-                        searchKey={"hits"}
-                        data={this.state.decadeData.top10ArtistsByHits}
-                      />
-                    ) : (
-                      <TopTwentyArtists
-                        searchKey={""}
-                        data={this.state.decadeData.topArtists}
-                      />
-                    )}
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText
-                      text={`Top 10 Artists of the ${compareValue}'s`}
-                    />
-                    <Grid container spacing={6}>
-                      <Grid item md={9} xs={0}></Grid>
-                      <Grid item alignItems="flex-start" md={3} xs={12}>
-                        {this.switchControl("toggleComparatorOn")}
-                      </Grid>
-                    </Grid>
-                    {toggleComparatorOn ? (
-                      <TopTwentyArtists
-                        searchKey={"hits"}
-                        data={this.state.compareValueData.top10ArtistsByHits}
-                      />
-                    ) : (
-                      <TopTwentyArtists
-                        searchKey={""}
-                        data={this.state.compareValueData.topArtists}
-                      />
-                    )}
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <LargeTitleText
-                      text={"Which Songs Stood The Test Of Time?"}
-                    />
-                    Some Songs, are more popular than others, so which of the
-                    top 100 songs from the {decade}'s and {compareValue} are
-                    popular today (August, 2020)?
-                    <br />
-                    <br />
-                    <BarChart
-                      decade={decade}
-                      compare={compareValue}
-                      feature={"popularity"}
-                      decadeValue={this.state.decadeData.averagePopularity}
-                      compareValue={
-                        this.state.compareValueData.averagePopularity
-                      }
-                    />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText
-                      text={`Most Popular Songs of the ${decade}'s in 2020`}
-                    />
-                    <TopTwentySongs
-                      data={this.state.decadeData.mostPopular}
-                      popularity={true}
-                    />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText
-                      text={`Most Popular Songs of the ${compareValue}'s in 2020`}
-                    />
-                    <TopTwentySongs
-                      data={this.state.compareValueData.mostPopular}
-                      popularity={true}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <LargeTitleText text={"Which Genres Defined The Decade?"} />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText text={`Most Popular Genres of ${decade}'s`} />
-                    <PieChart
-                      data={this.state.decadeData.mostPopularGenres}
-                      searchKey={"genre"}
-                    ></PieChart>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <TitleText
-                      text={`Most Popular Genres of ${compareValue}'s`}
-                    />
-                    <PieChart
-                      data={this.state.compareValueData.mostPopularGenres}
-                      searchKey={"genre"}
-                    ></PieChart>
-                  </Grid>
-                  {this.state.user ? null : (
-                    <Grid container style={{ margin: "1%" }} spacing={4}>
-                      <Grid item md={12} xs={12}>
-                        <LargeTitleText
-                          text={"Which Years Had the Most Influence?"}
-                        />
-                        <Typography variant="h6">
-                          Not All Years are equal, so which were the most
-                          influential in determining the top 100...
-                        </Typography>
-                      </Grid>
-                      <Grid item md={9} xs={12}>
-                        <VerticalBarChart
-                          decadeData={this.state.decadeData.distributionByYear}
-                          compareValueData={
-                            this.state.compareValueData.distributionByYear
-                          }
-                          decade={decade}
-                          compareValue={compareValue}
-                          searchKey={"year"}
-                        ></VerticalBarChart>
-                      </Grid>
-                      <Grid style={{ margin: "auto" }} item md={3} xs={12}>
-                        <FeatureChipBadges
-                          min={
-                            parseInt(
-                              this.state.decadeData.distributionByYear.indexOf(
-                                Math.min(
-                                  ...this.state.decadeData.distributionByYear
-                                )
-                              )
-                            ) + parseInt(decade)
-                          }
-                          max={
-                            parseInt(
-                              this.state.decadeData.distributionByYear.indexOf(
-                                Math.max(
-                                  ...this.state.decadeData.distributionByYear
-                                )
-                              )
-                            ) + parseInt(decade)
-                          }
-                          searchKey={"Contribution"}
-                          title={decade}
-                        />
-                        <FeatureChipBadges
-                          min={
-                            parseInt(
-                              this.state.compareValueData.distributionByYear.indexOf(
-                                Math.min(
-                                  ...this.state.compareValueData
-                                    .distributionByYear
-                                )
-                              )
-                            ) + parseInt(compareValue)
-                          }
-                          max={
-                            parseInt(
-                              this.state.compareValueData.distributionByYear.indexOf(
-                                Math.max(
-                                  ...this.state.compareValueData
-                                    .distributionByYear
-                                )
-                              )
-                            ) + parseInt(compareValue)
-                          }
-                          searchKey={"Contribution"}
-                          title={compareValue}
-                        />
-                      </Grid>
-                    </Grid>
-                  )}
-
-                  <Grid item md={12} xs={12}>
-                    <LargeTitleText text={"What Did The Music Sound Like?"} />
-                  </Grid>
-
-                  <Grid item md={12} xs={12}>
-                    <SubTitleText text={`Spotlight: Mode`} />
-                    <ModeDescription />
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <PieChart
-                      data={this.state.decadeData.modeDistribution}
-                      searchKey={"mode"}
-                    ></PieChart>
-                  </Grid>
-                  <Grid item md={6} xs={12}>
-                    <PieChart
-                      data={this.state.compareValueData.modeDistribution}
-                      searchKey={"mode"}
-                    ></PieChart>
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <SongFeatures
-                      decade={decade}
-                      feature={"Valence"}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                      word={"Va•lence"}
-                      searchKey={"valence"}
-                      type={"noun"}
-                      defention={`A measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track.`}
-                      explanation={`Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry). `}
-                      user={this.state.user}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <SongFeatures
-                      decade={decade}
-                      feature={"Energy"}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                      word={"En•er•gy"}
-                      type={"noun"}
-                      searchKey={"energy"}
-                      defention={`	Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity.`}
-                      explanation={`Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale.`}
-                      user={this.state.user}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <SongFeatures
-                      decade={decade}
-                      feature={"Danceability"}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                      word={"Dance·a·blity"}
-                      type={"noun"}
-                      searchKey={"danceability"}
-                      defention={`	Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. `}
-                      explanation={`TA value of 0.0 is least danceable and 1.0 is most danceable. `}
-                      user={this.state.user}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <SongFeatures
-                      decade={decade}
-                      feature={"Speechiness"}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                      word={"Speech·iness"}
-                      type={"noun"}
-                      searchKey={"speechiness"}
-                      defention={`	Speechiness detects the presence of spoken words in a track. `}
-                      explanation={`Values above 0.66 describe tracks that are probably made entirely of spoken words. Values between 0.33 and 0.66 describe tracks that may contain both music and speech, either in sections or layered, including such cases as rap music. `}
-                      user={this.state.user}
-                      max={60}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <SongFeatures
-                      decade={decade}
-                      feature={"Tempo"}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                      word={"tem·po"}
-                      type={"noun"}
-                      searchKey={"tempo"}
-                      defention={`the speed at which a passage of music is or should be played. `}
-                      explanation={`In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.  `}
-                      min={70}
-                      user={this.state.user}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <SongFeatures
-                      decade={decade}
-                      feature={"Acousticness"}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                      word={"A·cous·tic·ness"}
-                      type={"noun"}
-                      searchKey={"acousticness"}
-                      defention={`(of popular music or musical instruments) not having electrical amplification.`}
-                      explanation={`1.0 represents high confidence the track is acoustic.   `}
-                      user={this.state.user}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <SongFeatures
-                      decade={decade}
-                      feature={"Instrumentalness"}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                      word={"In·stru·men·tal·ness"}
-                      type={"noun"}
-                      searchKey={"instrumentalness"}
-                      defention={`	Predicts whether a track contains no vocals. “Ooh” and “aah” sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly “vocal”. `}
-                      explanation={`The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content.`}
-                      max={50}
-                      user={this.state.user}
-                    />
-                  </Grid>
-                  <Grid item md={12} xs={12}>
-                    <LargeTitleText
-                      text={`${decade}'s vs ${compareValue}'s: Head to Head`}
-                    />
-                  </Grid>
-                  <Grid item md={9} xs={12}>
-                    <OverallBarChart
-                      decade={decade}
-                      compareValue={compareValue}
-                      decadeData={this.state.decadeData}
-                      compareValueData={this.state.compareValueData}
-                    />
-                  </Grid>
-                  <Grid item md={3} xs={12}>
-                    <ChipBadges
-                      decade={decade}
-                      firstValue={this.state.decadeData}
-                      secondValue={this.state.compareValueData}
-                    />
-
-                    <ChipBadges
-                      decade={compareValue}
-                      firstValue={this.state.compareValueData}
-                      secondValue={this.state.decadeData}
-                    />
-                  </Grid>
-                  {this.state.user ? (
-                    <Grid container spacing={4}>
-                      <Grid item md={12} xs={12}>
-                        <LargeTitleText
-                          text={"We Think You Might Love These Tracks...."}
-                        />
-                      </Grid>
-                      <Grid item md={8} xs={12}>
-                        <Typography variant="h6">
-                          These songs fit your average listening habits.
-                        </Typography>
-                      </Grid>
-                      <Grid item md={4} xs={12}>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          startIcon={<PlaylistAddIcon />}
-                        >
-                          Make Me a Playlist
-                        </Button>
-                      </Grid>
-                      <Grid item md={12} xs={12}>
-                        <TopTwentySongs
-                          data={this.state.compareValueData.userReccomendations}
-                          popularity={false}
-                          length={
-                            this.state.compareValueData.userReccomendations
-                              .length
-                          }
-                          size={3}
-                        />
-                      </Grid>
-                    </Grid>
-                  ) : null}
-                </Grid>
-              </Element>
-            </div>
+    if (
+      this.props.location.state == null ||
+      this.state == null ||
+      this.state.decade == null
+    ) {
+      return null;
+    } else {
+      const { decade, compareValue, user } = this.state;
+      //switch code adapted from:https://material-ui.com/components/switches/#switch
+      return (
+        <Paper className="infoContainer" elevation={4}>
+          <div className="loader">
+            <ClockLoader
+              size={200}
+              color={"#2e8b57"}
+              loading={this.state.loading}
+            />
           </div>
-        )}
-      </Paper>
-    );
+
+          {this.state.loading ? null : (
+            <div class="recievedData">
+              <Intro
+                decade={decade}
+                comparator={compareValue}
+                user={user}
+              ></Intro>
+              <br />
+              <div class="musicInfo">
+                <Element name="allInfo">
+                  <Grid
+                    container
+                    spacing={5}
+                    style={{ width: "100%", margin: "auto" }}
+                  >
+                    <Grid container spacing={5}></Grid>
+                    <TopSongs
+                      decade={decade}
+                      compareValue={compareValue}
+                      decadeData={this.state.decadeData}
+                      compareValueData={this.state.compareValueData}
+                      user={this.state.user}
+                    />
+                    <TopArtists
+                      decade={decade}
+                      compareValue={compareValue}
+                      decadeData={this.state.decadeData}
+                      compareValueData={this.state.compareValueData}
+                      user={this.state.user}
+                    />
+                    <MostPopularSongs
+                      decade={decade}
+                      compareValue={compareValue}
+                      decadeData={this.state.decadeData}
+                      compareValueData={this.state.compareValueData}
+                      user={this.state.user}
+                    />
+                    <GenreBreakdown
+                      decade={decade}
+                      compareValue={compareValue}
+                      decadeData={this.state.decadeData}
+                      compareValueData={this.state.compareValueData}
+                      user={this.state.user}
+                    />
+                    <TimeBreakdown
+                      decade={decade}
+                      compareValue={compareValue}
+                      decadeData={this.state.decadeData}
+                      compareValueData={this.state.compareValueData}
+                      user={this.state.user}
+                    />
+                    <AllSongFeatures
+                      decade={decade}
+                      compareValue={compareValue}
+                      decadeData={this.state.decadeData}
+                      compareValueData={this.state.compareValueData}
+                      user={this.state.user}
+                    />
+                    {this.state.user ? (
+                      <UserReccomendations
+                        compareValueData={this.state.compareValueData}
+                      />
+                    ) : null}
+                  </Grid>
+                </Element>
+              </div>
+            </div>
+          )}
+        </Paper>
+      );
+    }
   }
 }
 
@@ -546,3 +187,8 @@ export default Music;
                       searchKey={"key"}
                     ></PieChart>
                   </Grid>*/
+
+//TODO fix bad information and add decade descrotion
+//TODO make loading and front page nicer
+//TODO add decade descriptions
+//TODO make playlist create button nicer

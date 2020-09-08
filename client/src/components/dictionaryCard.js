@@ -13,7 +13,7 @@ class DictionaryCard extends React.Component {
   //Card inspired from: https://material-ui.com/components/cards/
   render() {
     return (
-      <Card elevation={3}>
+      <Card elevation={3} style={{ minWidth: "90%", margin: "auto" }}>
         <CardContent>
           {" "}
           <Typography variant="h5" component="h2">
@@ -27,7 +27,9 @@ class DictionaryCard extends React.Component {
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size="small">Learn More</Button>
+          <Button size="small" target="_blank" href={this.props.moreInfo}>
+            Learn More
+          </Button>
         </CardActions>
       </Card>
     );

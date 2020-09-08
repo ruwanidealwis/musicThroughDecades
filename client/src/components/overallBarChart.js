@@ -1,9 +1,6 @@
-import { HorizontalBar } from "react-chartjs-2";
-import { defaults } from "react-chartjs-2";
-import React from "react";
 import "chartjs-plugin-deferred";
-import TitleText from "./titleText";
-import Typography from "@material-ui/core/Typography";
+import React from "react";
+import { defaults, HorizontalBar } from "react-chartjs-2";
 
 defaults.global.defaultFontColor = "black";
 defaults.global.defaultFontFamily = "Roboto";

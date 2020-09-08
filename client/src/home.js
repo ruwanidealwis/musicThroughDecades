@@ -1,19 +1,14 @@
-import React from "react";
-import { Route, BrowserRouter, Redirect, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "./home.css";
+import React from "react";
 import Button from "react-bootstrap/Button";
-import ToggleButton from "react-bootstrap/ToggleButton";
-import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import ScaleLoader from "react-spinners/ScaleLoader";
-import { WaveSpinner } from "react-spinners-kit";
 import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import ToggleButton from "react-bootstrap/ToggleButton";
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup";
+import "./home.css";
+import { ReactComponent as Headphones } from "./images/headphones.svg";
 
-import { GiSoundWaves } from "react-icons/gi";
-import { motion } from "framer-motion";
-import { SiBeatport } from "react-icons/si";
 class Home extends React.Component {
   constructor(props) {
     super(props);
@@ -87,9 +82,6 @@ class Home extends React.Component {
 
       case "1970s":
         return "seventies";
-
-      case "seventies":
-        return "1970";
 
       case "eighties":
         return "1980";
@@ -185,7 +177,7 @@ class Home extends React.Component {
     for (const key of keys) {
       console.log(key);
       console.log(this.state[key]);
-      if (this.state[key] == true) {
+      if (this.state[key] === true) {
         if (values != "") {
           values = values + this.getFormat(key);
         } else values = values + this.getFormat(key) + "-";
@@ -203,11 +195,9 @@ class Home extends React.Component {
   }
 
   checkToDisable(event) {
-    let keys = ["seventies", "eighties", "nineties", "allTime", "6Months"];
-
-    if (event.checked == false) {
+    if (event.checked === false) {
       console.log("hi");
-      this.setState({ count: this.state.count == 0 ? 0 : --this.state.count }); //dont decrease count if its already 0
+      this.setState({ count: this.state.count === 0 ? 0 : --this.state.count }); //dont decrease count if its already 0
     } else {
       console.log("increasing");
       this.setState({ count: ++this.state.count });
@@ -227,19 +217,21 @@ class Home extends React.Component {
     localStorage.setItem([event.value], event.checked); //set local storage...
 
     this.checkToDisable(event); //if reached limit --> disable
-    let firstVal = this.state.count == 0 ? true : false; //first value picked
+    let firstVal = this.state.count === 0 ? true : false; //first value picked
     console.log();
     let needUser = this.needsUser(event.value);
 
-    if (event.checked == true) {
+    if (event.checked === true) {
       //selected a value will be one of the two picked....
       //only two elements in the array so...
       console.log("hello!");
-      console.log(this.state[this.getFormat(this.state.userPicked[0])] == true);
+      console.log(
+        this.state[this.getFormat(this.state.userPicked[0])] === true
+      );
       let userPicked = [event.value, this.state.userPicked[1]];
       console.log(userPicked);
       //console.log(ReactDOM.findDOMNode("1970s"));
-      this.state[this.getFormat(this.state.picked[0])] == true
+      this.state[this.getFormat(this.state.picked[0])] === true
         ? this.setState({
             picked: [this.state.picked[0], event.parentNode.id],
           })
@@ -248,11 +240,20 @@ class Home extends React.Component {
           });
     } else {
       //unchecks...
+
       console.log();
-      this.state.picked[0] == event.parentNode.id
-        ? this.setState({ picked: ["_______", this.state.picked[1]] })
+      this.state.picked[0] === event.parentNode.id
+        ? this.setState({
+            picked: ["_______", this.state.picked[1]],
+            needsAuthorization: needUser
+              ? false
+              : this.state.needsAuthorization,
+          })
         : this.setState({
             picked: [this.state.picked[0], "_______"],
+            needsAuthorization: needUser
+              ? false
+              : this.state.needsAuthorization,
           });
     }
 
@@ -260,8 +261,8 @@ class Home extends React.Component {
       firstValue: firstVal,
       [event.value]: event.checked,
       userPicked:
-        (needUser && event.checked == true) ||
-        (this.state.userPicked && !event.checked == false && needUser) ||
+        (needUser && event.checked === true) ||
+        (this.state.userPicked && !event.checked === false && needUser) ||
         (this.state.userPicked && !needUser), //unpick if the user unselects a value that needs a user... (has to select (ie:checked must be true))
       //doesnt pick a user but user one alreadu picked, so should stay true-->
       //needs to check if the one that was picked was unselected....
@@ -270,8 +271,6 @@ class Home extends React.Component {
 
   render() {
     const {
-      isAuthorized,
-      needsAuthorization,
       allTime,
       fifties,
       sixties,
@@ -288,19 +287,19 @@ class Home extends React.Component {
 
     return (
       <Container fluid className="App">
-        <h1 className="title"> Music Through Decades </h1>
-
-        <div className="animation">
-          <WaveSpinner color="#2e8b57" size={100} loading={true}></WaveSpinner>
+        <h1 className="title"> MUSIC THROUGH THE DECADES </h1>
+        <div>
+          <Headphones className="headphones" />
         </div>
+
         <h5>
           Click on two decades to compare how different the top 100 hits of the
           decade are!
         </h5>
 
         <Container className="justify-content-md-center" fluid>
-          <Row className="justify-content-md-center row-fluid" sm={1}>
-            <Col className="col-md-12 justify-content-md-center" lg={2} sm={1}>
+          <Row className="justify-content-md-center row-fluid" md={12} sm={1}>
+            <Col className="col-md-12 justify-content-md-center" md={12} sm={1}>
               <ToggleButtonGroup
                 className="buttonGroup justify-content-md-center"
                 type="checkbox"
@@ -371,8 +370,8 @@ class Home extends React.Component {
               </ToggleButtonGroup>
             </Col>
           </Row>
-          <Row className="justify-content-md-center row-fluid" sm={1}>
-            <Col className="col-md-12 justify-content-md-center" lg={2} sm={1}>
+          <Row className="justify-content-md-center row-fluid" md={12} sm={1}>
+            <Col className="col-md-12 justify-content-md-center" md={12} sm={1}>
               <ToggleButtonGroup
                 className="buttonGroup justify-content-md-center"
                 type="checkbox"
@@ -424,6 +423,7 @@ class Home extends React.Component {
                 >
                   2010s
                 </ToggleButton>
+                <Col></Col>
               </ToggleButtonGroup>
             </Col>
             <br></br>
@@ -507,7 +507,11 @@ class Home extends React.Component {
             this.toCompare();
           }}
         >
-          Compare
+          {this.state.needsAuthorization ? (
+            <div>Login With Spotify & Compare</div>
+          ) : (
+            <div>Compare</div>
+          )}
         </Button>
       </Container>
     );
@@ -587,3 +591,6 @@ export default Home;
                 />
               </FormGroup>
             </FormControl>*/
+/*<div className="animation">
+          <WaveSpinner color="#2e8b57" size={100} loading={true}></WaveSpinner>
+        </div>*/

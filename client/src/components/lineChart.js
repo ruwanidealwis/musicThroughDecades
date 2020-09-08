@@ -12,7 +12,7 @@ class LineChart extends React.Component {
     console.log(props);
     let dataArray = [];
     let decadeDataArray = [];
-
+    let label = `${this.props.compare}'s`;
     if (this.props.user) {
       dataArray = [];
       if (this.props.feature != "Tempo") {
@@ -27,6 +27,8 @@ class LineChart extends React.Component {
 
         decadeDataArray = this.props.decadeData;
       }
+
+      label = `My Average ${this.props.feature}`;
     } else {
       if (this.props.feature != "Tempo") {
         //taken from: https://stackoverflow.com/questions/8454977/how-do-i-multiply-each-member-of-an-array-by-a-scalar-in-javascript
@@ -74,7 +76,7 @@ class LineChart extends React.Component {
             data: decadeDataArray,
           },
           {
-            label: `${this.props.compare}'s`,
+            label: label,
             fill: false,
             lineTension: 0.1,
             backgroundColor: "#E28497",
@@ -144,9 +146,9 @@ class LineChart extends React.Component {
   render() {
     return (
       <div>
-        <h6>
+        <h5>
           Change in Average {this.props.feature} of Songs Year by Year of Decade
-        </h6>
+        </h5>
         <Line
           data={this.state.data}
           options={this.state.options}

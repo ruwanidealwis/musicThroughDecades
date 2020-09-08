@@ -1,9 +1,6 @@
-import { Bar } from "react-chartjs-2";
-import { defaults } from "react-chartjs-2";
-import React from "react";
 import "chartjs-plugin-deferred";
-import TitleText from "./titleText";
-import Typography from "@material-ui/core/Typography";
+import React from "react";
+import { Bar, defaults } from "react-chartjs-2";
 
 defaults.global.defaultFontColor = "black";
 defaults.global.defaultFontFamily = "Roboto";
@@ -27,10 +24,12 @@ class VerticalBarChart extends React.Component {
       decadeValueArray.push(object);
     });
 
-    this.props.compareValueData.forEach((object, index) => {
-      compareLabelArray.push(parseInt(this.props.decade) + index);
-      compareValueArray.push(object);
-    });
+    if (!this.props.user) {
+      this.props.compareValueData.forEach((object, index) => {
+        compareLabelArray.push(parseInt(this.props.decade) + index);
+        compareValueArray.push(object);
+      });
+    }
 
     this.state = {
       data: {
@@ -126,7 +125,9 @@ class VerticalBarChart extends React.Component {
         animation: {
           duration: 3000,
         },
-        maintainAspectRatio: false,
+
+        aspectRatio: 2.5,
+        responsive: true,
         scales: {
           xAxes: [
             {
@@ -169,18 +170,18 @@ class VerticalBarChart extends React.Component {
         },
       },
     };
+
+    if (this.props.user) {
+      this.state.data.datasets.pop();
+      console.log(this.state.data);
+    }
   }
 
   render() {
     return (
       <div>
         <h6>Contribution by Year to Top 100 Songs of Decade</h6>
-        <Bar
-          data={this.state.data}
-          options={this.state.options}
-          width={400}
-          height={390}
-        />
+        <Bar data={this.state.data} options={this.state.options} />
       </div>
     );
   }

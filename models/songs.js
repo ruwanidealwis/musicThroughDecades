@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   Songs.init(
     {
       name: DataTypes.STRING,
-      imageUrl: DataTypes.STRING,
+      imageURL: DataTypes.STRING,
       yearOfRelease: DataTypes.INTEGER,
       valence: DataTypes.REAL,
       danceability: DataTypes.REAL,
@@ -44,6 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       decadeId: DataTypes.INTEGER,
       spotifyId: DataTypes.STRING,
       temp: { type: DataTypes.BOOLEAN, defaultValue: false },
+      previewURL: DataTypes.STRING,
     },
     {
       sequelize,

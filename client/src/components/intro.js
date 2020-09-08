@@ -14,6 +14,14 @@ class Intro extends React.Component {
   constructor(props) {
     super(props);
     console.log(props);
+    let title = `${this.props.comparator}'s`;
+    if (this.props.user) {
+      title = `My Top Tracks of ${this.props.comparator}`;
+    }
+
+    this.state = {
+      title: title,
+    };
   }
 
   scrollToElement(element) {
@@ -59,7 +67,7 @@ class Intro extends React.Component {
             <Card className="decadeCard" id="card2" elevation={14}>
               <CardContent>
                 <Typography align="center" variant="h2">
-                  {this.props.comparator}'s
+                  {this.state.title}
                 </Typography>
                 <br /> <br />
                 <Typography align="center" variant="subtitle1">

@@ -12,4 +12,5 @@ module.exports = {
   clientID: process.env.CLIENTID,
   clientSecret: process.env.CLIENTSECRET,
   password: process.env.PASSWORD,
+  callbackURL: process.env.CALLBACKURL,
 };

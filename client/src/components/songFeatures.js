@@ -17,6 +17,8 @@ class SongFeatures extends React.Component {
     console.log(props);
     let minYear = "";
     let maxYear = "";
+    let lowLabel = ` Lowest ${this.props.feature} Songs of the ${this.props.compareValue}'s`;
+    let highLabel = ` Highest ${this.props.feature} Songs of the ${this.props.compareValue}'s`;
     console.log(this.props.compareValueData[`average${this.props.feature}`]);
 
     if (!this.props.user) {
@@ -36,7 +38,7 @@ class SongFeatures extends React.Component {
       );
 
       let min = Math.min(compareMin, decadeMin);
-      if (min == compareMin) {
+      if (min === compareMin) {
         minYear =
           parseInt(this.props.compareValue) +
           parseInt(
@@ -55,7 +57,7 @@ class SongFeatures extends React.Component {
       }
       let max = Math.max(compareMax, decadeMax);
 
-      if (max == compareMax) {
+      if (max === compareMax) {
         maxYear =
           parseInt(this.props.compareValue) +
           parseInt(
@@ -72,16 +74,21 @@ class SongFeatures extends React.Component {
             )
           );
       }
+    } else {
+      highLabel = `My Lowest ${this.props.feature} Songs`;
+      lowLabel = `My Highest ${this.props.feature} songs`;
     }
     this.state = {
       minYear: minYear,
       maxYear: maxYear,
+      highLabel: highLabel,
+      lowLabel: lowLabel,
     };
     console.log(this.state);
   }
 
   render() {
-    const { minYear, maxYear } = this.state;
+    const { minYear, maxYear, highLabel, lowLabel } = this.state;
     return (
       <Grid container spacing={4}>
         <Grid item md={12} xs={12}>
@@ -101,6 +108,7 @@ class SongFeatures extends React.Component {
             type={this.props.type}
             defention={this.props.defention}
             explanation={this.props.explanation}
+            moreInfo={this.props.moreInfo}
           />
           {this.props.user ? null : (
             <div>
@@ -125,7 +133,7 @@ class SongFeatures extends React.Component {
             compareValueData={
               this.props.compareValueData[
                 `yearlyAverage${this.props.feature}`
-              ] == undefined
+              ] === undefined
                 ? this.props.compareValueData[`average${this.props.feature}`]
                 : this.props.compareValueData[
                     `yearlyAverage${this.props.feature}`
@@ -146,7 +154,9 @@ class SongFeatures extends React.Component {
         </Grid>
         <Grid item md={3} xs={12}>
           <Typography variant="subtitle1">
-            Lowest {this.props.feature} Songs of {this.props.decade}'s
+            <strong>
+              Lowest {this.props.feature} Songs of the {this.props.decade}'s
+            </strong>
           </Typography>
           <br />
           <TopThreeSongs
@@ -157,7 +167,10 @@ class SongFeatures extends React.Component {
         <Grid item md={3} xs={12}>
           <br /> <br />
           <Typography variant="subtitle1">
-            Highest {this.props.feature} Songs of {this.props.decade}'s
+            <strong>
+              {" "}
+              Highest {this.props.feature} Songs of the {this.props.decade}'s
+            </strong>
           </Typography>
           <br />
           <TopThreeSongs
@@ -168,7 +181,7 @@ class SongFeatures extends React.Component {
 
         <Grid item md={3} xs={12}>
           <Typography variant="subtitle1">
-            Lowest {this.props.feature} Songs of {this.props.compareValue}'s
+            <strong>{lowLabel}</strong>
           </Typography>
           <br />
           <TopThreeSongs
@@ -179,7 +192,7 @@ class SongFeatures extends React.Component {
         <Grid item md={3} xs={12}>
           <br /> <br />
           <Typography variant="subtitle1">
-            Highest {this.props.feature} Songs of {this.props.compareValue}'s
+            <strong>{highLabel}</strong>
           </Typography>
           <br />
           <TopThreeSongs

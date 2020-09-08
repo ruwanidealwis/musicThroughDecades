@@ -1,27 +1,55 @@
 import React from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
-
+import PlayArrowIcon from "@material-ui/icons/PlayArrow";
+import PauseIcon from "@material-ui/icons/Pause";
+import IconButton from "@material-ui/core/IconButton";
 import "./top20.css";
+import SongComponent from "./songComponent";
 
 class TopTwentySongs extends React.Component {
   constructor(props) {
     super(props);
-    //g(props);
+    this.state = {
+      audio: new Audio(
+        "https://p.scdn.co/mp3-preview/3eb16018c2a700240e9dfb8817b6f2d041f15eb1?cid=774b29d4f13844c495f206cafdad9c86"
+      ),
+    };
+  }
+  playAudio() {
+    if (!this.state.audio.paused) {
+      this.state.audio.pause();
+    } else {
+      this.state.audio.play();
+    }
   }
 
+  pauseAudio() {
+    var audio = new Audio(
+      "https://p.scdn.co/mp3-preview/3eb16018c2a700240e9dfb8817b6f2d041f15eb1?cid=774b29d4f13844c495f206cafdad9c86"
+    );
+
+    audio.pause();
+  }
   render() {
     let array = [0, 5];
     let size = 6;
     let addValue = 5;
-    if (this.props.size != undefined) {
+    if (this.props.size !== undefined) {
       size = this.props.size;
-      addValue =
-        Math.floor(this.props.length / 4) + (4 - (this.props.length % 4));
+      if (this.props.length % 4 === 0) {
+        addValue = Math.floor(this.props.length / 4);
+      } else if (this.props.length % 4 < 2) {
+        addValue = Math.floor(this.props.length / 4) + (this.props.length % 4);
+      } else if (this.props.length % 4 === 2) {
+        addValue = Math.floor(this.props.length / 4) + 1;
+      } else
+        addValue =
+          Math.floor(this.props.length / 4) + (4 - (this.props.length % 4));
       array = [];
       let i = 0;
       while (i < this.props.length) {
@@ -32,83 +60,31 @@ class TopTwentySongs extends React.Component {
 
     //regex taken from:https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
     return (
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         {array.map((arrItem) => {
           return (
-            <Grid item md={size} xs={12}>
+            <Grid item md={size} sm={12} xs={12}>
               {this.props.data
                 .slice(arrItem, arrItem + addValue)
                 .map((item, index) => {
                   //console.log(item);
                   return (
-                    <Card
-                      elevation={15}
-                      className="infoCard"
-                      bgcolor="grey.700"
-                      width="50%"
-                    >
-                      <CardContent className="cardContent">
-                        <Grid container wrap="nowrap" spacing={2}>
-                          <Grid className="coverGrid" item>
-                            <CardMedia
-                              className="cover"
-                              image={item.image}
-                            ></CardMedia>
-                          </Grid>
-                          <Grid wrap="nowrap" item xs>
-                            {" "}
-                            <Typography
-                              className="text"
-                              component="h5"
-                              variant="h5"
-                            >
-                              <strong>
-                                {index + arrItem + 1}.{" "}
-                                {item.name.replace(/ *\([^)]*\) */g, "")}
-                              </strong>
-                            </Typography>
-                            {this.props.popularity ? null : (
-                              <Typography
-                                align="left"
-                                className="text"
-                                variant="subtitle2"
-                                color="textSecondary"
-                              >
-                                {item.year}
-                              </Typography>
-                            )}
-                            <Typography
-                              align="left"
-                              className="text"
-                              variant="subtitle2"
-                              color="textSecondary"
-                            >
-                              {item.artists.toString()}
-                            </Typography>
-                            {this.props.popularity ? (
-                              <div>
-                                <Typography
-                                  align="left"
-                                  className="text"
-                                  variant="subtitle2"
-                                  color="textSecondary"
-                                >
-                                  <strong>popularity: {item.popularity}</strong>
-                                </Typography>
-                                <Typography
-                                  align="left"
-                                  className="text"
-                                  variant="subtitle2"
-                                  color="textSecondary"
-                                >
-                                  <strong> original rank: {item.rank}</strong>
-                                </Typography>
-                              </div>
-                            ) : null}
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
+                    <div>
+                      {" "}
+                      <SongComponent
+                        item={item}
+                        index={index}
+                        arrItem={arrItem}
+                      ></SongComponent>
+                      <iframe
+                        src="https://open.spotify.com/embed/track/1eT2CjXwFXNx6oY5ydvzKU"
+                        width="0"
+                        height="0"
+                        frameborder="0"
+                        allowtransparency="true"
+                        allow="encrypted-media"
+                      ></iframe>
+                    </div>
                   );
                 })}{" "}
             </Grid>

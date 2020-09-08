@@ -1,9 +1,7 @@
-import { Pie } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 import { defaults } from "react-chartjs-2";
 import React from "react";
 import "chartjs-plugin-deferred";
-import TitleText from "./titleText";
-import Typography from "@material-ui/core/Typography";
 
 defaults.global.defaultFontColor = "black";
 defaults.global.defaultFontFamily = "Roboto";
@@ -20,18 +18,21 @@ class PieChart extends React.Component {
     super(props);
     let labelArray = [];
     let valueArray = [];
-    this.props.data.forEach((object, index) => {
-      if (this.props.searchKey === "mode") {
-        labelArray = ["minor", "major"];
-        valueArray.push(object.count);
-      } else if (this.props.searchKey === "year") {
-        labelArray.push(parseInt(this.props.decade) + index);
-        valueArray.push(object);
-      } else {
-        labelArray.push(object[this.props.searchKey]);
-        valueArray.push(object.count);
-      }
-    });
+
+    if (this.props.searchKey === "decade") {
+      labelArray = Object.keys(this.props.data);
+      valueArray = Object.values(this.props.data);
+    } else {
+      this.props.data.forEach((object, index) => {
+        if (this.props.searchKey === "mode") {
+          labelArray = ["minor", "major"];
+          valueArray.push(object.count);
+        } else {
+          labelArray.push(object[this.props.searchKey]);
+          valueArray.push(object.count);
+        }
+      });
+    }
 
     this.state = {
       data: {
@@ -126,14 +127,14 @@ class PieChart extends React.Component {
   render() {
     return (
       <div>
-        <Typography color="textSecondary" variant="h5">
-          Average Popularity
-        </Typography>
-        <Pie
+        <h5>
+          <strong>{this.props.title}</strong>
+        </h5>
+        <Doughnut
           data={this.state.data}
           options={this.state.options}
-          width={270}
-          height={270}
+          width={300}
+          height={300}
         />
       </div>
     );

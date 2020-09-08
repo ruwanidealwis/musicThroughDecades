@@ -15,6 +15,7 @@ var { PythonShell } = require("python-shell");
   process.env.CALLBACKURL;
 /** @global timerange for user top songs*/ var userTopRead = "";
 /** @global stores databasetable*/ var databaseTable = require("./databaseController");
+const { resolve } = require("path");
 
 /*********************************************** SET BASIC INFO (if running locally...) *********************************/
 if (process.env.PORT == null) {
@@ -230,9 +231,10 @@ var getBasicSongInfo = async (trackObject) => {
             image: data.album.images[0].url,
             artists: artistInfo,
             popularity: data.popularity,
+            previewURL: data.preview_url,
             artistRank: trackObject.artistRank,
           };
-          if (object.release == "") {
+          if (object.release === "") {
             object.release = data.album.release_date;
           }
           console.log(data.album.release_date);
@@ -314,7 +316,7 @@ let getSongAudioInformation = async function (
   for (var songObject of songArray) {
     //console.log(returnData[i]);
     console.log(songObject);
-    if (returnData[i] == null) {
+    if (returnData[i] === null) {
       songObject.danceability = -1;
       songObject.energy = -1;
       songObject.acousticness = -1;
@@ -336,7 +338,7 @@ let getSongAudioInformation = async function (
     }
     i++;
 
-    if (songArray == fullInfoHitArray)
+    if (songArray === fullInfoHitArray)
       await databaseTable.addSongToDatabase(songObject, decade, i);
     //indexing will change rank by 1 (index 0 has rank 1, but we need it saved to the db as rank 1)
     else {
@@ -354,6 +356,8 @@ let getSongAudioInformation = async function (
  * @return {Promise} Array with the information on the users top hits (if successful), or throws an error (after all retries used up)
  */
 let getUserTopTracks = async (timeRange, retries) => {
+  console.log(timeRange);
+  console.log(spotifyApi);
   return spotifyApi
     .getMyTopTracks({
       time_range: timeRange,
@@ -361,6 +365,7 @@ let getUserTopTracks = async (timeRange, retries) => {
     })
     .then(
       async (data) => {
+        console.log(data);
         for (var songObject of data.body.items) {
           songIdArray.push(songObject.id); //push to array to get audio features...
           let artistsId = [];
@@ -376,6 +381,7 @@ let getUserTopTracks = async (timeRange, retries) => {
             spotifyId: songObject.id,
             name: songObject.name.replace("-[^-]*$").trim(),
             popularity: songObject.popularity,
+            previewURL: songObject.preview_url,
             release: songObject.album.release_date,
             artists: artistInfo,
             imageUrl: songObject.album.images[0].url,
@@ -385,17 +391,15 @@ let getUserTopTracks = async (timeRange, retries) => {
         return myTopHits;
       },
       async (err) => {
-        if (retries > 0) {
-          console.error(err);
-          await asyncTimeout(
-            err.headers["retry-after"]
-              ? parseInt(err.headers["retry-after"]) * 1000
-              : RETRY_INTERVAL
-          );
-          return getUserTopTracks(timeRange, retries - 1);
+        console.log(err);
+        /* if (retries > 0) {
+          console.error(err.headers);
+          (await err.headers["retry-after"])
+            ? parseInt(err.headers["retry-after"]) * 1000
+            : 3000;
 
-          //taken from:https://github.com/thelinmichael/spotify-web-api-node/issues/217
-        }
+          return getUserTopTracks(timeRange, retries - 1);}*/
+        //taken from:https://github.com/thelinmichael/spotify-web-api-node/issues/217
       }
     );
 };
@@ -411,7 +415,6 @@ let getUserId = (req) => {
     },
     function (err) {
       console.log("Something went wrong!", err);
-      return err;
     }
   );
 };
@@ -512,12 +515,12 @@ exports.getAuthorizationURL = (timeRange, req) => {
     clientSecret: clientSecret,
     redirectUri: redirectUri, //this time we need user to authorize access
   });
-
   let authorizeURL = spotifyApi.createAuthorizeURL(
     ["user-top-read", "playlist-modify-public"],
     state
   ); //generated
-
+  console.log(redirectUri);
+  console.log(authorizeURL);
   return authorizeURL;
 };
 
@@ -532,59 +535,50 @@ exports.getAuthorizationURL = (timeRange, req) => {
 
 exports.getUserListeningHabbits = async (req, res) => {
   // databaseTable = determineDatabaseTable(""); //should be users
-  if (spotifyApi === undefined) {
+  console.log(spotifyApi);
+  console.log(req.query.code);
+  if (spotifyApi == undefined) {
     res.redirect("/login");
-  }
-  console.log(databaseTable);
-  return spotifyApi
-    .authorizationCodeGrant(req.query.code)
-    .then(
-      (data) => {
-        console.log("The token expires in " + data.body["expires_in"]);
-        console.log("The access token is " + data.body["access_token"]);
-        console.log("The refresh token is " + data.body["refresh_token"]);
+  } else {
+    console.log(spotifyApi.getRefreshToken());
+    if (spotifyApi.getRefreshToken() == null) {
+      console.log("got here");
+      let data = await spotifyApi.authorizationCodeGrant(req.query.code);
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      spotifyApi.setRefreshToken(data.body["refresh_token"]);
+      console.log(spotifyApi);
+      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+    } else {
+      let data = await spotifyApi.refreshAccessToken();
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      console.log("refreshAccessToken");
+      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+      console.log(data);
+    }
 
-        // Set the access token on the API object to use it in later calls
-        spotifyApi.setAccessToken(data.body["access_token"]);
-        spotifyApi.setRefreshToken(data.body["refresh_token"]);
-        req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
-      },
-      (err) => {
-        console.log("Something went wrong!", err);
-      }
-    )
-    .then(async (data) => {
-      getUserId(req);
-    })
-    .then(async (data) => {
-      await databaseTable.createTempUser(req.session.id);
-      return getUserTopTracks(req.session.userTopRead, req.session.retries); //gets the top tracks for the user
-    })
-    .then(async (data) => {
-      console.log(myTopHits);
-      await delay(230); //waits 230ms (gets around spotify api rate limiting)
-      return getSongAudioInformation(
-        myTopHits,
-        req.session.id,
-        req.session.decade,
-        req.session.retries
-      ); //gets the audio info each of the top hits
-    })
-    .then((data) => {
-      //need to get the stats for the data...
-      //need to get reccomendations...
-      return databaseTable.getUserStatistics(
-        req.session.id,
-        req.session.decade
-      );
-    })
-    .then(async (data) => {
-      console.log(songIdArray);
-      await databaseTable.deleteUserSongsFromDatabase(req.session.id);
-      data["topArtists"] = await getUserTopArtists(req.session.userTopRead);
-      myTopHits = [];
-      return data;
-    });
+    await getUserId(req);
+    await databaseTable.createTempUser(req.session.id);
+    console.log(req.session);
+    await getUserTopTracks(req.session.userTopRead, req.session.retries); //gets the top tracks for the user
+    await delay(230); //waits 230ms (gets around spotify api rate limiting)
+
+    await getSongAudioInformation(
+      myTopHits,
+      req.session.id,
+      req.session.decade,
+      req.session.retries
+    ); //gets the audio info each of the top hits
+    let userData = await databaseTable.getUserStatistics(
+      req.session.id,
+      req.session.decade
+    );
+
+    await databaseTable.deleteUserSongsFromDatabase(req.session.id);
+    userData["topArtists"] = await getUserTopArtists(req.session.userTopRead);
+    songIdArray = [];
+    myTopHits = [];
+    return userData;
+  }
 };
 
 //*********************************** EXPORTED FUNTIONS ***********************************/

@@ -31,7 +31,8 @@ router.get("/", (req, res) => {
 router.get("/music/createPlaylist", (req, res) => {
   console.log("hello");
   spotifyController.createPlaylist(req).then((url) => {
-    res.send(200).send(url);
+    console.log(url);
+    res.status(200).send({ url: url });
     (err) => {
       res.send(400).send({ error: "Could not Create Playlist" });
     };

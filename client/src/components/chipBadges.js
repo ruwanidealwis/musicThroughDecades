@@ -73,6 +73,11 @@ const acoustic = (
 class ChipBadges extends React.Component {
   constructor(props) {
     super(props);
+    let title = `${this.props.decade}'s`;
+    if (this.props.user) {
+      title = `My Top Tracks (${this.props.decade})`;
+    }
+    this.state = { title: title };
   }
 
   render() {
@@ -80,7 +85,7 @@ class ChipBadges extends React.Component {
       <Grid container spacing={4}>
         <Grid item md={12} sm={12}>
           <Card variant="outlined">
-            <Typography variant="h6">{this.props.decade}'s</Typography>
+            <Typography variant="h6">{this.state.title}</Typography>
 
             <List>
               {this.props.firstValue.averageValence >

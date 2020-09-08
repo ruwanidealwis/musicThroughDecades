@@ -62,7 +62,7 @@ def getDecadeInfo(decade):
 
     if(decade == "2010"):
         # CSV TAKE FROM: http://chart2000.com/about.htm
-        with open('/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/server/webScraperPython/files/2010scharts.csv') as csv_file:
+        with open('/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/webScraperPython/files/2010scharts.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             line_count = 0
             for row in csv_reader:
@@ -170,5 +170,5 @@ def getYearInfo(year):
     return finalList'''
 
 
-# print(getDecadeInfo(sys.argv[1]))
-print(getDecadeInfo("2000"))
+print(getDecadeInfo(sys.argv[1]))
+# print(getDecadeInfo("2000"))

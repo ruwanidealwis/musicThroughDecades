@@ -11,13 +11,13 @@
   flex-direction: column;
   justify-content: center;
   background-color: white !important;
-  width: 90%;
+  max-width: 90vw;
 }
 
 .loader {
-  justify-content: center;
-  background-color: rgb(46, 45, 45);
-  margin: 8% !important;
+  margin-left: auto;
+  margin-right: auto;
+
   color: white;
 }
 .recievedData {
@@ -25,19 +25,41 @@
   padding: 0% 0% 0% 0%;
   color: rgb(31, 30, 30);
   font-family: "Roboto", sans-serif;
+  width: 100%;
+  word-wrap: break-word;
 }
 a.MuiTypography-colorTextSecondary {
   color: #2e8b57;
+}
+
+.allInfo {
+  width: 100%;
+}
+.playlistButton {
+  background-color: #1db954 !important;
+  color: white !important;
 }
 .musicInfo {
   margin: 1.5%;
 }
 .typgoraphyText {
-  padding-left: 2%;
+  padding-left: 0%;
 }
 .divider {
   height: 5px !important;
-  background-color: rgb(31, 30, 30) !important;
-  margin-right: 40% !important;
+  background-color: rgb(53, 52, 52) !important;
+  margin-right: 30% !important;
   margin-bottom: 0 !important;
+  padding-left: 0%;
+  margin-left: 0% !important;
+}
+.MuiDialog-paper {
+  text-align: center !important;
+  width: 50% !important;
+  height: 30% !important;
+}
+@media only screen and (max-width: 767px) {
+  .headphones {
+    margin-left: -20%;
+  }
 }

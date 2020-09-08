@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles, useTheme } from "@material-ui/core/styles";
+
 import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -8,9 +8,6 @@ import Grid from "@material-ui/core/Grid";
 
 import "./top20.css";
 
-let topCard = (data) => {
-  data.forEach((item) => {});
-};
 class TopTwentyArtists extends React.Component {
   constructor(props) {
     super(props);
@@ -18,15 +15,15 @@ class TopTwentyArtists extends React.Component {
   }
 
   render() {
-    let array = [0, 2, 4, 6, 8];
+    let array = [0, 5];
     return (
       <div>
-        <Grid class="grid" container width="50vh" spacing={2}>
+        <Grid container spacing={2}>
           {array.map((arrItem) => {
             return (
-              <Grid container width="50vh" spacing={2}>
+              <Grid item md={6} xs={12}>
                 {this.props.data
-                  .slice(arrItem, arrItem + 2)
+                  .slice(arrItem, arrItem + 5)
                   .map((item, index) => {
                     console.log(item);
                     return (

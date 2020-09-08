@@ -12,9 +12,10 @@
 .infoCard {
   display: flex;
   padding: 0;
+
   margin: auto;
   margin-bottom: 5% !important;
-  width: 36vh;
+  width: 35vh;
   height: 14vh;
   object-fit: contain;
   background-color: white !important;

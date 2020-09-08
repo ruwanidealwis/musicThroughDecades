@@ -8,6 +8,7 @@ import { Grid, Typography } from "@material-ui/core";
 
 const style = {
   paddingLeft: "2.3%",
+  minWidth: "60%",
 };
 
 const iconStyle = {
@@ -16,55 +17,119 @@ const iconStyle = {
 };
 
 const LowImportanceIcon = () => {
-  return <div style={iconStyle}>🔻</div>;
+  return (
+    <span aria-label="less important" role="img" style={iconStyle}>
+      🔻
+    </span>
+  );
 };
 
 const HighImportanceIcon = () => {
-  return <div style={iconStyle}>🔺</div>;
+  return (
+    <span aria-label="highly important" role="img" style={iconStyle}>
+      🔺
+    </span>
+  );
 };
 const HappyIcon = () => {
-  return <div style={iconStyle}>😄</div>;
+  return (
+    <span aria-label="happy emoji" role="img" style={iconStyle}>
+      😄
+    </span>
+  );
 };
 const SadIcon = () => {
-  return <div style={iconStyle}>😔</div>;
+  return (
+    <span role="img" aria-label="sad emoji" style={iconStyle}>
+      😔
+    </span>
+  );
 };
 const HighEnergyIcon = () => {
-  return <div style={iconStyle}>⚡</div>;
+  return (
+    <span aria-label="lightening bolt" role="img" style={iconStyle}>
+      ⚡
+    </span>
+  );
 };
 const LowEnergyIcon = () => {
-  return <div style={iconStyle}>🥱</div>;
+  return (
+    <span aria-label="yawning" role="img" style={iconStyle}>
+      🥱
+    </span>
+  );
 };
 const HighDanceIcon = () => {
-  return <div style={iconStyle}>💃</div>;
+  return (
+    <span role="img" aria-label="woman dancing" style={iconStyle}>
+      💃
+    </span>
+  );
 };
 
 const LowDanceIcon = () => {
-  return <div style={iconStyle}>🧍‍♂️</div>;
+  return (
+    <span aria-label="man standing" role="img" style={iconStyle}>
+      🧍‍♂️
+    </span>
+  );
 };
 
 const HighTempoIcon = () => {
-  return <div style={iconStyle}>💨</div>;
+  return (
+    <span aria-label="dash" role="img" style={iconStyle}>
+      💨
+    </span>
+  );
 };
 const LowTempoIcon = () => {
-  return <div style={iconStyle}>🐢</div>;
+  return (
+    <span aria-label="turtle" role="img" style={iconStyle}>
+      🐢
+    </span>
+  );
 };
 const HighAcousticIcon = () => {
-  return <div style={iconStyle}>🎻</div>;
+  return (
+    <span aria-label="violin" role="img" style={iconStyle}>
+      🎻
+    </span>
+  );
 };
 const LowAcousticIcon = () => {
-  return <div style={iconStyle}>🎸</div>;
+  return (
+    <span aria-label="electric guitar" role="img" style={iconStyle}>
+      🎸
+    </span>
+  );
 };
 const HighInstrumentalnessIcon = () => {
-  return <div style={iconStyle}>🎹</div>;
+  return (
+    <span aria-label="keyboard" role="img" style={iconStyle}>
+      🎹
+    </span>
+  );
 };
 const LowInstrumentalnessIcon = () => {
-  return <div style={iconStyle}>🎤</div>;
+  return (
+    <span aria-label="microphone" role="img" style={iconStyle}>
+      🎤
+    </span>
+  );
 };
 const HighSpeechinessIcon = () => {
-  return <div style={iconStyle}>🔊</div>;
+  return (
+    <span aria-label="louad speaker" role="img" style={iconStyle}>
+      🔊
+    </span>
+  );
 };
 const LowSpeechinessIcon = () => {
-  return <div style={iconStyle}>🔇</div>;
+  return (
+    <span aria-label="muted speaker" role="img" style={iconStyle}>
+      🔇
+    </span>
+  );
 };
 const happiest = (
   <Chip style={style} icon={<HappyIcon />} label="Happiest Music" />
@@ -177,10 +242,10 @@ class FeatureChipBadges extends React.Component {
   render() {
     return (
       <Grid container spacing={4}>
-        <Grid item md={12} sm={12}>
+        <Grid item md={12} sm={12} style={{ width: "90%", margin: "auto" }}>
           <Card style={divStyle} variant="outlined">
             <Typography variant="h6">
-              {`${this.props.title}'s` || "Fast Facts"}
+              {`${this.props.title}` || "Fast Facts"}
             </Typography>
 
             <List>

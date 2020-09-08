@@ -3,7 +3,7 @@
 const { Sequelize } = require("sequelize");
 const { Op } = require("sequelize");
 /**
- * converts first letter to capital (hi==>Hi)
+ * converts first letter to capital (hi===>Hi)
  *taken from:https://dzone.com/articles/capitalize-first-letter-string-javascript
  * @summary If the description is long, write your summary here. Otherwise, feel free to remove this.
  * @param {String} string - string to convert to capital
@@ -46,7 +46,7 @@ exports.addSongToDatabase = async (songObjects, decade, index) => {
   let song = await db.Songs.create({
     name: songObjects.name,
     yearOfRelease: dateArray[0],
-    imageUrl: songObjects.image,
+    imageURL: songObjects.image,
     valence: songObjects.valence,
     danceability: songObjects.danceability,
     popularity: songObjects.popularity,
@@ -60,6 +60,7 @@ exports.addSongToDatabase = async (songObjects, decade, index) => {
     rank: index,
     decadeId: decadeId.id,
     spotifyId: songObjects.spotifyId,
+    previewURL: songObjects.previewURL,
   });
   for (const artist of songObjects.artists) {
     //call helper method
@@ -87,7 +88,7 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
     include: [{ model: db.Artist }],
   });
   //console.log(song);
-  if (song == null) {
+  if (song === null) {
     //wecreate the song.... but we make it temporary (after we get all the data the song is deleted from the database)
     console.log(dateArray[0]);
     await createUserEntry(songObjects, dateArray, sessionId, index);
@@ -131,8 +132,8 @@ exports.deleteUserSongsFromDatabase = async (sessionId) => {
     let songId = song.id;
 
     //this avoids the case where two users are using the app at the same time, and both have the same top song
-    if (song.tempUsers.length == 1) {
-      if (song.tempUsers[0].sessionId == sessionId) {
+    if (song.tempUsers.length === 1) {
+      if (song.tempUsers[0].sessionId === sessionId) {
         //destroy it....
         count++;
         //song can be deleted, but can artists be?
@@ -171,7 +172,7 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
   let userSong = await db.Songs.create({
     name: songObjects.name,
     yearOfRelease: dateArray[0],
-    imageUrl: songObjects.imageUrl,
+    imageURL: songObjects.imageUrl,
     valence: songObjects.valence,
     danceability: songObjects.danceability,
     popularity: songObjects.popularity,
@@ -183,6 +184,7 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
     energy: songObjects.energy,
     instrumentalness: songObjects.instrumentalness,
     spotifyId: songObjects.spotifyId,
+    previewURL: songObjects.previewURL,
     temp: true, //song is temporary and no decade Id.... (we need to delete it)
   });
   for (const artist of songObjects.artists) {
@@ -196,7 +198,7 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
     });
     //console.log(artist_id);
     let createArtistId;
-    if (artist_id == null) {
+    if (artist_id === null) {
       //create new artist and then add it...
       let newArtistId = await db.Artist.create({
         //where: { name: artist.name, imageURL: artist.imageURL },
@@ -256,7 +258,7 @@ let addPermanantArtists = async (artist, decadeId, song, songObj) => {
     }, //TODO CHANGE THIS}
     raw: true,
   });
-  if (artist_id == null) {
+  if (artist_id === null) {
     //create new artist and then add it...
     let artistId = await db.Artist.create({
       //where: { name: artist.name, imageURL: artist.imageURL },
@@ -288,7 +290,7 @@ let addPermanantArtists = async (artist, decadeId, song, songObj) => {
       raw: true,
     });
 
-    if (currentDecades == null) {
+    if (currentDecades === null) {
       //add new decade association (this happens when an artist from another decade appears in this dedcade)
       await db.DecadeArtists.create({
         artistId: artist_id.id,
@@ -313,9 +315,9 @@ let deleteUserArtistsFromDatabase = async (artist, sessionId) => {
 
   //if its null it means that the artist was also in another song and was already deleted
   //has to be false otherwise the artist is one of the artists of the decade....
-  if (otherUsers != null && otherUsers.temp == true) {
-    if (otherUsers.tempUsers.length == 1) {
-      if (otherUsers.tempUsers[0].sessionId == sessionId) {
+  if (otherUsers != null && otherUsers.temp === true) {
+    if (otherUsers.tempUsers.length === 1) {
+      if (otherUsers.tempUsers[0].sessionId === sessionId) {
         db.Artist.destroy({
           where: { id: artist.id },
         });
@@ -429,7 +431,8 @@ getTopFeaturesForDecade = async (
           "yearOfRelease",
           "rank",
           "id",
-          "imageUrl",
+          "imageURL",
+          "previewURL",
         ],
         required: false,
         model: db.Songs,
@@ -454,8 +457,9 @@ getTopFeaturesForDecade = async (
       year: songs.yearOfRelease,
       rank: songs.rank,
       [feature]: songs[feature],
-      image: songs.imageUrl,
+      image: songs.imageURL,
       artists: artistsArray,
+      previewURL: songs.previewURL,
     };
     objArray.push(obj);
   }
@@ -467,7 +471,7 @@ let getTopSongs = (decade) => {
   let TopArray = [];
   return getDecadeId(decade).then((id) => {
     return db.Songs.findAll({
-      attributes: ["name", "rank", "imageUrl", "yearOfRelease"],
+      attributes: ["name", "rank", "imageURL", "yearOfRelease", "previewURL"],
       where: { decadeId: id },
       include: { model: db.Artist },
       limit: 20,
@@ -485,9 +489,9 @@ let getTopSongs = (decade) => {
             name: song.name,
             rank: song.rank,
             year: song.yearOfRelease,
-            image: song.imageUrl,
+            image: song.imageURL,
             artists: artists,
-            image: song.imageUrl,
+            previewURL: song.previewURL,
           });
         }
       })
@@ -705,7 +709,7 @@ exports.getDecadeStatistics = async (decade) => {
 
   if (keyDistribution.length != 12) {
     for (let i = 1; i < 12; i++) {
-      if (keyDistribution.findIndex((item) => item.key == i) == -1) {
+      if (keyDistribution.findIndex((item) => item.key === i) === -1) {
         //check which key is non existant
         keyDistribution.push({ key: i, count: 0 });
       }
@@ -777,10 +781,11 @@ let getUserTopFeatures = async (sessionId, feature, order, limit) => {
           name: song.name,
           year: song.yearOfRelease,
           artists: artists,
-          [feature]: song[feature] == null ? i : song[feature],
-          image: song.imageUrl,
+          [feature]: song[feature] === null ? i : song[feature],
+          image: song.imageURL,
+          previewURL: song.previewURL,
         });
-        if (i == limit) break;
+        if (i === limit) break;
         i++;
       }
       return topSongs;
@@ -839,12 +844,15 @@ let getUserDistribution = async (sessionId, feature) => {
       let decadeDistribution = data;
       //console.log(data);
       for (const key of data) {
-        if (feature == "yearOfRelease") {
+        if (feature === "yearOfRelease") {
           decadeDistribution = {};
           for (const key of data) {
-            decadeDistribution[key.yearOfRelease - (key.yearOfRelease % 10)] =
-              decadeDistribution[key.yearOfRelease - (key.yearOfRelease % 10)] +
-                key.count || key.count;
+            decadeDistribution[
+              `${key.yearOfRelease - (key.yearOfRelease % 10)}'s`
+            ] =
+              decadeDistribution[
+                `${key.yearOfRelease - (key.yearOfRelease % 10)}'s`
+              ] + key.count || key.count;
           }
         }
       }
@@ -855,7 +863,7 @@ let getUserDistribution = async (sessionId, feature) => {
 let getSongReccomendations = (decadeId, infoObj) => {
   return getDecadeId(decadeId).then((id) => {
     return db.Songs.findAll({
-      attributes: ["name", "imageUrl", "spotifyId"],
+      attributes: ["name", "imageURL", "spotifyId"],
       include: [{ model: db.Artist }],
       where: {
         decadeId: id,
@@ -887,7 +895,7 @@ let getSongReccomendations = (decadeId, infoObj) => {
         reccomendationsArray.push({
           name: song.name,
           artists: artists,
-          image: song.imageUrl,
+          image: song.imageURL,
           spotifyId: song.spotifyId,
         });
       }
