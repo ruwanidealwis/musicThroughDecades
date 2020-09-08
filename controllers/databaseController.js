@@ -466,6 +466,17 @@ getTopFeaturesForDecade = async (
   return objArray;
 };
 
+let getDecadeDiscription = (decade) => {
+  return db.Decade.findOne({
+    attributes: ["description"],
+    raw: true,
+    where: { name: decade },
+  }).then((data) => {
+    console.log(data);
+    return data.description;
+  });
+};
+
 //get the top 10 songs of the decade....
 let getTopSongs = (decade) => {
   let TopArray = [];
@@ -732,7 +743,8 @@ exports.getDecadeStatistics = async (decade) => {
 
   ////console.log(fullStatsObject);
   fullStatsObject[`topArtists`] = await getTopArtistsByRank(decade);
-
+  console.log(getDecadeDiscription(decade));
+  fullStatsObject[`description`] = await getDecadeDiscription(decade);
   return fullStatsObject;
   ////console.log(fullStatsObject);
 

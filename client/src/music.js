@@ -102,6 +102,10 @@ class Music extends React.Component {
               <Intro
                 decade={decade}
                 comparator={compareValue}
+                decadeDescription={this.state.decadeData.description}
+                compareValueDescription={
+                  this.state.compareValueData.description
+                }
                 user={user}
               ></Intro>
               <br />
@@ -190,5 +194,4 @@ export default Music;
 
 //TODO fix bad information and add decade descrotion
 //TODO make loading and front page nicer
-//TODO add decade descriptions
 //TODO make playlist create button nicer

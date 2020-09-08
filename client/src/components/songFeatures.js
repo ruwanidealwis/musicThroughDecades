@@ -75,8 +75,8 @@ class SongFeatures extends React.Component {
           );
       }
     } else {
-      highLabel = `My Lowest ${this.props.feature} Songs`;
-      lowLabel = `My Highest ${this.props.feature} songs`;
+      lowLabel = `My Lowest ${this.props.feature} Songs`;
+      highLabel = `My Highest ${this.props.feature} songs`;
     }
     this.state = {
       minYear: minYear,

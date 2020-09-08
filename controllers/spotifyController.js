@@ -237,6 +237,14 @@ var getBasicSongInfo = async (trackObject) => {
           if (object.release === "") {
             object.release = data.album.release_date;
           }
+
+          if (data.preview_url == null) {
+            console.log("sajiodjaiojeqioajsdiojasdiojio");
+            delay(200);
+            let track = await spotifyApi.getTrack(data.id, { market: "US" });
+            console.log(track.body.preview_url);
+            object.previewURL = track.body.preview_url;
+          }
           console.log(data.album.release_date);
           fullInfoHitArray.push(object);
           songIdArray.push(data.id);
@@ -470,9 +478,12 @@ exports.getMusicInformation = async (req, decade) => {
 
         return authorizeApp();
       })
-      .then((data) => {
+      .then(async (data) => {
         // console.log("hi");
         //console.log(top100Hits);
+        /*let login = await spotifyApi.authorizationCodeGrant(req.query.code);
+        spotifyApi.setAccessToken(login.body["access_token"]);
+        spotifyApi.setRefreshToken(login.body["refresh_token"]);*/
         return getSongInformation();
       })
       .then((data) => {
