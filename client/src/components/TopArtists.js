@@ -77,15 +77,17 @@ class TopArtists extends React.Component {
         <Grid item md={12} xs={12}>
           <LargeTitleText text={"Which Artists Ruled The Decade?"} />
         </Grid>
-        <Grid item md={6} xs={12}>
+        <Grid item md={6} sm={12} xs={12}>
           <TitleText text={`Top 10 Artists of the ${decade}'s`} />
-          <Grid container spacing={6}>
-            <Grid item md={8} xs={0}></Grid>
+          <Grid container spacing={10}>
+            <Grid item md={8} sm={0} xs={0}></Grid>
             <Grid
               item
               style={{ paddingRight: "0" }}
               alignItems="left"
-              md={4}
+              md={12}
+              lg={4}
+              sm={12}
               xs={12}
             >
               {this.switchControl("toggleDecadeOn")}
@@ -105,12 +107,23 @@ class TopArtists extends React.Component {
         </Grid>
         <Grid item md={6} xs={12}>
           <TitleText text={title} />
-          <Grid container spacing={6}>
-            <Grid item md={9} xs={0}></Grid>
-            <Grid item alignItems="flex-start" md={3} xs={12}>
+          <Grid container spacing={10}>
+            <Grid item md={8} sm={0} xs={0}></Grid>
+            <Grid
+              item
+              item
+              style={{ paddingRight: "0", marginRight: "0" }}
+              alignItems="left"
+              md={12}
+              lg={4}
+              sm={12}
+              xs={12}
+              alignItems="flex-start"
+            >
               {this.switchControl("toggleComparatorOn")}
             </Grid>
           </Grid>
+
           {toggleComparatorOn ? (
             <TopTwentyArtists
               searchKey={"hits"}

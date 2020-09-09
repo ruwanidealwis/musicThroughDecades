@@ -16,7 +16,7 @@ class Intro extends React.Component {
     console.log(props);
     let title = `${this.props.comparator}'s`;
     if (this.props.user) {
-      title = `My Top Tracks of ${this.props.comparator}`;
+      title = `My Top Tracks`;
     }
 
     this.state = {
@@ -40,7 +40,7 @@ class Intro extends React.Component {
                 <Typography align="center" variant="h2">
                   {this.props.decade}'s
                 </Typography>
-                <br /> <br />
+                <br />
                 <Typography align="center" variant="subtitle1">
                   {this.props.decadeDescription}
                 </Typography>
@@ -66,9 +66,10 @@ class Intro extends React.Component {
                 <Typography align="center" variant="h2">
                   {this.state.title}
                 </Typography>
-                <br /> <br />
+                <br />
                 <Typography align="center" variant="subtitle1">
-                  {this.props.compareValueDescription}
+                  {this.props.compareValueDescription ||
+                    `(${this.props.comparator})`}
                 </Typography>
               </CardContent>
             </Card>

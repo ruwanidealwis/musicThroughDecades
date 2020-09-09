@@ -63,7 +63,7 @@ class TopTwentySongs extends React.Component {
       <Grid container spacing={2}>
         {array.map((arrItem) => {
           return (
-            <Grid item md={size} sm={12} xs={12}>
+            <Grid item lg={size} md={12} sm={12} xs={12}>
               {this.props.data
                 .slice(arrItem, arrItem + addValue)
                 .map((item, index) => {

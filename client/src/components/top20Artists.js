@@ -21,7 +21,7 @@ class TopTwentyArtists extends React.Component {
         <Grid container spacing={2}>
           {array.map((arrItem) => {
             return (
-              <Grid item md={6} xs={12}>
+              <Grid item lg={6} md={12} sm={12} xs={12}>
                 {this.props.data
                   .slice(arrItem, arrItem + 5)
                   .map((item, index) => {
@@ -75,7 +75,7 @@ class TopTwentyArtists extends React.Component {
                                 variant="subtitle1"
                                 color="textSecondary"
                               >
-                                {item.genres.slice(0, 4).toString()}
+                                {item.genres.slice(0, 3).join(",  ")}
                               </Typography>
                             </Grid>
                           </Grid>

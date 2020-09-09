@@ -45,10 +45,15 @@ class UserReccomendations extends React.Component {
         <Grid item md={12} xs={12}>
           <LargeTitleText text={"We Think You Might Love These Tracks...."} />
         </Grid>
-        <Grid item md={8} xs={12} align="left">
-          <h6>These songs fit your average listening habits.</h6>
-        </Grid>
-        <Grid align="right" item md={4} xs={12}>
+
+        <Grid
+          className="playlistCreateGrid"
+          item
+          lg={4}
+          md={12}
+          xs={12}
+          align="left"
+        >
           <Button
             variant="contained"
             className="playlistButton"
@@ -60,6 +65,12 @@ class UserReccomendations extends React.Component {
             Make Me a Playlist
           </Button>
         </Grid>
+        <Grid item md={8} xs={12} align="left">
+          <Typography variant="h6">
+            These songs fit your average listening habits.
+          </Typography>
+        </Grid>
+
         <Grid item md={12} xs={12}>
           <TopTwentySongs
             data={this.state.compareValueData.userReccomendations}
@@ -83,14 +94,13 @@ class UserReccomendations extends React.Component {
                 this.setState({ open: !this.state.open });
               }}
             >
-              <CloseIcon />
+              <CloseIcon style={{ color: "white" }} />
             </IconButton>
-            <Typography variant="h5" style={{ fontSize: "2.4rem" }}>
+            <Typography variant="subtitle1" style={{ fontSize: "1.8rem" }}>
               {"Just Made you a playlist!"}
             </Typography>
             <DialogContent>
-              <br /> <br />
-              <Typography variant="h6">
+              <Typography variant="body1">
                 Checkout your new{" "}
                 <Link target="_blank" href={this.state.playlistURL}>
                   playlist

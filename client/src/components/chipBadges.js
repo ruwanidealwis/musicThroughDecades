@@ -83,7 +83,7 @@ class ChipBadges extends React.Component {
   render() {
     return (
       <Grid container spacing={4}>
-        <Grid item md={12} sm={12}>
+        <Grid style={{ margin: "auto" }} item md={12} sm={12}>
           <Card variant="outlined">
             <Typography variant="h6">{this.state.title}</Typography>
 

@@ -112,12 +112,13 @@ class Home extends React.Component {
 
       case "All Time":
         return "allTime";
-
+      case "oneMonth":
+        return "1Month";
       case "Last 6 Months":
         return "sixMonths";
 
-      case "oneMonth":
-        return "1Month";
+      case "Last Month":
+        return "oneMonth";
 
       default:
         return value;
@@ -306,9 +307,8 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: fifties ? "#6987bd" : "",
+                    backgroundColor: fifties ? "#6987bd" : "#96b2e6",
                   }}
-                  variant="success"
                   id={"1950s"}
                   className="buttonToggle"
                   size="lg"
@@ -322,9 +322,8 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: sixties ? "#6987bd" : "",
+                    backgroundColor: sixties ? "#6987bd" : "#96b2e6",
                   }}
-                  variant="success"
                   id={"1960s"}
                   className="buttonToggle"
                   size="lg"
@@ -338,9 +337,8 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: seventies ? "#6987bd" : "",
+                    backgroundColor: seventies ? "#6987bd" : "#96b2e6",
                   }}
-                  variant="success"
                   id={"1970s"}
                   className="buttonToggle"
                   size="lg"
@@ -353,10 +351,9 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: eighties ? "#6987bd" : "",
+                    backgroundColor: eighties ? "#6987bd" : "#96b2e6",
                   }} //={this.style(eighties)}
                   id={"1980s"}
-                  variant="success"
                   className="buttonToggle"
                   type="checkbox"
                   size="lg"
@@ -378,9 +375,8 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: nineties ? "#6987bd" : "",
+                    backgroundColor: nineties ? "#6987bd" : "#96b2e6",
                   }}
-                  variant="success"
                   id={"1990s"}
                   className="buttonToggle"
                   size="lg"
@@ -393,9 +389,8 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: twothousands ? "#6987bd" : "",
+                    backgroundColor: twothousands ? "#6987bd" : "#96b2e6",
                   }}
-                  variant="success"
                   className="buttonToggle"
                   id={"2000s"}
                   size="lg"
@@ -410,9 +405,8 @@ class Home extends React.Component {
                 <ToggleButton
                   id={"2010s"}
                   style={{
-                    backgroundColor: twenty10s ? "#6987bd" : "",
+                    backgroundColor: twenty10s ? "#6987bd" : "#96b2e6",
                   }}
-                  variant="success"
                   className="buttonToggle"
                   size="lg"
                   disabled={disabled && !twenty10s}
@@ -440,9 +434,8 @@ class Home extends React.Component {
           <ToggleButtonGroup type="checkbox" className=" buttonGroup">
             <ToggleButton
               style={{
-                backgroundColor: allTime ? "#6987bd" : "",
+                backgroundColor: allTime ? "#6987bd" : "#96b2e6",
               }}
-              variant="success"
               size="lg"
               id={"All Time"}
               className="buttonToggle"
@@ -458,9 +451,8 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: sixMonths ? "#6987bd" : "",
+                backgroundColor: sixMonths ? "#6987bd" : "#96b2e6",
               }}
-              variant="success"
               id={"Last 6 Months"}
               className="buttonToggle"
               size="lg"
@@ -477,9 +469,8 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: oneMonth ? "#6987bd" : "",
+                backgroundColor: oneMonth ? "#6987bd" : "#96b2e6",
               }}
-              variant="success"
               id={"Last Month"}
               className="buttonToggle"
               size="lg"

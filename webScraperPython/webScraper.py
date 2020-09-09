@@ -1,9 +1,15 @@
 # import requests
+import os
 import requests
 import re
 from bs4 import BeautifulSoup
 import sys
 import csv
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+from dotenv import load_dotenv
+load_dotenv()
+token = os.environ.get("api-token")
 
 
 def getDecadeInfo(decade):
@@ -15,7 +21,8 @@ def getDecadeInfo(decade):
     Returns:
         [finalList]: [list of the top 100 songs]
     """
-    finalList = []
+    finalList = [["Song", "Artists", "Year",
+                  "ArtistRank", "SongsId", "ArtistsId", "albumID"]]
 
     if(decade in ["1950", "1960", "1970", "1980", "1990", "2000"]):
 
@@ -35,6 +42,8 @@ def getDecadeInfo(decade):
 
         topArtists = []
         count = 0
+        spotify = spotipy.Spotify(
+            client_credentials_manager=SpotifyClientCredentials())
 
         for song in songTable[1].findAll("tr"):
             if(count != 0):
@@ -53,14 +62,40 @@ def getDecadeInfo(decade):
 
         for i in range(100):
             rank = 101
+            results = spotify.search(
+                q=songs[i] + " " + artists[i], type="track", limit=1)
+            songId = ""
+            artistsId = ""
+            if(len(results['tracks']['items']) > 0):
+                songId = results['tracks']['items'][0]['id']
+                artistsId = ""
+                albumId = results['tracks']['items'][0]['album']['id']
+                for j in range(0, len(results['tracks']['items'][0]['artists'])):
+                    songArtists = results['tracks']['items'][0]['artists'][j]
+                    if len == 1:
+                        artistsId = songArtists['id']
+                    else:
+                        if(j == 0):
+                            artistsId = artistsId + songArtists['id']
+                        else:
+                            artistsId = artistsId + "," + songArtists['id']
+                print(songId)
+                print(artistsId)
+
             if(artists[i] in topArtists):
                 rank = topArtists.index(artists[i]) + 1
-            finalList.append(songs[i] + " - " +
-                             artists[i] + " - " + year[i] + " - " + str(rank))
-
+            finalList.append([songs[i],
+                              artists[i], int(year[i]), rank, songId, artistsId, albumId])
+            with open("dataFiles/" + decade + ".csv", "w", newline='') as csvfile:
+                writer = csv.writer(
+                    csvfile, quoting=csv.QUOTE_NONNUMERIC, delimiter='|')
+                writer.writerows(finalList)
         # get top artists of the decade...
 
     if(decade == "2010"):
+        spotify = spotipy.Spotify(
+            client_credentials_manager=SpotifyClientCredentials())
+
         # CSV TAKE FROM: http://chart2000.com/about.htm
         with open('/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/webScraperPython/files/2010scharts.csv') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
@@ -73,10 +108,34 @@ def getDecadeInfo(decade):
                     artist = row[2].replace("'", "").replace(
                         ",", " &").replace("$", "s")
                     song = re.sub("\((.*?)\)", "", row[3].replace("'", ""))
-                    finalList.append(song + " - " + artist)
+                    results = spotify.search(
+                        q=song + " " + artist, type="track", limit=1)
+                    songId = results['tracks']['items'][0]['id']
+                    # albumId = results['tracks']['items'][0]['aprint(results['tracks']['items'][0])
+                    albumId = results['tracks']['items'][0]['album']['id']
+                    artistsId = ""
+                    for j in range(0, len(results['tracks']['items'][0]['artists'])):
+                        songArtists = results['tracks']['items'][0]['artists'][j]
+                        if len == 1:
+                            artistsId = songArtists['id']
+                        else:
+                            if(j == 0):
+                                artistsId = artistsId + songArtists['id']
+                            else:
+                                artistsId = artistsId + "," + songArtists['id']
+                    print(songId)
+                    print(artistsId)
+
+                    finalList.append(
+                        [song, artist, 0, 101, songId, artistsId, albumId])
                     line_count += 1
                 if(line_count == 101):
-                    break  # only want first 100
+                    break  # only want first 10
+        with open(decade + ".csv", "w", newline='') as csvfile:
+            writer = csv.writer(
+                csvfile, quoting=csv.QUOTE_NONNUMERIC, delimiter='|')
+            writer.writerows(finalList)
+
     return finalList
     '''songTable = soup.find("tbody", {"class": "songlist"})
         for song in songTable.findAll("tr"):
@@ -170,5 +229,6 @@ def getYearInfo(year):
     return finalList'''
 
 
-print(getDecadeInfo(sys.argv[1]))
-# print(getDecadeInfo("2000"))
+# print(getDecadeInfo(sys.argv[1]))
+
+print(getDecadeInfo("2010"))

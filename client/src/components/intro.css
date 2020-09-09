@@ -22,9 +22,11 @@
   margin: auto;
   background-color: #8894b6 !important;
   color: rgb(240, 240, 240) !important;
+  min-height: 100% !important;
 }
 #card2 {
   background-color: #e28497 !important;
+  min-height: 100% !important;
 }
 
 button:focus {

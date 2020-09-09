@@ -39,13 +39,12 @@ exports.addSongToDatabase = async (songObjects, decade, index) => {
     raw: true,
   });
   //console.log(songObjects);
-  let dateArray = songObjects.release.split("-"); //get the date (we only care about year, not exact date)
 
   //console.log(decadeId);
   console.log(songObjects);
   let song = await db.Songs.create({
     name: songObjects.name,
-    yearOfRelease: dateArray[0],
+    yearOfRelease: songObjects.release,
     imageURL: songObjects.image,
     valence: songObjects.valence,
     danceability: songObjects.danceability,
@@ -334,6 +333,19 @@ let getSongDistributionByYear = (decade, year) => {
     //console.log(data);
     //console.log(data.Songs);
     return data.Songs.length;
+  });
+};
+
+exports.deleteSongsFromDB = async (decade) => {
+  console.log("about to delete");
+  id = await getDecadeId(decade);
+  await db.Songs.destroy({
+    where: { decadeId: id },
+  });
+};
+exports.deleteArtistsFromDB = async (decade) => {
+  await db.Artist.destroy({
+    where: {},
   });
 };
 

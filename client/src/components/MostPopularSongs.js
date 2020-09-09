@@ -33,8 +33,7 @@ class MostPopularSongs extends React.Component {
         <Grid item md={12} xs={12}>
           <LargeTitleText text={"Which Songs Stood The Test Of Time?"} />
           Some Songs, are more popular than others, so which of the top 100
-          songs from the {decade}'s and {compareValue} are popular today
-          (August, 2020)?
+          songs from the {decade}'s and {compareValue} are popular today ?
           <br />
           <br />
           <BarChart
