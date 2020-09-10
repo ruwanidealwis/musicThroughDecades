@@ -75,20 +75,35 @@ class Intro extends React.Component {
           </Grid>
           <Grid className="basicInfo" item md={12} xs={12}>
             <br></br>
-            <Typography align="center" color="textPrimary" variant="h5">
-              <strong>
-                FIND OUT HOW DIFFERENT THE MUSIC FROM THESE TWO DECADES WERE...
-              </strong>
-              <Typography align="center" variant="subtitle1">
+            {this.props.user ? (
+              <Typography align="center" color="textPrimary" variant="h5">
                 <strong>
-                  All the information is based on the 100 top songs gathered
-                  from:
-                  <Link target="_blank" href="http://tsort.info/">
-                    {" "}
-                    tsort.info
-                  </Link>
+                  Find Out How Different Was The Music Between These Two
+                  Decades?
                 </strong>
               </Typography>
+            ) : (
+              <Typography align="center" color="textPrimary" variant="h5">
+                <strong>
+                  How Different was Your Music From The Hits of The{" "}
+                  {this.props.decade}?
+                </strong>
+              </Typography>
+            )}
+
+            <Typography align="center" variant="h6">
+              <strong>
+                All the information is based on the 100 top songs/artists
+                gathered from:
+                <Link
+                  className="link"
+                  target="_blank"
+                  href="http://tsort.info/"
+                >
+                  {" "}
+                  tsort.info
+                </Link>
+              </strong>
             </Typography>
 
             <Button

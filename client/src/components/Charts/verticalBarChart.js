@@ -51,8 +51,8 @@ class VerticalBarChart extends React.Component {
         datasets: [
           {
             label: `${this.props.decade}'s`,
-            backgroundColor: "#8894b6",
-            borderColor: "#8894b6",
+            backgroundColor: "#426e86",
+            borderColor: "#426e86",
 
             hoverBackgroundColor: [
               "#9FC195",
@@ -86,8 +86,8 @@ class VerticalBarChart extends React.Component {
           },
           {
             label: `${this.props.compareValue}'s`,
-            backgroundColor: "#E28497",
-            borderColor: "#E28497",
+            backgroundColor: "#f8a055",
+            borderColor: "#f8a055",
 
             hoverBackgroundColor: [
               "#9FC195",

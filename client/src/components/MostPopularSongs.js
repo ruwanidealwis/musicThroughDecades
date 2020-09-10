@@ -11,7 +11,7 @@ import BarChart from "./Charts/barChart";
 class MostPopularSongs extends React.Component {
   constructor(props) {
     super(props);
-    let title = `Most Popular Songs of the ${this.props.compareValue}'s in 2020`;
+    let title = `Most Popular Songs of the ${this.props.compareValue}'s`;
     if (this.props.user) {
       title = `My Most Popular Tracks (of ${this.props.compareValue} )`;
     }
@@ -30,8 +30,8 @@ class MostPopularSongs extends React.Component {
     return (
       <Grid container style={{ margin: "auto" }} spacing={6}>
         <Grid item md={12} xs={12}>
-          <LargeTitleText text={"Which Songs Stood The Test Of Time?"} />
-          Some Songs, are more popular than others, so which of the top 100
+          <LargeTitleText text={"Which Songs  Stood The Test of Time?"} />
+          Some songs were so good that they are still iconic today! So which
           songs from the {decade}'s and {compareValue} are popular today ?
           <br />
           <br />
@@ -44,7 +44,7 @@ class MostPopularSongs extends React.Component {
           />
         </Grid>
         <Grid item md={6} xs={12}>
-          <TitleText text={`Most Popular Songs of the ${decade}'s in 2020`} />
+          <TitleText text={`Most Popular Songs of the ${decade}'s`} />
           <TopTwentySongs
             data={this.state.decadeData.mostPopular}
             popularity={true}

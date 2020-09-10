@@ -103,7 +103,7 @@ class UserReccomendations extends React.Component {
               <Typography variant="body1">
                 Checkout your new{" "}
                 <Link
-                  className="playlistLink"
+                  className="link"
                   target="_blank"
                   href={this.state.playlistURL}
                 >

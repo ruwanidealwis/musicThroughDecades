@@ -10,6 +10,7 @@ const fs = require("fs");
 /** @global full array with relevant info of top songs for decade */ var fullInfoHitArray = []; //this array contains all the information on the song (audio features etc)
 /** @global spotify id's of songs*/ var songIdArray = []; //spotify id's of the song, enabling to get audio information
 /** @global spotify id's of songs*/ var albumIdArray = []; //spotify id's of the song, enabling to get audio information
+/** @global spotify id's of songs*/ var topArtistIdArray = []; //spotify id's of the song, enabling to get audio information
 /** @global spotify id's of songs*/ var artistsIdArray = []; //spotify id's of the song, enabling to get audio information
 /** @global user top hits for specific range*/ var myTopHits = []; //spotify id's of the song, enabling to get audio information
 /** @global spotify web api wrapper*/ var spotifyApi; //create an instance of webAPI
@@ -59,15 +60,28 @@ let getReadChoice = (comparator) => {
  */
 
 let getCSVData = (decade) => {
-  const file = fs.createReadStream(`dataFiles/${decade}.csv`);
-  console.log(file);
+  var file = fs.createReadStream(`dataFiles/${decade}.csv`);
   Papa.parse(file, {
     dynamicTyping: true,
     complete: function (results) {
+      console.log(results.data);
       top100Hits = formatData(results.data);
       console.log(top100Hits);
     },
   });
+
+  file = fs.createReadStream(`dataFiles/${decade}Artists.csv`);
+  Papa.parse(file, {
+    delimiter: "|",
+    complete: function (results) {
+      console.log("hello");
+      console.log(results.data);
+      for (const artist of results.data) {
+        topArtistIdArray.push(artist[1]);
+      }
+    },
+  });
+
   /*return new Promise(function (success, nosuccess) {
 >>>>>>> Stashed changes
     let options = {
@@ -140,8 +154,8 @@ let formatData = (data) => {
 
     hit[5].split(",").forEach((id) => artistsIdArray.push(id));
 
-    console.log("artistsId");
-    console.log(artistsIdArray);
+    //console.log("artistsId");
+    // console.log(artistsIdArray);
     songIdArray.push(hit[4]);
     albumIdArray.push(hit[6]);
     console.log(hit[5]);
@@ -217,7 +231,7 @@ var getArtistInfo = async (ids) => {
         let obj = {
           name: artistObject.name,
           genres: artistObject.genres,
-          imageURL: image,
+          image: image,
         };
         artistArray.push(obj);
         index++;
@@ -636,6 +650,7 @@ exports.getMusicInformation = async (req, decade) => {
     artistsIdArray = [];
     songIdArray = [];
     albumIdArray = [];
+    topArtistIdArray = [];
   }
   console.log("getting csv");
   console.log(decade);
@@ -662,12 +677,18 @@ exports.getMusicInformation = async (req, decade) => {
   }
 
   await getSongInformation(decade);
+
   let data = await databaseTable.getDecadeStatistics(decade);
+  if (decade !== "2010") {
+    data["topArtists"] = await getArtistInfo(topArtistIdArray);
+  }
+
   top100Hits = [];
   fullInfoHitArray = [];
   artistsIdArray = [];
   songIdArray = [];
   albumIdArray = [];
+  topArtistIdArray = [];
 
   return data;
   /*return getCSVData(req)

@@ -39,7 +39,7 @@ class Home extends React.Component {
       firstValue: true,
       userPicked: false,
       fetching: false,
-      picked: ["_______", "______"],
+      picked: ["____________", "___________"],
     };
     this.needsUser = this.needsUser.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -245,13 +245,13 @@ class Home extends React.Component {
       console.log();
       this.state.picked[0] === event.parentNode.id
         ? this.setState({
-            picked: ["_______", this.state.picked[1]],
+            picked: ["____________", this.state.picked[1]],
             needsAuthorization: needUser
               ? false
               : this.state.needsAuthorization,
           })
         : this.setState({
-            picked: [this.state.picked[0], "_______"],
+            picked: [this.state.picked[0], "____________"],
             needsAuthorization: needUser
               ? false
               : this.state.needsAuthorization,
@@ -307,7 +307,7 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: fifties ? "#6987bd" : "#96b2e6",
+                    backgroundColor: fifties ? "#f8a055" : "#426e86",
                   }}
                   id={"1950s"}
                   className="buttonToggle"
@@ -322,7 +322,7 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: sixties ? "#6987bd" : "#96b2e6",
+                    backgroundColor: sixties ? "#f8a055" : "#426e86",
                   }}
                   id={"1960s"}
                   className="buttonToggle"
@@ -337,7 +337,7 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: seventies ? "#6987bd" : "#96b2e6",
+                    backgroundColor: seventies ? "#f8a055" : "#426e86",
                   }}
                   id={"1970s"}
                   className="buttonToggle"
@@ -351,7 +351,7 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: eighties ? "#6987bd" : "#96b2e6",
+                    backgroundColor: eighties ? "#f8a055" : "#426e86",
                   }} //={this.style(eighties)}
                   id={"1980s"}
                   className="buttonToggle"
@@ -375,7 +375,7 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: nineties ? "#6987bd" : "#96b2e6",
+                    backgroundColor: nineties ? "#f8a055" : "#426e86",
                   }}
                   id={"1990s"}
                   className="buttonToggle"
@@ -389,7 +389,7 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: twothousands ? "#6987bd" : "#96b2e6",
+                    backgroundColor: twothousands ? "#f8a055" : "#426e86",
                   }}
                   className="buttonToggle"
                   id={"2000s"}
@@ -405,7 +405,7 @@ class Home extends React.Component {
                 <ToggleButton
                   id={"2010s"}
                   style={{
-                    backgroundColor: twenty10s ? "#6987bd" : "#96b2e6",
+                    backgroundColor: twenty10s ? "#f8a055" : "#426e86",
                   }}
                   className="buttonToggle"
                   size="lg"
@@ -434,7 +434,7 @@ class Home extends React.Component {
           <ToggleButtonGroup type="checkbox" className=" buttonGroup">
             <ToggleButton
               style={{
-                backgroundColor: allTime ? "#6987bd" : "#96b2e6",
+                backgroundColor: allTime ? "#f8a055" : "#426e86",
               }}
               size="lg"
               id={"All Time"}
@@ -451,7 +451,7 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: sixMonths ? "#6987bd" : "#96b2e6",
+                backgroundColor: sixMonths ? "#f8a055" : "#426e86",
               }}
               id={"Last 6 Months"}
               className="buttonToggle"
@@ -469,7 +469,7 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: oneMonth ? "#6987bd" : "#96b2e6",
+                backgroundColor: oneMonth ? "#f8a055" : "#426e86",
               }}
               id={"Last Month"}
               className="buttonToggle"
@@ -486,7 +486,9 @@ class Home extends React.Component {
           </ToggleButtonGroup>
         </div>
         <br></br>
-        {this.state.firstValue ? null : (
+        {this.state.firstValue ? (
+          <h4>___________ vs ___________</h4>
+        ) : (
           <h4>
             {this.state.picked[0]} vs {this.state.picked[1]}{" "}
           </h4>

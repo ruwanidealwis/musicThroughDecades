@@ -75,7 +75,7 @@ class TopArtists extends React.Component {
       <Grid container spacing={6} style={{ margin: "auto" }}>
         {" "}
         <Grid item md={12} xs={12}>
-          <LargeTitleText text={"Which Artists Ruled The Decade?"} />
+          <LargeTitleText text={"Which Artists  Recieved The Most Love?"} />
         </Grid>
         <Grid item md={6} sm={12} xs={12}>
           <TitleText text={`Top 10 Artists of the ${decade}'s`} />

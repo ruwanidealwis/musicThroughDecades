@@ -31,9 +31,10 @@
 a.MuiTypography-colorTextSecondary {
   color: #2e8b57;
 }
-.playlistLink {
+.link {
   color: #1db954 !important;
 }
+
 .allInfo {
   width: 100%;
 }
@@ -47,10 +48,11 @@ a.MuiTypography-colorTextSecondary {
 }
 .typgoraphyText {
   padding-left: 0%;
+  color: rgb(70, 70, 70);
 }
 .divider {
   height: 5px !important;
-  background-color: rgb(53, 52, 52) !important;
+  background-color: rgb(70, 70, 70) !important;
   margin-right: 30% !important;
   margin-bottom: 0 !important;
   padding-left: 0%;

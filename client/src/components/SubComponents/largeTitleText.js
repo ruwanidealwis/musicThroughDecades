@@ -3,7 +3,7 @@ import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 
 const textStyle = {
-  color: "#878DA1",
+  color: "#9489A8",
   padding: "1.5%",
 };
 
@@ -11,7 +11,7 @@ const dividerStyle = {
   marginLeft: "17%",
   marginRight: "17%",
   padding: "0.3%",
-  backgroundColor: "#878DA1",
+  backgroundColor: "#9489A8",
 };
 class LargeTitleText extends React.Component {
   constructor(props) {

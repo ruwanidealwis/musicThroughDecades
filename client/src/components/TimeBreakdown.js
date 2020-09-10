@@ -38,13 +38,14 @@ class TimeBreakdown extends React.Component {
         {this.state.user ? (
           <Grid container spacing={1}>
             <Grid item md={12} xs={12}>
-              <LargeTitleText text={"Which Years Had the Most Influence?"} />
+              <LargeTitleText text={"Which Years Were The Most Influential?"} />
               <Typography variant="h6">
-                Not All Years are equal, so which were the most influential in
-                determining the top 100...
+                Not all years are equally influentical, so which ones made the
+                biggest mark?
+                <br />
               </Typography>
             </Grid>
-            <Grid item md={9} xs={12} style={{ marginLeft: "2.5%" }}>
+            <Grid item md={9} xs={12} style={{ marginLeft: "1.1%" }}>
               <VerticalBarChart
                 decadeData={this.state.decadeData.distributionByYear}
                 decade={decade}

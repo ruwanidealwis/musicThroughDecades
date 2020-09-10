@@ -190,7 +190,7 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
       attributes: ["id"],
       where: {
         name: artist.name,
-        imageURL: artist.imageURL,
+        imageURL: artist.image,
       }, //TODO CHANGE THIS}
       raw: true,
     });
@@ -201,7 +201,7 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
       let newArtistId = await db.Artist.create({
         //where: { name: artist.name, imageURL: artist.imageURL },
         name: artist.name,
-        imageURL: artist.imageURL,
+        imageURL: artist.image,
         genres: artist.genres,
         temp: true,
       });
@@ -252,7 +252,7 @@ let addPermanantArtists = async (artist, decadeId, song, songObj) => {
     include: [{ model: db.Decade }],
     where: {
       name: artist.name,
-      imageURL: artist.imageURL,
+      imageURL: artist.image,
     }, //TODO CHANGE THIS}
     raw: true,
   });
@@ -261,7 +261,7 @@ let addPermanantArtists = async (artist, decadeId, song, songObj) => {
     let artistId = await db.Artist.create({
       //where: { name: artist.name, imageURL: artist.imageURL },
       name: artist.name,
-      imageURL: artist.imageURL,
+      imageURL: artist.image,
       genres: artist.genres, //TODO CHANGE THIS
     });
     //create an association with decade
@@ -283,7 +283,7 @@ let addPermanantArtists = async (artist, decadeId, song, songObj) => {
     //determine if the artist is associated with the current decade being searched
     let currentDecades = await db.Artist.findOne({
       attributes: ["id"],
-      where: { name: artist.name, imageURL: artist.imageURL },
+      where: { name: artist.name, imageURL: artist.image },
       include: [{ model: db.Decade, where: { id: decadeId } }],
       raw: true,
     });

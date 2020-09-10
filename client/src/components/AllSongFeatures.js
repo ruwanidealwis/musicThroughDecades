@@ -30,7 +30,7 @@ class AllSongFeatures extends React.Component {
     return (
       <Grid container spacing={4}>
         <Grid item md={12} xs={12}>
-          <LargeTitleText text={"What Did The Music Sound Like?"} />
+          <LargeTitleText text={"So, What Did The Music Sound Like?"} />
         </Grid>
 
         <Grid item md={12} xs={12}>
@@ -61,7 +61,7 @@ class AllSongFeatures extends React.Component {
             word={"Va•lence"}
             searchKey={"valence"}
             type={"noun"}
-            defention={`A measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track.`}
+            defention={`A measure from 0.0 to 100 describing the musical positiveness conveyed by a track.`}
             explanation={`Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry). `}
             user={this.state.user}
             moreInfo={
@@ -79,7 +79,7 @@ class AllSongFeatures extends React.Component {
             word={"En•er•gy"}
             type={"noun"}
             searchKey={"energy"}
-            defention={`	Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity.`}
+            defention={`	Energy is a measure from 0.0 to 100 and represents a perceptual measure of intensity and activity.`}
             explanation={`Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale.`}
             user={this.state.user}
             moreInfo={
@@ -98,7 +98,7 @@ class AllSongFeatures extends React.Component {
             type={"noun"}
             searchKey={"danceability"}
             defention={`	Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. `}
-            explanation={`TA value of 0.0 is least danceable and 1.0 is most danceable. `}
+            explanation={`TA value of 0.0 is least danceable and 100 is most danceable. `}
             user={this.state.user}
             moreInfo={
               "https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/"
@@ -154,7 +154,7 @@ class AllSongFeatures extends React.Component {
             type={"noun"}
             searchKey={"acousticness"}
             defention={`(of popular music or musical instruments) not having electrical amplification.`}
-            explanation={`1.0 represents high confidence the track is acoustic.   `}
+            explanation={`100 represents high confidence the track is acoustic.   `}
             user={this.state.user}
             moreInfo={
               "https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/"
@@ -172,7 +172,7 @@ class AllSongFeatures extends React.Component {
             type={"noun"}
             searchKey={"instrumentalness"}
             defention={`	Predicts whether a track contains no vocals. “Ooh” and “aah” sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly “vocal”. `}
-            explanation={`The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content.`}
+            explanation={`The closer the instrumentalness value is to 100, the greater likelihood the track contains no vocal content.`}
             max={50}
             user={this.state.user}
             moreInfo={

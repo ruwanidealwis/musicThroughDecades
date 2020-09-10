@@ -9,7 +9,6 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from dotenv import load_dotenv
 load_dotenv()
-token = os.environ.get("api-token")
 
 
 def getDecadeInfo(decade):
@@ -229,6 +228,61 @@ def getYearInfo(year):
     return finalList'''
 
 
-# print(getDecadeInfo(sys.argv[1]))
+def getArtistInfo(decade):
+    """[gets top artists of the specified decade]
 
-print(getDecadeInfo("2010"))
+    Args:
+        decade ([stirng]): [specified decade]
+
+    Returns:
+        [finalList]: [list of the top 100 songs]
+    """
+    finalList = []
+
+    if(decade in ["1950", "1960", "1970", "1980", "1990", "2000"]):
+
+        page = requests.get(
+            "http://tsort.info/music/ds" + decade + ".htm")  # data from website...
+
+        src = page.content
+        soup = BeautifulSoup(src, 'html.parser')
+        songTable = soup.findAll("table", {"class": "linkitem"})
+        count = 0
+        topArtists = []
+        spotify = spotipy.Spotify(
+            client_credentials_manager=SpotifyClientCredentials())
+        for song in songTable[1].findAll("tr"):
+            if(count != 0):
+                songRow = song.find("td")
+                if(songRow != None):
+                    text = songRow.find("a")
+                    id = ""
+                    result = spotify.search(q=text, type="artist", limit=1)
+                    if(len(result['artists']['items']) > 0):
+
+                        id = result['artists']['items'][0]['id']
+
+                    print(id)
+
+                topArtists.append([text.get_text().replace(
+                    "'", "").replace("$", "s"), id])
+            count += 1
+            if(count > 10):
+                break
+
+        with open("dataFiles/" + decade + "Artists.csv", "w", newline='') as csvfile:
+            writer = csv.writer(
+                csvfile, quoting=csv.QUOTE_NONNUMERIC, delimiter='|')
+            writer.writerows(topArtists)
+
+        print(topArtists)
+        # print(getDecadeInfo(sys.argv[1]))
+
+
+print(getArtistInfo("1950"))
+print(getArtistInfo("1960"))
+
+print(getArtistInfo("1970"))
+print(getArtistInfo("1980"))
+print(getArtistInfo("1990"))
+print(getArtistInfo("2000"))

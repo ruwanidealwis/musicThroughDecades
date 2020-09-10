@@ -27,7 +27,7 @@ class GenreBreakdown extends React.Component {
     return (
       <Grid container style={{ margin: "auto" }} spacing={4}>
         <Grid item md={12} xs={12}>
-          <LargeTitleText text={"Which Genres Defined The Decade?"} />
+          <LargeTitleText text={"Which Genres Thrived?"} />
         </Grid>
         <Grid item md={6} xs={12}>
           <PieChart

@@ -30,7 +30,7 @@ class TopSongs extends React.Component {
     return (
       <Grid container spacing={6} style={{ margin: "auto" }}>
         <Grid item md={12} xs={12}>
-          <LargeTitleText text={"Which Songs Had The Most Love?"} />
+          <LargeTitleText text={"Which Songs Made The Biggest Mark?"} />
         </Grid>
         <Grid item md={6} xs={12}>
           <TitleText text={`Top 10 Songs of the ${decade}'s`} />
