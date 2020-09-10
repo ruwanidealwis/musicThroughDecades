@@ -8,7 +8,7 @@ import Grid from "@material-ui/core/Grid";
 import PlayArrowIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
 import IconButton from "@material-ui/core/IconButton";
-import "./top20.css";
+import "../styles/top20.css";
 import SongComponent from "./songComponent";
 
 class TopTwentySongs extends React.Component {

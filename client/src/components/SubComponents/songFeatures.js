@@ -1,5 +1,5 @@
 import React from "react";
-import LineChart from "./lineChart";
+import LineChart from "../Charts/lineChart";
 import DictionaryCard from "./dictionaryCard";
 import TopThreeSongs from "./topThreeSongs";
 import Grid from "@material-ui/core/Grid";

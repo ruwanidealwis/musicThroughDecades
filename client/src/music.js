@@ -12,7 +12,7 @@ import Grid from "@material-ui/core/Grid";
 
 import AllSongFeatures from "./components/AllSongFeatures";
 import UserReccomendations from "./components/UserReccomendations";
-import TopSongs from "./components/topSongs";
+import TopSongs from "./components/TopSongs";
 import MostPopularSongs from "./components/MostPopularSongs";
 import TimeBreakdown from "./components/TimeBreakdown";
 import GenreBreakdown from "./components/GenreBreakdown";

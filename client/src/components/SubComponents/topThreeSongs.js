@@ -6,7 +6,7 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
 
-import "./top20.css";
+import "../styles/top20.css";
 import SongComponent from "./songComponent";
 
 class TopThreeSongs extends React.Component {

@@ -1,13 +1,13 @@
 import React from "react";
 
-import LargeTitleText from "./largeTitleText";
+import LargeTitleText from "./SubComponents/largeTitleText";
 
 import { Grid } from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
-import TitleText from "./titleText";
+import TitleText from "./SubComponents/titleText";
 import Switch from "@material-ui/core/Switch";
-import TopTwentyArtists from "./top20Artists";
+import TopTwentyArtists from "./SubComponents/top20Artists";
 class TopArtists extends React.Component {
   constructor(props) {
     super(props);

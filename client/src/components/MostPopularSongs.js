@@ -2,12 +2,11 @@ import React from "react";
 
 import { Grid } from "@material-ui/core";
 
-import LargeTitleText from "./largeTitleText";
-import PieChart from "./pieChart";
+import LargeTitleText from "./SubComponents/largeTitleText";
 
-import TopTwentySongs from "./top20Songs";
-import TitleText from "./titleText";
-import BarChart from "./barChart";
+import TopTwentySongs from "./SubComponents/top20Songs";
+import TitleText from "./SubComponents/titleText";
+import BarChart from "./Charts/barChart";
 
 class MostPopularSongs extends React.Component {
   constructor(props) {

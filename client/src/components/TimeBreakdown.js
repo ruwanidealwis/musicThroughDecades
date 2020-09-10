@@ -1,12 +1,12 @@
 import React from "react";
 
-import LargeTitleText from "./largeTitleText";
+import LargeTitleText from "./SubComponents/largeTitleText";
 
 import { Grid, Typography } from "@material-ui/core";
 
-import VerticalBarChart from "./verticalBarChart";
-import FeatureChipBadges from "./featureChipBadges";
-import PieChart from "./pieChart";
+import VerticalBarChart from "./Charts/verticalBarChart";
+import FeatureChipBadges from "./SubComponents/featureChipBadges";
+import PieChart from "./Charts/pieChart";
 class TimeBreakdown extends React.Component {
   constructor(props) {
     super(props);

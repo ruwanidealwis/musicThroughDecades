@@ -1,11 +1,11 @@
 import React from "react";
 
-import LargeTitleText from "./largeTitleText";
+import LargeTitleText from "./SubComponents/largeTitleText";
 
 import { Grid, Button } from "@material-ui/core";
 
-import TopTwentySongs from "./top20Songs";
-import TitleText from "./titleText";
+import TopTwentySongs from "./SubComponents/top20Songs";
+import TitleText from "./SubComponents/titleText";
 class TopSongs extends React.Component {
   constructor(props) {
     super(props);

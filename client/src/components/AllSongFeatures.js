@@ -1,12 +1,12 @@
 import React from "react";
-import SongFeatures from "./songFeatures";
+import SongFeatures from "./SubComponents/songFeatures";
 import { Grid } from "@material-ui/core";
-import ChipBadges from "./chipBadges";
-import OverallBarChart from "./overallBarChart";
-import LargeTitleText from "./largeTitleText";
-import PieChart from "./pieChart";
-import SubTitleText from "./subTitleText";
-import ModeDescription from "./modeDescription";
+import ChipBadges from "./SubComponents/chipBadges";
+import OverallBarChart from "./Charts/overallBarChart";
+import LargeTitleText from "./SubComponents/largeTitleText";
+import PieChart from "./Charts/pieChart";
+import SubTitleText from "./SubComponents/subTitleText";
+import ModeDescription from "./SubComponents/modeDescription";
 
 class AllSongFeatures extends React.Component {
   constructor(props) {

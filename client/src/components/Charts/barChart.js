@@ -2,7 +2,7 @@ import { HorizontalBar } from "react-chartjs-2";
 import { defaults } from "react-chartjs-2";
 import React from "react";
 import "chartjs-plugin-deferred";
-import TitleText from "./titleText";
+import TitleText from "../SubComponents/titleText";
 import Typography from "@material-ui/core/Typography";
 
 defaults.global.defaultFontColor = "black";

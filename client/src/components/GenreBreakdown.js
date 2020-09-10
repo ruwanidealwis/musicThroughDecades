@@ -1,10 +1,10 @@
 import React from "react";
 
-import LargeTitleText from "./largeTitleText";
+import LargeTitleText from "./SubComponents/largeTitleText";
 
 import Grid from "@material-ui/core/Grid";
 
-import PieChart from "./pieChart";
+import PieChart from "./Charts/pieChart";
 class GenreBreakdown extends React.Component {
   constructor(props) {
     super(props);

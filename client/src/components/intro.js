@@ -6,8 +6,7 @@ import Link from "@material-ui/core/Link";
 import Button from "@material-ui/core/Button";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import { motion } from "framer-motion";
-import "./intro.css";
+import "./styles/intro.css";
 var Scroll = require("react-scroll");
 var scroller = Scroll.scroller;
 class Intro extends React.Component {

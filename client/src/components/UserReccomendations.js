@@ -1,8 +1,8 @@
 import { Button, Grid, Typography } from "@material-ui/core";
 import PlaylistAddIcon from "@material-ui/icons/PlaylistAdd";
 import React from "react";
-import LargeTitleText from "./largeTitleText";
-import TopTwentySongs from "./top20Songs";
+import LargeTitleText from "./SubComponents/largeTitleText";
+import TopTwentySongs from "./SubComponents/top20Songs";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
