@@ -30,9 +30,9 @@ router.get("/", (req, res) => {
 });
 
 router.get("/music/createPlaylist", (req, res) => {
-  console.log("hello");
+  //console.log("hello");
   spotifyController.createPlaylist(req).then((url) => {
-    console.log(url);
+    //console.log(url);
     res.status(200).send({ url: url });
     (err) => {
       res.send(400).send({ error: "Could not Create Playlist" });
@@ -41,10 +41,10 @@ router.get("/music/createPlaylist", (req, res) => {
 });
 
 router.get("/music", (req, res) => {
-  console.log(req.session.userTopRead);
-  console.log(req.session.id);
-  console.log(req.session.type);
-  console.log(req.session.userId);
+  //console.log(req.session.userTopRead);
+  //console.log(req.session.id);
+  //console.log(req.session.type);
+  //console.log(req.session.userId);
 
   //logic from :https://github.com/finallyayo/music-history/blob/master/server.js
   //res.redirect(`${clientURL}/?authorized=true`);
@@ -55,13 +55,13 @@ router.get("/music", (req, res) => {
 });
 
 router.get("/login", (req, res) => {
-  console.log("logging in");
+  //console.log("logging in");
   timeRange = req.query.timeRange;
   let url = spotifyController.getAuthorizationURL(req);
   res.status(200).send({ url: url }); //now redirects user to authorization... (after successful should return to callback...)
 });
 router.get("/callback", async (req, res) => {
-  console.log("redirecting to: " + `${clientURL}/?authorized=true`);
+  //console.log("redirecting to: " + `${clientURL}/?authorized=true`);
 
   res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
 });
@@ -74,7 +74,7 @@ router.get("/compare/:comparators", async (req, res) => {
     let validated = validateValues(comparators[0]);
     if (validated === true) {
       req.session.decade = comparators[0];
-      console.log(req.session.decade);
+      //console.log(req.session.decade);
       req.session.decadeStats = await spotifyController.getMusicInformation(
         req,
         req.session.decade
@@ -98,40 +98,41 @@ router.get("/compare/:comparators", async (req, res) => {
     let validated = validateValues(comparators[0]);
     if (validated === true) {
       req.session.type = "decade";
+
+      let validateSecondComparator = validateValues(comparators[1]);
+      if (validateSecondComparator == true) {
+        //get all the data...
+        req.session.decadeStats = await spotifyController.getMusicInformation(
+          req,
+          req.session.decade
+        );
+
+        await databaseTable.deleteSongsFromDB(req.session.decade);
+        await databaseTable.deleteArtistsFromDB(req.session.decade);
+        req.session.decade2 = comparators[1];
+        req.session.comparator = await spotifyController.getMusicInformation(
+          req,
+          req.session.decade2
+        );
+
+        await databaseTable.deleteSongsFromDB(req.session.decade2);
+        await databaseTable.deleteArtistsFromDB(req.session.decade2);
+
+        res.status(200).redirect("/music");
+      } else {
+        res
+          .status(400)
+          .send({ error: "invalid value entered for 2nd comparator" });
+      }
     } else {
       res
         .status(400)
         .send({ error: "invalid value entered for 1st comparator" });
     }
-    let validateSecondComparator = validateValues(comparators[1]);
-    if (validateSecondComparator == true) {
-      //get all the data...
-      req.session.decadeStats = await spotifyController.getMusicInformation(
-        req,
-        req.session.decade
-      );
-
-      await databaseTable.deleteSongsFromDB(req.session.decade);
-      await databaseTable.deleteArtistsFromDB(req.session.decade);
-      req.session.decade2 = comparators[1];
-      req.session.comparator = await spotifyController.getMusicInformation(
-        req,
-        req.session.decade2
-      );
-
-      await databaseTable.deleteSongsFromDB(req.session.decade2);
-      await databaseTable.deleteArtistsFromDB(req.session.decade2);
-
-      res.status(200).redirect("/music");
-    } else {
-      res
-        .status(400)
-        .send({ error: "invalid value entered for 2nd comparator" });
-    }
   }
 
   /*let validated = validateValues(comparators[0]);
-  console.log(validated);
+  //console.log(validated);
   if (validated === true) {
     req.session.decade = comparators[0];
 
@@ -179,8 +180,8 @@ router.get("*", (req, res) => {
   //taken from: https://stackoverflow.com/questions/16750524/remove-last-directory-in-url
   let rootPath = __dirname.split(path.sep);
   rootPath.pop();
-  console.log(req.path);
-  console.log("hi");
+  //console.log(req.path);
+  //console.log("hi");
   //res.sendFile(path.join(rootPath.join(path.sep) + "/client/build/index.html"));
 });
 
