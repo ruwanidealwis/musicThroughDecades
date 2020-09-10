@@ -11,7 +11,7 @@ import ModeDescription from "./SubComponents/modeDescription";
 class AllSongFeatures extends React.Component {
   constructor(props) {
     super(props);
-    let modeTitle = `Breakdown of the Mode of Songs in the ${this.props.compareValue}'s`;
+    let modeTitle = `Breakdown of the Mode of The Top Songs in the ${this.props.compareValue}'s`;
     if (this.props.user) {
       modeTitle = `Breakdown of the Mode of My Top Songs (${this.props.compareValue})`;
     }
