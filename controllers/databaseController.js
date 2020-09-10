@@ -38,15 +38,6 @@ exports.addSongToDatabase = async (songObjects, decade, index) => {
     where: { name: decade },
     raw: true,
   });
-<<<<<<< Updated upstream
-  //console.log(songObjects);
-<<<<<<< Updated upstream
-=======
-  let dateArray = songObjects.release.split("-"); //get the date (we only care about year, not exact date)
-=======
-  ////console.log(songObjects);
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 
   ////console.log(decadeId);
   //console.log(songObjects);
@@ -344,15 +335,7 @@ let getSongDistributionByYear = (decade, year) => {
   });
 };
 
-<<<<<<< Updated upstream
 exports.deleteSongsFromDB = async (decade) => {
-  console.log("about to delete");
-=======
-<<<<<<< Updated upstream
-=======
-exports.deleteSongsFromDB = async (decade) => {
-  //console.log("about to delete");
->>>>>>> Stashed changes
   id = await getDecadeId(decade);
   await db.Songs.destroy({
     where: { decadeId: id },
@@ -364,10 +347,6 @@ exports.deleteArtistsFromDB = async (decade) => {
   });
 };
 
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 /********************************* METHODS FOR QUERYING DATABASE */
 exports.getAmount = async (decade) => {
   let decadeInfo = await db.Decade.findOne({

@@ -58,30 +58,17 @@ let getReadChoice = (comparator) => {
  * @return {Promise} returns the data (or error)
  */
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-let runPy = (req) => {
-  return new Promise(function (success, nosuccess) {
-=======
->>>>>>> Stashed changes
 let getCSVData = (decade) => {
   const file = fs.createReadStream(`dataFiles/${decade}.csv`);
+  console.log(file);
   Papa.parse(file, {
     dynamicTyping: true,
     complete: function (results) {
       top100Hits = formatData(results.data);
-<<<<<<< Updated upstream
       console.log(top100Hits);
     },
   });
   /*return new Promise(function (success, nosuccess) {
-=======
-      //console.log(top100Hits);
-    },
-  });
-  /*return new Promise(function (success, nosuccess) {
->>>>>>> Stashed changes
 >>>>>>> Stashed changes
     let options = {
       mode: "text",
@@ -142,11 +129,6 @@ authorizeApp = async () => {
  * @return  {Array} Returns object array with information extracted (track, artists, year)
  */
 let formatData = (data) => {
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
   let allHitsArray = [];
   for (const hit of data) {
     allHitsArray.push({
@@ -157,7 +139,7 @@ let formatData = (data) => {
     }); //because of the way the website is structured (this may not be exactly correc t)
 
     hit[5].split(",").forEach((id) => artistsIdArray.push(id));
-<<<<<<< Updated upstream
+
     console.log("artistsId");
     console.log(artistsIdArray);
     songIdArray.push(hit[4]);
@@ -211,17 +193,9 @@ let formatData = (data) => {
     }); //because of the way the website is structured (this may not be exactly correc t)
   });
 
-<<<<<<< Updated upstream
-  console.log(allHitsArray);
-<<<<<<< Updated upstream
-  return allHitsArray;*/
-=======
-  return allHitsArray;
-=======
-  //console.log(allHitsArray);
-  return allHitsArray;*/
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
+};
+*/
 };
 /**
  * Gets information about the artists (name, genres, image)
@@ -273,13 +247,7 @@ var getArtistInfo = async (ids) => {
  * @param {object} trackObject - Object containing the name of the song, the artist, along with the year it was released
  * @return {Promise} that resolves to array with data from spotify API, or the error generated when quereying the API
  */
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-var getBasicSongInfo = async (trackObject) => {
-  return spotifyApi
-=======
->>>>>>> Stashed changes
+
 var getBasicSongInfo = async (songIdArray, startIndex) => {
   let returnData = [];
   let i = startIndex;
@@ -300,19 +268,12 @@ var getBasicSongInfo = async (songIdArray, startIndex) => {
         object.release = parseInt(track.album.release_date.split("-")[0]);
       }
       returnData.push(object);
-<<<<<<< Updated upstream
-      console.log(object.artists);
-      console.log(object.release);
-      console.log(object.name);
-      i = i + 1;
-      console.log(i);
-=======
+
       //console.log(object.artists);
       //console.log(object.release);
       //console.log(object.name);
       i = i + 1;
       //console.log(i);
->>>>>>> Stashed changes
     }
     return returnData;
   });
@@ -395,22 +356,15 @@ var getBasicSongInfo = async (songIdArray, startIndex) => {
 };
 
 let getAlbumInfo = async function (partialAlbumIds) {
-  spotifyApi.getAlbums(partialAlbumIds).then((data) => {
-<<<<<<< Updated upstream
-    console.log(data.body);
-  });
-=======
-    //console.log(data.body);
-  });
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+  spotifyApi.getAlbums(partialAlbumIds).then((data) => {});
+
+  //console.log(data.body);
 };
 
 /**
  * @summary traverses the list of all top 100 songs to get the basic info for the track using the spotify API
  * @return {Array} Array of objects with full info about the audio features
  */
-<<<<<<< Updated upstream
 let getSongInformation = async function (decade) {
   let arr = [0, 50, 100, 150, 200];
   let artistInfo = [];
@@ -477,77 +431,9 @@ let getSongInformation = async function () {
     //await genreInformation(trackObject); //gets genre of ALBUM!
   } //waits till promise is resolved (this maintains order)
   console.log("done");
-  //console.log(fullInfoHitArray);
-<<<<<<< Updated upstream
-  return fullInfoHitArray;*/
-=======
+  //console.log(fullInfoHitArray);*/
+
   return fullInfoHitArray;
-=======
-let getSongInformation = async function (decade) {
-  let arr = [0, 50, 100, 150, 200];
-  let artistInfo = [];
-  for (const index of arr) {
-    if (index > artistsIdArray.length) {
-      break;
-    }
-    let end = index + 50;
-    if (end > artistsIdArray.length) {
-      end = index + (artistsIdArray.length % 50);
-    }
-    let partialArtistIds = artistsIdArray.slice(index, end);
-    //console.log(partialArtistIds);
-    artistInfo = artistInfo.concat(await getArtistInfo(partialArtistIds));
-  }
-  let firstHalf = songIdArray.slice(0, 50);
-  let secondHalf = songIdArray.slice(50, 100);
-  // //console.log(secondHalf);
-  let firstHalfData = await getBasicSongInfo(firstHalf, 0);
-  let secondHalfData = await getBasicSongInfo(secondHalf, 50);
-  let audioData = await getAudioInfo(3); //await until
-  let fullInfoHitArray = firstHalfData.concat(secondHalfData);
-  let artistIndex = 0;
-  for (let i = 0; i < 100; i++) {
-    fullInfoHitArray[i].danceability = audioData[i].danceability;
-    fullInfoHitArray[i].energy = audioData[i].energy;
-    fullInfoHitArray[i].acousticness = audioData[i].acousticness;
-    fullInfoHitArray[i].key = audioData[i].key;
-    fullInfoHitArray[i].mode = audioData[i].mode;
-    fullInfoHitArray[i].valence = audioData[i].valence;
-    fullInfoHitArray[i].speechiness = audioData[i].speechiness;
-    fullInfoHitArray[i].tempo = audioData[i].tempo;
-    fullInfoHitArray[i].instrumentalness = audioData[i].instrumentalness;
-
-    let length = fullInfoHitArray[i].artists; //number of artists per song...
-    let end = artistIndex + length;
-    fullInfoHitArray[i].artists = [];
-    //start from where we left off, and add until we get to length
-    for (let j = artistIndex; j < end; j++) {
-      fullInfoHitArray[i].artists.push(artistInfo[j]);
-      /* //console.log(fullInfoHitArray[i].name);
-      //console.log(artistInfo[j]);
-      //console.log("start " + artistIndex);
-      //console.log("end " + end);
-      //console.log("full length " + parseInt(artistIndex));
-      //console.log(i);*/
-    }
-
-    artistIndex = end;
-    await databaseTable.addSongToDatabase(fullInfoHitArray[i], decade, i);
-  }
-
-  //console.log(fullInfoHitArray);
-  ////console.log(artistInfo.length);
-  ////console.log(fullInfoHitArray);
-  /*for (const trackObject of top100Hits) {
-    ////console.log(trackObject);
-    await getBasicSongInfo(trackObject);
-    //await genreInformation(trackObject); //gets genre of ALBUM!
-  } //waits till promise is resolved (this maintains order)
-  //console.log("done");
-  ////console.log(fullInfoHitArray);
-  return fullInfoHitArray;*/
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 };
 
 /**
@@ -744,12 +630,6 @@ exports.getMusicInformation = async (req, decade) => {
   //need to check if database has the data...
 
   //need to run python script and get spotify authentication...
-
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-    return runPy(req)
-=======
   if (songIdArray.length != 0) {
     top100Hits = [];
     fullInfoHitArray = [];
@@ -757,7 +637,8 @@ exports.getMusicInformation = async (req, decade) => {
     songIdArray = [];
     albumIdArray = [];
   }
->>>>>>> Stashed changes
+  console.log("getting csv");
+  console.log(decade);
   await getCSVData(decade);
   if (req.session.type === "decade") await authorizeApp();
   else {
@@ -765,25 +646,21 @@ exports.getMusicInformation = async (req, decade) => {
     if (spotifyApi.getRefreshToken() != null) {
       let data = await spotifyApi.refreshAccessToken();
       spotifyApi.setAccessToken(data.body["access_token"]);
-<<<<<<< Updated upstream
+
       console.log("refreshAccessToken");
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
       console.log(data);
-=======
+
       //console.log("refreshAccessToken");
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
       //console.log(data);
->>>>>>> Stashed changes
     } else {
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
     }
   }
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
   await getSongInformation(decade);
   let data = await databaseTable.getDecadeStatistics(decade);
   top100Hits = [];
@@ -872,29 +749,19 @@ exports.getUserListeningHabbits = async (req, res) => {
   } else {
     //console.log(spotifyApi.getRefreshToken());
     if (spotifyApi.getRefreshToken() == null) {
-<<<<<<< Updated upstream
-      /* console.log("got here");
-=======
-<<<<<<< Updated upstream
-      console.log("got here");
->>>>>>> Stashed changes
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
       console.log(spotifyApi);
-<<<<<<< Updated upstream
-      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...*/
-=======
+
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
-=======
+
       /* //console.log("got here");
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
       //console.log(spotifyApi);
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...*/
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     } else {
       let data = await spotifyApi.refreshAccessToken();
       spotifyApi.setAccessToken(data.body["access_token"]);
