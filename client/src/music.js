@@ -194,5 +194,4 @@ export default Music;
                   </Grid>*/
 
 //TODO fix bad information and add decade descrotion
-//TODO make loading and front page nicer
 //TODO make playlist create button nicer

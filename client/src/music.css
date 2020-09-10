@@ -31,7 +31,9 @@
 a.MuiTypography-colorTextSecondary {
   color: #2e8b57;
 }
-
+.playlistLink {
+  color: #1db954 !important;
+}
 .allInfo {
   width: 100%;
 }

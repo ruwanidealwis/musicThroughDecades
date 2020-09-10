@@ -34,6 +34,9 @@ class ModeDescription extends React.Component {
                 and fourth degrees and the seventh and eighth degrees.`}
             explanation={`Major chords are often precieved as happy, bright and/or
                   cheery`}
+            moreInfo={
+              "https://en.wikipedia.org/wiki/Major_and_minor#:~:text=A%20major%20scale%20is%20a,third%20above%20the%20chord's%20root."
+            }
           />
         </Grid>
         <Grid item md={4} xs={12}>
@@ -44,6 +47,9 @@ class ModeDescription extends React.Component {
                 and third degrees, and (usually) the fifth and sixth, and the
                 seventh and eighth.`}
             explanation={` Minor chords are often precieved as sad, dark and/or gloomy`}
+            moreInfo={
+              "https://en.wikipedia.org/wiki/Major_and_minor#:~:text=A%20major%20scale%20is%20a,third%20above%20the%20chord's%20root."
+            }
           />
         </Grid>
         <Grid item md={2} xs={0}></Grid>

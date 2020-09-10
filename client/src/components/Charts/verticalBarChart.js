@@ -126,7 +126,7 @@ class VerticalBarChart extends React.Component {
           duration: 3000,
         },
 
-        aspectRatio: 2.5,
+        aspectRatio: 2,
         responsive: true,
         scales: {
           xAxes: [

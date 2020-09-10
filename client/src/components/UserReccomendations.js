@@ -97,12 +97,16 @@ class UserReccomendations extends React.Component {
               <CloseIcon style={{ color: "white" }} />
             </IconButton>
             <Typography variant="subtitle1" style={{ fontSize: "1.8rem" }}>
-              {"Just Made you a playlist!"}
+              {"Just made you a playlist :)"}
             </Typography>
             <DialogContent>
               <Typography variant="body1">
                 Checkout your new{" "}
-                <Link target="_blank" href={this.state.playlistURL}>
+                <Link
+                  className="playlistLink"
+                  target="_blank"
+                  href={this.state.playlistURL}
+                >
                   playlist
                 </Link>
               </Typography>

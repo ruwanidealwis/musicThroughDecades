@@ -37,14 +37,14 @@ class TimeBreakdown extends React.Component {
       <Grid container style={{ width: "100%", marginBottom: "1%" }} spacing={4}>
         {this.state.user ? (
           <Grid container spacing={1}>
-            <Grid item md={12} xs={12} style={{ margin: "auto" }}>
+            <Grid item md={12} xs={12}>
               <LargeTitleText text={"Which Years Had the Most Influence?"} />
               <Typography variant="h6">
                 Not All Years are equal, so which were the most influential in
                 determining the top 100...
               </Typography>
             </Grid>
-            <Grid item md={9} xs={12}>
+            <Grid item md={9} xs={12} style={{ marginLeft: "2.5%" }}>
               <VerticalBarChart
                 decadeData={this.state.decadeData.distributionByYear}
                 decade={decade}

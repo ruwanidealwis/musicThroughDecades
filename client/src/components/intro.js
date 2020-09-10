@@ -84,11 +84,7 @@ class Intro extends React.Component {
                 <strong>
                   All the information is based on the 100 top songs gathered
                   from:
-                  <Link
-                    target="_blank"
-                    color="textSecondary"
-                    href="http://tsort.info/"
-                  >
+                  <Link target="_blank" href="http://tsort.info/">
                     {" "}
                     tsort.info
                   </Link>
