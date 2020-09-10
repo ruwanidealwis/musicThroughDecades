@@ -110,15 +110,45 @@ html {
   color: #61dafb;
 }
 
+#note1 {
+  animation: scaleX 4s infinite;
+  animation-delay: 0s;
+}
+
+#note2 {
+  animation: scaleX 4s infinite;
+  animation-delay: 2s;
+}
+
+#note3 {
+  animation: scaleX 4s infinite;
+  animation-delay: 3s;
+}
+
+#note4 {
+  animation: scaleX 4s infinite;
+  animation-delay: 4s;
+}
+
+#note5 {
+  animation: scaleX 4s infinite;
+  animation-delay: 5s;
+}
+
+#note6 {
+  animation: scaleX 4s infinite;
+  animation-delay: 6s;
+}
+
 @keyframes scaleX {
   0% {
-    transform: scaleX(1);
+    opacity: 1;
   }
   50% {
-    transform: scaleX(1.2);
+    opacity: 0;
   }
   100% {
-    transform: scaleX(1);
+    opacity: 1;
   }
 }
 

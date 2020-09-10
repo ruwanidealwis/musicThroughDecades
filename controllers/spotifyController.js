@@ -23,7 +23,7 @@ const { resolve } = require("path");
 
 /*********************************************** SET BASIC INFO (if running locally...) *********************************/
 if (process.env.PORT == null) {
-  console.log("local");
+  //console.log("local");
   redirectUri = "http://localhost:8000/callback";
 }
 /**
@@ -58,16 +58,31 @@ let getReadChoice = (comparator) => {
  * @return {Promise} returns the data (or error)
  */
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+let runPy = (req) => {
+  return new Promise(function (success, nosuccess) {
+=======
+>>>>>>> Stashed changes
 let getCSVData = (decade) => {
   const file = fs.createReadStream(`dataFiles/${decade}.csv`);
   Papa.parse(file, {
     dynamicTyping: true,
     complete: function (results) {
       top100Hits = formatData(results.data);
+<<<<<<< Updated upstream
       console.log(top100Hits);
     },
   });
   /*return new Promise(function (success, nosuccess) {
+=======
+      //console.log(top100Hits);
+    },
+  });
+  /*return new Promise(function (success, nosuccess) {
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     let options = {
       mode: "text",
       pythonPath:
@@ -80,7 +95,7 @@ let getCSVData = (decade) => {
 
     PythonShell.run("./webScraper.py", options, function (err, results) {
       if (err) {
-        console.log(err);
+        //console.log(err);
         nosuccess(err);
       }
       // results is an array consisting of messages collected during execution
@@ -102,8 +117,8 @@ authorizeApp = async () => {
     //adapted from from: https://github.com/thelinmichael/spotify-web-api-node
     spotifyApi.clientCredentialsGrant().then(
       function (data) {
-        console.log("The access token expires in " + data.body["expires_in"]);
-        console.log("The access token is " + data.body["access_token"]);
+        //console.log("The access token expires in " + data.body["expires_in"]);
+        //console.log("The access token is " + data.body["access_token"]);
 
         // Save the access token so that it's used in future calls
         spotifyApi.setAccessToken(data.body["access_token"]);
@@ -127,6 +142,11 @@ authorizeApp = async () => {
  * @return  {Array} Returns object array with information extracted (track, artists, year)
  */
 let formatData = (data) => {
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
   let allHitsArray = [];
   for (const hit of data) {
     allHitsArray.push({
@@ -137,6 +157,7 @@ let formatData = (data) => {
     }); //because of the way the website is structured (this may not be exactly correc t)
 
     hit[5].split(",").forEach((id) => artistsIdArray.push(id));
+<<<<<<< Updated upstream
     console.log("artistsId");
     console.log(artistsIdArray);
     songIdArray.push(hit[4]);
@@ -146,22 +167,42 @@ let formatData = (data) => {
   }
   return allHitsArray;
   /*
+=======
+    //console.log("artistsId");
+    //console.log(artistsIdArray);
+    songIdArray.push(hit[4]);
+    albumIdArray.push(hit[6]);
+    //console.log(hit[5]);
+    //console.log(hit[5].split(",").length);
+  }
+  return allHitsArray;
+  /*
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
   let dataToModify = data[0];
-  console.log(dataToModify);
+  //console.log(dataToModify);
   let allHitsArray = [];
   let newData = dataToModify.substring(1, data[0].length - 1).split("',");
 
+<<<<<<< Updated upstream
 
+=======
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
   console.log(newData);
+=======
+
+  //console.log(newData);
+>>>>>>> Stashed changes
 
   newData.forEach((hit) => {
-    console.log(hit);
+    //console.log(hit);
     let artists = [];
     let splitHit = hit.replace("'", "").split(" - ");
     if (splitHit[1] != null) artists = splitHit[1].split("&") || "";
     if (splitHit[2] == null) splitHit[2] = "";
     if (splitHit[3] == null) splitHit[3] = 101;
-    //console.log(splitHit[0]);
+    ////console.log(splitHit[0]);
     allHitsArray.push({
       track: splitHit[0] || hit,
       artist: artists[0],
@@ -170,8 +211,17 @@ let formatData = (data) => {
     }); //because of the way the website is structured (this may not be exactly correc t)
   });
 
+<<<<<<< Updated upstream
   console.log(allHitsArray);
+<<<<<<< Updated upstream
   return allHitsArray;*/
+=======
+  return allHitsArray;
+=======
+  //console.log(allHitsArray);
+  return allHitsArray;*/
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 };
 /**
  * Gets information about the artists (name, genres, image)
@@ -183,10 +233,12 @@ var getArtistInfo = async (ids) => {
   let artistArray = [];
   return spotifyApi.getArtists(ids).then(
     (data) => {
-      //console.log("Artist information", data.body.artists);
+      index = 0;
+      ////console.log("Artist information", data.body.artists);
       data.body.artists.forEach((artistObject) => {
-        //console.log(artistObject);
+        ////console.log(artistObject);
         image = "";
+        //console.log(index);
         if (artistObject.images[0] != null) image = artistObject.images[0].url;
         let obj = {
           name: artistObject.name,
@@ -194,6 +246,7 @@ var getArtistInfo = async (ids) => {
           imageURL: image,
         };
         artistArray.push(obj);
+        index++;
       });
 
       return artistArray;
@@ -220,6 +273,13 @@ var getArtistInfo = async (ids) => {
  * @param {object} trackObject - Object containing the name of the song, the artist, along with the year it was released
  * @return {Promise} that resolves to array with data from spotify API, or the error generated when quereying the API
  */
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+var getBasicSongInfo = async (trackObject) => {
+  return spotifyApi
+=======
+>>>>>>> Stashed changes
 var getBasicSongInfo = async (songIdArray, startIndex) => {
   let returnData = [];
   let i = startIndex;
@@ -240,15 +300,27 @@ var getBasicSongInfo = async (songIdArray, startIndex) => {
         object.release = parseInt(track.album.release_date.split("-")[0]);
       }
       returnData.push(object);
+<<<<<<< Updated upstream
       console.log(object.artists);
       console.log(object.release);
       console.log(object.name);
       i = i + 1;
       console.log(i);
+=======
+      //console.log(object.artists);
+      //console.log(object.release);
+      //console.log(object.name);
+      i = i + 1;
+      //console.log(i);
+>>>>>>> Stashed changes
     }
     return returnData;
   });
   /*return spotifyApi
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     .searchTracks((trackObject.track || "") + " " + (trackObject.artist || ""))
     .then(
       function (data) {
@@ -298,13 +370,13 @@ var getBasicSongInfo = async (songIdArray, startIndex) => {
           }
 
           if (data.preview_url == null) {
-            console.log("sajiodjaiojeqioajsdiojasdiojio");
+            //console.log("sajiodjaiojeqioajsdiojasdiojio");
             delay(200);
             let track = await spotifyApi.getTrack(data.id, { market: "US" });
-            console.log(track.body.preview_url);
+            //console.log(track.body.preview_url);
             object.previewURL = track.body.preview_url;
           }
-          console.log(data.album.release_date);
+          //console.log(data.album.release_date);
           fullInfoHitArray.push(object);
           songIdArray.push(data.id);
         }
@@ -313,19 +385,32 @@ var getBasicSongInfo = async (songIdArray, startIndex) => {
       (error) => {
         return err;
       }
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+    );
+=======
+>>>>>>> Stashed changes
     );*/
 };
 
 let getAlbumInfo = async function (partialAlbumIds) {
   spotifyApi.getAlbums(partialAlbumIds).then((data) => {
+<<<<<<< Updated upstream
     console.log(data.body);
   });
+=======
+    //console.log(data.body);
+  });
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 };
 
 /**
  * @summary traverses the list of all top 100 songs to get the basic info for the track using the spotify API
  * @return {Array} Array of objects with full info about the audio features
  */
+<<<<<<< Updated upstream
 let getSongInformation = async function (decade) {
   let arr = [0, 50, 100, 150, 200];
   let artistInfo = [];
@@ -382,13 +467,87 @@ let getSongInformation = async function (decade) {
   //console.log(artistInfo.length);
   //console.log(fullInfoHitArray);
   /*for (const trackObject of top100Hits) {
+=======
+<<<<<<< Updated upstream
+let getSongInformation = async function () {
+  for (const trackObject of top100Hits) {
+>>>>>>> Stashed changes
     //console.log(trackObject);
     await getBasicSongInfo(trackObject);
     //await genreInformation(trackObject); //gets genre of ALBUM!
   } //waits till promise is resolved (this maintains order)
   console.log("done");
   //console.log(fullInfoHitArray);
+<<<<<<< Updated upstream
   return fullInfoHitArray;*/
+=======
+  return fullInfoHitArray;
+=======
+let getSongInformation = async function (decade) {
+  let arr = [0, 50, 100, 150, 200];
+  let artistInfo = [];
+  for (const index of arr) {
+    if (index > artistsIdArray.length) {
+      break;
+    }
+    let end = index + 50;
+    if (end > artistsIdArray.length) {
+      end = index + (artistsIdArray.length % 50);
+    }
+    let partialArtistIds = artistsIdArray.slice(index, end);
+    //console.log(partialArtistIds);
+    artistInfo = artistInfo.concat(await getArtistInfo(partialArtistIds));
+  }
+  let firstHalf = songIdArray.slice(0, 50);
+  let secondHalf = songIdArray.slice(50, 100);
+  // //console.log(secondHalf);
+  let firstHalfData = await getBasicSongInfo(firstHalf, 0);
+  let secondHalfData = await getBasicSongInfo(secondHalf, 50);
+  let audioData = await getAudioInfo(3); //await until
+  let fullInfoHitArray = firstHalfData.concat(secondHalfData);
+  let artistIndex = 0;
+  for (let i = 0; i < 100; i++) {
+    fullInfoHitArray[i].danceability = audioData[i].danceability;
+    fullInfoHitArray[i].energy = audioData[i].energy;
+    fullInfoHitArray[i].acousticness = audioData[i].acousticness;
+    fullInfoHitArray[i].key = audioData[i].key;
+    fullInfoHitArray[i].mode = audioData[i].mode;
+    fullInfoHitArray[i].valence = audioData[i].valence;
+    fullInfoHitArray[i].speechiness = audioData[i].speechiness;
+    fullInfoHitArray[i].tempo = audioData[i].tempo;
+    fullInfoHitArray[i].instrumentalness = audioData[i].instrumentalness;
+
+    let length = fullInfoHitArray[i].artists; //number of artists per song...
+    let end = artistIndex + length;
+    fullInfoHitArray[i].artists = [];
+    //start from where we left off, and add until we get to length
+    for (let j = artistIndex; j < end; j++) {
+      fullInfoHitArray[i].artists.push(artistInfo[j]);
+      /* //console.log(fullInfoHitArray[i].name);
+      //console.log(artistInfo[j]);
+      //console.log("start " + artistIndex);
+      //console.log("end " + end);
+      //console.log("full length " + parseInt(artistIndex));
+      //console.log(i);*/
+    }
+
+    artistIndex = end;
+    await databaseTable.addSongToDatabase(fullInfoHitArray[i], decade, i);
+  }
+
+  //console.log(fullInfoHitArray);
+  ////console.log(artistInfo.length);
+  ////console.log(fullInfoHitArray);
+  /*for (const trackObject of top100Hits) {
+    ////console.log(trackObject);
+    await getBasicSongInfo(trackObject);
+    //await genreInformation(trackObject); //gets genre of ALBUM!
+  } //waits till promise is resolved (this maintains order)
+  //console.log("done");
+  ////console.log(fullInfoHitArray);
+  return fullInfoHitArray;*/
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 };
 
 /**
@@ -400,7 +559,7 @@ let getSongInformation = async function (decade) {
 let getAudioInfo = async function (retries) {
   return spotifyApi.getAudioFeaturesForTracks(songIdArray).then(
     (data) => {
-      console.log(songIdArray);
+      //console.log(songIdArray);
 
       return data.body.audio_features;
     },
@@ -437,12 +596,12 @@ let getSongAudioInformation = async function (
 ) {
   let returnData = await getAudioInfo(retries); //await until
 
-  //åconsole.log(returnData);
+  //å//console.log(returnData);
   let i = 0;
 
   for (var songObject of songArray) {
-    //console.log(returnData[i]);
-    console.log(songObject);
+    ////console.log(returnData[i]);
+    //console.log(songObject);
     if (returnData[i] === null) {
       songObject.danceability = -1;
       songObject.energy = -1;
@@ -469,8 +628,8 @@ let getSongAudioInformation = async function (
       await databaseTable.addSongToDatabase(songObject, decade, i);
     //indexing will change rank by 1 (index 0 has rank 1, but we need it saved to the db as rank 1)
     else {
-      //console.log(songObject);
-      //console.log(databaseTable);
+      ////console.log(songObject);
+      ////console.log(databaseTable);
       await databaseTable.addUserSongToDatabase(songObject, i, sessionId);
     } //works differentl
   }
@@ -483,8 +642,8 @@ let getSongAudioInformation = async function (
  * @return {Promise} Array with the information on the users top hits (if successful), or throws an error (after all retries used up)
  */
 let getUserTopTracks = async (timeRange, retries) => {
-  console.log(timeRange);
-  console.log(spotifyApi);
+  //console.log(timeRange);
+  //console.log(spotifyApi);
   return spotifyApi
     .getMyTopTracks({
       time_range: timeRange,
@@ -492,7 +651,7 @@ let getUserTopTracks = async (timeRange, retries) => {
     })
     .then(
       async (data) => {
-        console.log(data);
+        //console.log(data);
         for (var songObject of data.body.items) {
           songIdArray.push(songObject.id); //push to array to get audio features...
           let artistsId = [];
@@ -519,7 +678,7 @@ let getUserTopTracks = async (timeRange, retries) => {
         return myTopHits;
       },
       async (err) => {
-        console.log(err);
+        //console.log(err);
         /* if (retries > 0) {
           console.error(err.headers);
           (await err.headers["retry-after"])
@@ -542,7 +701,7 @@ let getUserId = (req) => {
       req.session.userId = data.body.id;
     },
     function (err) {
-      console.log("Something went wrong!", err);
+      //console.log("Something went wrong!", err);
     }
   );
 };
@@ -559,7 +718,7 @@ let getUserTopArtists = (timeRange) => {
       limit: 10,
     })
     .then(async (data) => {
-      console.log(data);
+      //console.log(data);
       let topArtists = [];
       for (var ArtistObject of data.body.items) {
         topArtists.push({
@@ -586,6 +745,19 @@ exports.getMusicInformation = async (req, decade) => {
 
   //need to run python script and get spotify authentication...
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+    return runPy(req)
+=======
+  if (songIdArray.length != 0) {
+    top100Hits = [];
+    fullInfoHitArray = [];
+    artistsIdArray = [];
+    songIdArray = [];
+    albumIdArray = [];
+  }
+>>>>>>> Stashed changes
   await getCSVData(decade);
   if (req.session.type === "decade") await authorizeApp();
   else {
@@ -593,15 +765,25 @@ exports.getMusicInformation = async (req, decade) => {
     if (spotifyApi.getRefreshToken() != null) {
       let data = await spotifyApi.refreshAccessToken();
       spotifyApi.setAccessToken(data.body["access_token"]);
+<<<<<<< Updated upstream
       console.log("refreshAccessToken");
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
       console.log(data);
+=======
+      //console.log("refreshAccessToken");
+      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+      //console.log(data);
+>>>>>>> Stashed changes
     } else {
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
     }
   }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
   await getSongInformation(decade);
   let data = await databaseTable.getDecadeStatistics(decade);
   top100Hits = [];
@@ -612,18 +794,22 @@ exports.getMusicInformation = async (req, decade) => {
 
   return data;
   /*return getCSVData(req)
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
       .then((data) => {
         return authorizeApp();
       })
       .then(async (data) => {
-        // console.log("hi");
-        //console.log(top100Hits);
+        // //console.log("hi");
+        ////console.log(top100Hits);
         /*let login = await spotifyApi.authorizationCodeGrant(req.query.code);
         spotifyApi.setAccessToken(login.body["access_token"]);
         spotifyApi.setRefreshToken(login.body["refresh_token"]);
         return getSongInformation();})
       .then((data) => {
-        // console.log(fullInfoHitArray);
+        // //console.log(fullInfoHitArray);
 
         return getSongAudioInformation(
           fullInfoHitArray,
@@ -633,7 +819,7 @@ exports.getMusicInformation = async (req, decade) => {
         );
       })
       .then((data) => {
-        // console.log(fullInfoHitArray);
+        // //console.log(fullInfoHitArray);
         //eturn saveToDatabase(fullInfoHitArray, "");
         return databaseTable.getDecadeStatistics(decade);
       })
@@ -665,8 +851,8 @@ exports.getAuthorizationURL = (timeRange, req) => {
     ["user-top-read", "playlist-modify-public"],
     state
   ); //generated
-  console.log(redirectUri);
-  console.log(authorizeURL);
+  //console.log(redirectUri);
+  //console.log(authorizeURL);
   return authorizeURL;
 };
 
@@ -684,25 +870,42 @@ exports.getUserListeningHabbits = async (req, res) => {
   if (spotifyApi == undefined) {
     res.redirect("/login");
   } else {
-    console.log(spotifyApi.getRefreshToken());
+    //console.log(spotifyApi.getRefreshToken());
     if (spotifyApi.getRefreshToken() == null) {
+<<<<<<< Updated upstream
       /* console.log("got here");
+=======
+<<<<<<< Updated upstream
+      console.log("got here");
+>>>>>>> Stashed changes
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
       console.log(spotifyApi);
+<<<<<<< Updated upstream
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...*/
+=======
+      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+=======
+      /* //console.log("got here");
+      let data = await spotifyApi.authorizationCodeGrant(req.query.code);
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      spotifyApi.setRefreshToken(data.body["refresh_token"]);
+      //console.log(spotifyApi);
+      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...*/
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     } else {
       let data = await spotifyApi.refreshAccessToken();
       spotifyApi.setAccessToken(data.body["access_token"]);
-      console.log("refreshAccessToken");
+      //console.log("refreshAccessToken");
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
-      console.log(data);
+      //console.log(data);
     }
 
     await getUserId(req);
     await databaseTable.createTempUser(req.session.id);
-    console.log(req.session);
+    //console.log(req.session);
     await getUserTopTracks(req.session.userTopRead, req.session.retries); //gets the top tracks for the user
     await delay(230); //waits 230ms (gets around spotify api rate limiting)
 
@@ -739,7 +942,7 @@ exports.createPlaylist = (req) => {
     .refreshAccessToken()
     .then(
       (data) => {
-        console.log(data.body);
+        //console.log(data.body);
         return data;
       },
       (err) => {
@@ -759,7 +962,7 @@ exports.createPlaylist = (req) => {
     })
     .then(
       (data) => {
-        console.log(data.body);
+        //console.log(data.body);
         //use the req.comparator object to get the user reccomended songs and add them to playlist
         req.session.playlistId = data.body.id;
         playlistURL = data.body.external_urls.spotify;

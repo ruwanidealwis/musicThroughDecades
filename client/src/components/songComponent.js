@@ -13,11 +13,14 @@ import "./top20.css";
 class SongComponent extends React.Component {
   constructor(props) {
     super(props);
+    let songAudio = new Audio(this.props.item.previewURL || "");
+
     this.state = {
       item: this.props.item,
       index: this.props.index,
       arrItem: this.props.arrItem,
       isPlaying: false,
+
       audio: new Audio(this.props.item.previewURL || ""),
     };
     this.playAudio = this.playAudio.bind(this);
@@ -30,6 +33,18 @@ class SongComponent extends React.Component {
       this.state.audio.play();
       this.setState({ isPlaying: true });
     }
+  }
+  //adapoted from: https://stackoverflow.com/questions/47686345/playing-sound-in-reactjs
+  componentDidMount() {
+    this.state.audio.addEventListener("ended", () => {
+      this.setState({ isPlaying: false });
+    });
+  }
+
+  componentWillUnmount() {
+    this.state.audio.addEventListener("ended", () => {
+      this.setState({ isPlaying: false });
+    });
   }
 
   pauseAudio() {
@@ -58,10 +73,10 @@ class SongComponent extends React.Component {
                     aria-label="play/pause"
                     onClick={() => this.playAudio()}
                   >
-                    {this.state.isPlaying ? (
-                      <PauseIcon style={{ scale: 0.8, marginTop: "10%" }} />
-                    ) : (
+                    {!this.state.isPlaying ? (
                       <PlayArrowIcon style={{ scale: 0.8, marginTop: "10%" }} />
+                    ) : (
+                      <PauseIcon style={{ scale: 0.8, marginTop: "10%" }} />
                     )}
                   </IconButton>
                 ) : null}
@@ -93,7 +108,7 @@ class SongComponent extends React.Component {
               >
                 {item.artists.join(",  ")}
               </Typography>
-              {this.props.popularity ? (
+              {this.props.popularity && item.rank != null ? (
                 <div>
                   <Typography
                     align="left"
@@ -101,15 +116,7 @@ class SongComponent extends React.Component {
                     variant="subtitle2"
                     color="textSecondary"
                   >
-                    <strong>popularity: {item.popularity}</strong>
-                  </Typography>
-                  <Typography
-                    align="left"
-                    className="text"
-                    variant="subtitle2"
-                    color="textSecondary"
-                  >
-                    <strong> original rank: {item.rank}</strong>
+                    <strong> original rank: {item.rank + 1}</strong>
                   </Typography>
                 </div>
               ) : null}
