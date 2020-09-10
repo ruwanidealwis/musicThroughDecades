@@ -2,11 +2,15 @@
 let SpotifyWebApi = require("spotify-web-api-node");
 config = require("../variableConfig.js");
 var { PythonShell } = require("python-shell");
+const Papa = require("papaparse");
+const fs = require("fs");
 
 /********* variable declaration */
 /** @global allhitdata */ var top100Hits; //stores 100 hits as retrived from webScraper
 /** @global full array with relevant info of top songs for decade */ var fullInfoHitArray = []; //this array contains all the information on the song (audio features etc)
 /** @global spotify id's of songs*/ var songIdArray = []; //spotify id's of the song, enabling to get audio information
+/** @global spotify id's of songs*/ var albumIdArray = []; //spotify id's of the song, enabling to get audio information
+/** @global spotify id's of songs*/ var artistsIdArray = []; //spotify id's of the song, enabling to get audio information
 /** @global user top hits for specific range*/ var myTopHits = []; //spotify id's of the song, enabling to get audio information
 /** @global spotify web api wrapper*/ var spotifyApi; //create an instance of webAPI
 /** @global clientID of app */ var clientId = process.env.CLIENTID; //client id for app
@@ -54,8 +58,16 @@ let getReadChoice = (comparator) => {
  * @return {Promise} returns the data (or error)
  */
 
-let runPy = (req) => {
-  return new Promise(function (success, nosuccess) {
+let getCSVData = (decade) => {
+  const file = fs.createReadStream(`dataFiles/${decade}.csv`);
+  Papa.parse(file, {
+    dynamicTyping: true,
+    complete: function (results) {
+      top100Hits = formatData(results.data);
+      console.log(top100Hits);
+    },
+  });
+  /*return new Promise(function (success, nosuccess) {
     let options = {
       mode: "text",
       pythonPath:
@@ -74,7 +86,7 @@ let runPy = (req) => {
       // results is an array consisting of messages collected during execution
       success(results);
     });
-  });
+  });*/
 };
 
 /**
@@ -115,10 +127,30 @@ authorizeApp = async () => {
  * @return  {Array} Returns object array with information extracted (track, artists, year)
  */
 let formatData = (data) => {
+  let allHitsArray = [];
+  for (const hit of data) {
+    allHitsArray.push({
+      track: hit[0],
+      year: hit[2],
+      artists: hit[5].split(",").length,
+      artistRank: hit[3],
+    }); //because of the way the website is structured (this may not be exactly correc t)
+
+    hit[5].split(",").forEach((id) => artistsIdArray.push(id));
+    console.log("artistsId");
+    console.log(artistsIdArray);
+    songIdArray.push(hit[4]);
+    albumIdArray.push(hit[6]);
+    console.log(hit[5]);
+    console.log(hit[5].split(",").length);
+  }
+  return allHitsArray;
+  /*
   let dataToModify = data[0];
   console.log(dataToModify);
   let allHitsArray = [];
   let newData = dataToModify.substring(1, data[0].length - 1).split("',");
+
 
   console.log(newData);
 
@@ -139,7 +171,7 @@ let formatData = (data) => {
   });
 
   console.log(allHitsArray);
-  return allHitsArray;
+  return allHitsArray;*/
 };
 /**
  * Gets information about the artists (name, genres, image)
@@ -188,8 +220,35 @@ var getArtistInfo = async (ids) => {
  * @param {object} trackObject - Object containing the name of the song, the artist, along with the year it was released
  * @return {Promise} that resolves to array with data from spotify API, or the error generated when quereying the API
  */
-var getBasicSongInfo = async (trackObject) => {
-  return spotifyApi
+var getBasicSongInfo = async (songIdArray, startIndex) => {
+  let returnData = [];
+  let i = startIndex;
+  return spotifyApi.getTracks(songIdArray).then((data) => {
+    for (const track of data.body.tracks) {
+      let object = {
+        spotifyId: track.id,
+        albumId: track.album.id,
+        name: track.name.split("-")[0].trim(), //taken from: https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
+        release: top100Hits[i].year,
+        artists: top100Hits[i].artists,
+        image: track.album.images[0].url,
+        popularity: track.popularity,
+        previewURL: track.preview_url,
+        artistRank: top100Hits[i].artistRank,
+      };
+      if (object.release === 0) {
+        object.release = parseInt(track.album.release_date.split("-")[0]);
+      }
+      returnData.push(object);
+      console.log(object.artists);
+      console.log(object.release);
+      console.log(object.name);
+      i = i + 1;
+      console.log(i);
+    }
+    return returnData;
+  });
+  /*return spotifyApi
     .searchTracks((trackObject.track || "") + " " + (trackObject.artist || ""))
     .then(
       function (data) {
@@ -254,22 +313,82 @@ var getBasicSongInfo = async (trackObject) => {
       (error) => {
         return err;
       }
-    );
+    );*/
+};
+
+let getAlbumInfo = async function (partialAlbumIds) {
+  spotifyApi.getAlbums(partialAlbumIds).then((data) => {
+    console.log(data.body);
+  });
 };
 
 /**
  * @summary traverses the list of all top 100 songs to get the basic info for the track using the spotify API
  * @return {Array} Array of objects with full info about the audio features
  */
-let getSongInformation = async function () {
-  for (const trackObject of top100Hits) {
+let getSongInformation = async function (decade) {
+  let arr = [0, 50, 100, 150, 200];
+  let artistInfo = [];
+  for (const index of arr) {
+    if (index > artistsIdArray.length) {
+      break;
+    }
+    let end = index + 50;
+    if (end > artistsIdArray.length) {
+      end = index + (artistsIdArray.length % 50);
+    }
+    let partialArtistIds = artistsIdArray.slice(index, end);
+    console.log(partialArtistIds);
+    artistInfo = artistInfo.concat(await getArtistInfo(partialArtistIds));
+  }
+  let firstHalf = songIdArray.slice(0, 50);
+  let secondHalf = songIdArray.slice(50, 100);
+  // console.log(secondHalf);
+  let firstHalfData = await getBasicSongInfo(firstHalf, 0);
+  let secondHalfData = await getBasicSongInfo(secondHalf, 50);
+  let audioData = await getAudioInfo(3); //await until
+  let fullInfoHitArray = firstHalfData.concat(secondHalfData);
+  let artistIndex = 0;
+  for (let i = 0; i < 100; i++) {
+    fullInfoHitArray[i].danceability = audioData[i].danceability;
+    fullInfoHitArray[i].energy = audioData[i].energy;
+    fullInfoHitArray[i].acousticness = audioData[i].acousticness;
+    fullInfoHitArray[i].key = audioData[i].key;
+    fullInfoHitArray[i].mode = audioData[i].mode;
+    fullInfoHitArray[i].valence = audioData[i].valence;
+    fullInfoHitArray[i].speechiness = audioData[i].speechiness;
+    fullInfoHitArray[i].tempo = audioData[i].tempo;
+    fullInfoHitArray[i].instrumentalness = audioData[i].instrumentalness;
+
+    let length = fullInfoHitArray[i].artists; //number of artists per song...
+    let end = artistIndex + length;
+    fullInfoHitArray[i].artists = [];
+    //start from where we left off, and add until we get to length
+    for (let j = artistIndex; j < end; j++) {
+      fullInfoHitArray[i].artists.push(artistInfo[j]);
+      /* console.log(fullInfoHitArray[i].name);
+      console.log(artistInfo[j]);
+      console.log("start " + artistIndex);
+      console.log("end " + end);
+      console.log("full length " + parseInt(artistIndex));
+      console.log(i);*/
+    }
+
+    artistIndex = end;
+    await databaseTable.addSongToDatabase(fullInfoHitArray[i], decade, i);
+  }
+
+  console.log(fullInfoHitArray);
+  //console.log(artistInfo.length);
+  //console.log(fullInfoHitArray);
+  /*for (const trackObject of top100Hits) {
     //console.log(trackObject);
     await getBasicSongInfo(trackObject);
     //await genreInformation(trackObject); //gets genre of ALBUM!
   } //waits till promise is resolved (this maintains order)
   console.log("done");
   //console.log(fullInfoHitArray);
-  return fullInfoHitArray;
+  return fullInfoHitArray;*/
 };
 
 /**
@@ -388,6 +507,7 @@ let getUserTopTracks = async (timeRange, retries) => {
           object = {
             spotifyId: songObject.id,
             name: songObject.name.replace("-[^-]*$").trim(),
+
             popularity: songObject.popularity,
             previewURL: songObject.preview_url,
             release: songObject.album.release_date,
@@ -464,18 +584,35 @@ exports.getMusicInformation = async (req, decade) => {
   //only called when it is a decade...
   //need to check if database has the data...
 
-  amount = await databaseTable.getAmount(decade);
-  console.log(amount);
-  if (amount > 0) {
-    data = await databaseTable.getDecadeStatistics(decade);
-    return data;
-  } else {
-    //need to run python script and get spotify authentication...
+  //need to run python script and get spotify authentication...
 
-    return runPy(req)
+  await getCSVData(decade);
+  if (req.session.type === "decade") await authorizeApp();
+  else {
+    //authenticated for users...
+    if (spotifyApi.getRefreshToken() != null) {
+      let data = await spotifyApi.refreshAccessToken();
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      console.log("refreshAccessToken");
+      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+      console.log(data);
+    } else {
+      let data = await spotifyApi.authorizationCodeGrant(req.query.code);
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      spotifyApi.setRefreshToken(data.body["refresh_token"]);
+    }
+  }
+  await getSongInformation(decade);
+  let data = await databaseTable.getDecadeStatistics(decade);
+  top100Hits = [];
+  fullInfoHitArray = [];
+  artistsIdArray = [];
+  songIdArray = [];
+  albumIdArray = [];
+
+  return data;
+  /*return getCSVData(req)
       .then((data) => {
-        top100Hits = formatData(data);
-
         return authorizeApp();
       })
       .then(async (data) => {
@@ -483,9 +620,8 @@ exports.getMusicInformation = async (req, decade) => {
         //console.log(top100Hits);
         /*let login = await spotifyApi.authorizationCodeGrant(req.query.code);
         spotifyApi.setAccessToken(login.body["access_token"]);
-        spotifyApi.setRefreshToken(login.body["refresh_token"]);*/
-        return getSongInformation();
-      })
+        spotifyApi.setRefreshToken(login.body["refresh_token"]);
+        return getSongInformation();})
       .then((data) => {
         // console.log(fullInfoHitArray);
 
@@ -506,8 +642,7 @@ exports.getMusicInformation = async (req, decade) => {
         top100Hits = [];
         spotifyApi = {}; //empty object again...
         return data;
-      });
-  }
+      });*/
 };
 
 /*********************************** EXPORTED FUNTIONS ***********************************/
@@ -546,19 +681,17 @@ exports.getAuthorizationURL = (timeRange, req) => {
 
 exports.getUserListeningHabbits = async (req, res) => {
   // databaseTable = determineDatabaseTable(""); //should be users
-  console.log(spotifyApi);
-  console.log(req.query.code);
   if (spotifyApi == undefined) {
     res.redirect("/login");
   } else {
     console.log(spotifyApi.getRefreshToken());
     if (spotifyApi.getRefreshToken() == null) {
-      console.log("got here");
+      /* console.log("got here");
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
       console.log(spotifyApi);
-      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...*/
     } else {
       let data = await spotifyApi.refreshAccessToken();
       spotifyApi.setAccessToken(data.body["access_token"]);

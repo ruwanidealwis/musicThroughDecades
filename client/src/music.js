@@ -116,7 +116,6 @@ class Music extends React.Component {
                     spacing={5}
                     style={{ width: "100%", margin: "auto" }}
                   >
-                    <Grid container spacing={5}></Grid>
                     <TopSongs
                       decade={decade}
                       compareValue={compareValue}

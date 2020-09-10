@@ -38,6 +38,7 @@ a.MuiTypography-colorTextSecondary {
 .playlistButton {
   background-color: #1db954 !important;
   color: white !important;
+  margin-left: 2% !important;
 }
 .musicInfo {
   margin: 1.5%;
@@ -56,10 +57,22 @@ a.MuiTypography-colorTextSecondary {
 .MuiDialog-paper {
   text-align: center !important;
   width: 50% !important;
-  height: 30% !important;
+  height: 20% !important;
+  background-color: rgb(43, 42, 42) !important;
+  color: white !important;
 }
 @media only screen and (max-width: 767px) {
   .headphones {
     margin-left: -20%;
+  }
+
+  .playlistButton {
+    background-color: #1db954 !important;
+    color: white !important;
+    margin: auto !important;
+  }
+
+  .playlistCreateGrid {
+    align-content: center;
   }
 }

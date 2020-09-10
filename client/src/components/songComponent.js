@@ -53,7 +53,7 @@ class SongComponent extends React.Component {
                     style={{
                       scale: 0.8,
                       marginTop: "32%",
-                      backgroundColor: "#ffffff9c",
+                      backgroundColor: "#ffffffb8",
                     }}
                     aria-label="play/pause"
                     onClick={() => this.playAudio()}
@@ -72,7 +72,7 @@ class SongComponent extends React.Component {
               <Typography className="text" component="h5" variant="h5">
                 <strong>
                   {index + arrItem + 1}.{" "}
-                  {item.name.replace(/ *\([^)]*\) */g, "")}
+                  {item.name.split("-")[0].replace(/ *\([^)]*\) */g, "")}
                 </strong>
               </Typography>
               {this.props.popularity ? null : (
@@ -91,7 +91,7 @@ class SongComponent extends React.Component {
                 variant="subtitle2"
                 color="textSecondary"
               >
-                {item.artists.toString()}
+                {item.artists.join(",  ")}
               </Typography>
               {this.props.popularity ? (
                 <div>
