@@ -86,7 +86,7 @@ class Intro extends React.Component {
               <Typography align="center" color="textPrimary" variant="h5">
                 <strong>
                   How Different was Your Music From The Hits of The{" "}
-                  {this.props.decade}?
+                  {this.props.decade}'s?
                 </strong>
               </Typography>
             )}
