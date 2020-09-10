@@ -42,6 +42,8 @@ class Music extends React.Component {
           compareValue = "the last 6 months";
         } else if (compareValue === "1Month") {
           compareValue = "the last month";
+        } else if (compareValue === "allTime") {
+          compareValue = "All Time";
         }
       }
       this.state = {

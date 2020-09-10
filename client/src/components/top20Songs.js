@@ -60,7 +60,7 @@ class TopTwentySongs extends React.Component {
 
     //regex taken from:https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
     return (
-      <Grid container spacing={2}>
+      <Grid container spacing={1}>
         {array.map((arrItem) => {
           return (
             <Grid item lg={size} md={12} sm={12} xs={12}>
@@ -75,6 +75,7 @@ class TopTwentySongs extends React.Component {
                         item={item}
                         index={index}
                         arrItem={arrItem}
+                        popularity={this.props.popularity || false}
                       ></SongComponent>
                       <iframe
                         src="https://open.spotify.com/embed/track/1eT2CjXwFXNx6oY5ydvzKU"

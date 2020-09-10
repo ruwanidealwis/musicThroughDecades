@@ -29,7 +29,7 @@ class MostPopularSongs extends React.Component {
   render() {
     const { decade, compareValue, title } = this.state;
     return (
-      <Grid container style={{ margin: "auto" }} spacing={4}>
+      <Grid container style={{ margin: "auto" }} spacing={6}>
         <Grid item md={12} xs={12}>
           <LargeTitleText text={"Which Songs Stood The Test Of Time?"} />
           Some Songs, are more popular than others, so which of the top 100
