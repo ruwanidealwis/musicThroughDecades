@@ -45,7 +45,7 @@ class TimeBreakdown extends React.Component {
                 <br />
               </Typography>
             </Grid>
-            <Grid item md={9} xs={12} style={{ marginLeft: "1.1%" }}>
+            <Grid item md={9} xs={12} style={{ marginLeft: "0.5%" }}>
               <VerticalBarChart
                 decadeData={this.state.decadeData.distributionByYear}
                 decade={decade}
