@@ -32,7 +32,7 @@ exports.createTempUser = async (sessionId) => {
  * @param {Number} decade specifies the decade the song was created in
  * @param {Number} index specifies the rank
  */
-exports.addSongToDatabase = async (songObjects, decade, index) => {
+exports.addSongToDatabase = async (songObjects, decade, index, sessionId) => {
   let decadeId = await db.Decade.findOne({
     attributes: ["id"],
     where: { name: decade },
@@ -40,30 +40,50 @@ exports.addSongToDatabase = async (songObjects, decade, index) => {
   });
 
   ////console.log(decadeId);
-  //console.log(songObjects);
-  let song = await db.Songs.create({
-    name: songObjects.name,
-    yearOfRelease: songObjects.release,
-    imageURL: songObjects.image,
-    valence: songObjects.valence,
-    danceability: songObjects.danceability,
-    popularity: songObjects.popularity,
-    key: songObjects.key,
-    mode: songObjects.mode,
-    speechiness: songObjects.speechiness,
-    tempo: songObjects.tempo,
-    acousticness: songObjects.acousticness,
-    energy: songObjects.energy,
-    instrumentalness: songObjects.instrumentalness,
-    rank: index,
-    decadeId: decadeId.id,
-    spotifyId: songObjects.spotifyId,
-    previewURL: songObjects.previewURL,
+
+  let song = await db.Songs.findOrCreate({
+    where: {
+      spotifyId: songObjects.spotifyId,
+    },
+    defaults: {
+      name: songObjects.name,
+      yearOfRelease: songObjects.release,
+      imageURL: songObjects.image,
+      valence: songObjects.valence,
+      danceability: songObjects.danceability,
+      popularity: songObjects.popularity,
+      key: songObjects.key,
+      mode: songObjects.mode,
+      speechiness: songObjects.speechiness,
+      tempo: songObjects.tempo,
+      acousticness: songObjects.acousticness,
+      energy: songObjects.energy,
+      instrumentalness: songObjects.instrumentalness,
+      rank: index,
+      decadeId: decadeId.id,
+      spotifyId: songObjects.spotifyId,
+      previewURL: songObjects.previewURL,
+    },
   });
-  for (const artist of songObjects.artists) {
-    //call helper method
-    await addPermanantArtists(artist, decadeId.id, song, songObjects);
-  }
+
+  console.log(song[0].dataValues);
+  await db.UserSongs.create({
+    sessionId: sessionId,
+    songId: song[0].dataValues.id,
+  });
+
+  if (song[1] === true)
+    for (const artist of songObjects.artists) {
+      //call helper method
+
+      await addPermanantArtists(
+        artist,
+        decadeId.id,
+        song[0],
+        songObjects,
+        sessionId
+      );
+    }
 };
 
 /**
@@ -98,13 +118,21 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
       songId: song.id,
       rank: index,
     });
+
+    //make a user
+    song.temp = true;
+    song.save();
     for (const artist of song.Artists) {
       //association could have been created with another song
-      await db.UserArtists.findOrCreate({
+      let createdArtist = await db.UserArtists.findOrCreate({
         where: { sessionId: sessionId, artistId: artist.id },
-        sessionId: sessionId,
-        artistId: artist.id,
+        default: { sessionId: sessionId, artistId: artist.id, temp: true },
       });
+
+      if (createdArtist[1] == false) {
+        createdArtist[0].dataValues.temp = true;
+        createdArtist[0].save();
+      }
     }
   }
 };
@@ -113,11 +141,12 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
  * Deletes all temporary user songs from database (means these songs are not the top songs of the decade, but top  songs of the user)
  * @param {String} sessionId the id of the current session
  */
-exports.deleteUserSongsFromDatabase = async (sessionId) => {
+exports.deleteUserSongsFromDatabase = async (sessionId, decade) => {
   //after we get all the nescessary information...the song will be deleted
+  let decadeId = await getDecadeId(decade);
   let possibleSongs = await db.Songs.findAll({
     attributes: ["name", "id"],
-    where: { temp: true }, //only user songs are temp
+    where: { [Op.or]: [{ temp: true }, { decadeId: decadeId }] }, //only user songs are temp
     include: [
       { model: db.tempUser },
       { model: db.Artist }, //this will return all the artists associated with this song (that are temporary, becasuse songs could have artists with other perm entries)
@@ -155,8 +184,12 @@ exports.deleteUserSongsFromDatabase = async (sessionId) => {
     }
     //console.log(count);
   }
-  await db.tempUser.destroy({ where: { sessionId: sessionId } }); //delete it from userDB
+
   ////console.log(count);
+};
+
+exports.deleteTempUser = async (sessionId) => {
+  await db.tempUser.destroy({ where: { sessionId: sessionId } }); //delete it from userDB
 };
 
 /**
@@ -246,7 +279,13 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
  *  @param {Object} song the song that was created in the database that the artist sang
  * @param {Object} songObj information about the song
  */
-let addPermanantArtists = async (artist, decadeId, song, songObj) => {
+let addPermanantArtists = async (
+  artist,
+  decadeId,
+  song,
+  songObj,
+  sessionId
+) => {
   let artist_id = await db.Artist.findOne({
     attributes: ["id"],
     include: [{ model: db.Decade }],
@@ -272,12 +311,31 @@ let addPermanantArtists = async (artist, decadeId, song, songObj) => {
       decadeId: decadeId,
       rank: songObj.artistRank,
     });
+
+    await db.UserArtists.findOrCreate({
+      where: {
+        sessionId: sessionId,
+        artistId: artistId.id,
+      },
+      sessionId: sessionId,
+      artistId: artistId.id,
+    });
+
     // ////console.log(artist_id);
   } else {
     //already created we just add an extra association
     await db.SongArtists.create({
       artistId: artist_id.id,
       songId: song.id,
+    });
+
+    await db.UserArtists.findOrCreate({
+      where: {
+        sessionId: sessionId,
+        artistId: artist_id.id,
+      },
+      sessionId: sessionId,
+      artistId: artist_id.id,
     });
 
     //determine if the artist is associated with the current decade being searched
@@ -313,7 +371,7 @@ let deleteUserArtistsFromDatabase = async (artist, sessionId) => {
 
   //if its null it means that the artist was also in another song and was already deleted
   //has to be false otherwise the artist is one of the artists of the decade....
-  if (otherUsers != null && otherUsers.temp === true) {
+  if (otherUsers != null) {
     if (otherUsers.tempUsers.length === 1) {
       if (otherUsers.tempUsers[0].sessionId === sessionId) {
         db.Artist.destroy({
@@ -776,7 +834,7 @@ let getUserTopFeatures = async (sessionId, feature, order, limit) => {
       include: [
         {
           model: db.Songs,
-
+          where: { temp: true },
           raw: true,
           include: [{ model: db.Artist }],
         },
@@ -826,6 +884,7 @@ let getUserAverageFeature = async (sessionId, feature) => {
       include: {
         model: db.Songs,
         as: "Songs",
+        where: { temp: true },
         raw: true,
         attributes: [],
         through: { attributes: [] },
@@ -853,6 +912,7 @@ let getUserDistribution = async (sessionId, feature) => {
       include: {
         model: db.Songs,
         as: "Songs",
+        where: { temp: true },
         raw: true,
         attributes: [],
         through: { attributes: [] },
@@ -972,6 +1032,7 @@ let getMostHits = (sessionId) => {
           include: [
             {
               model: db.Songs,
+              where: { temp: true },
               attributes: ["name"],
               include: [
                 {

@@ -68,6 +68,17 @@ router.get("/callback", async (req, res) => {
 
 router.get("/compare/:comparators", async (req, res) => {
   let userSpotify = ["allTime", "6Months", "1Month"];
+
+  //session vars
+  req.session.myTopHits = [];
+  req.session.top100Hits = [];
+  req.session.fullInfoHitArray = [];
+  req.session.artistsIdArray = [];
+  req.session.songIdArray = [];
+  req.session.albumIdArray = [];
+  req.session.topArtistIdArray = [];
+  console.log(req.params.comparators.split("-"));
+  await databaseTable.createTempUser(req.session.id);
   let comparators = req.params.comparators.split("-"); //getting properly formatted comparators
   if (userSpotify.includes(comparators[1])) {
     req.session.type = "user";
@@ -75,6 +86,7 @@ router.get("/compare/:comparators", async (req, res) => {
     if (validated === true) {
       req.session.decade = comparators[0];
       //console.log(req.session.decade);
+      req.session.userTopRead = comparators[1];
       req.session.decadeStats = await spotifyController.getMusicInformation(
         req,
         req.session.decade
@@ -85,8 +97,11 @@ router.get("/compare/:comparators", async (req, res) => {
         res
       );
 
-      await databaseTable.deleteSongsFromDB(req.session.decade);
-      await databaseTable.deleteArtistsFromDB(req.session.decade);
+      await databaseTable.deleteUserSongsFromDatabase(
+        req.session.id,
+        req.session.decade
+      );
+      await databaseTable.deleteTempUser(req.session.id);
       res.status(200).redirect("/music");
     } else {
       res
@@ -107,16 +122,28 @@ router.get("/compare/:comparators", async (req, res) => {
           req.session.decade
         );
 
-        await databaseTable.deleteSongsFromDB(req.session.decade);
-        await databaseTable.deleteArtistsFromDB(req.session.decade);
+        //await databaseTable.deleteSongsFromDB(req.session.decade);
+        //await databaseTable.deleteArtistsFromDB(req.session.decade);
         req.session.decade2 = comparators[1];
         req.session.comparator = await spotifyController.getMusicInformation(
           req,
           req.session.decade2
         );
 
-        await databaseTable.deleteSongsFromDB(req.session.decade2);
-        await databaseTable.deleteArtistsFromDB(req.session.decade2);
+        //await databaseTable.deleteSongsFromDB(req.session.decade2);
+        //await databaseTable.deleteArtistsFromDB(req.session.decade2);
+
+        await databaseTable.deleteUserSongsFromDatabase(
+          req.session.id,
+          req.session.decade
+        );
+
+        await databaseTable.deleteUserSongsFromDatabase(
+          req.session.id,
+          req.session.decade2
+        );
+
+        await databaseTable.deleteTempUser(req.session.id);
 
         res.status(200).redirect("/music");
       } else {
