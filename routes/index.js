@@ -70,6 +70,7 @@ router.get("/compare/:comparators", async (req, res) => {
   let userSpotify = ["allTime", "6Months", "1Month"];
 
   //session vars
+  req.session.token = "";
   req.session.myTopHits = [];
   req.session.top100Hits = [];
   req.session.fullInfoHitArray = [];

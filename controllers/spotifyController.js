@@ -663,16 +663,24 @@ exports.getMusicInformation = async (req, decade) => {
   if (req.session.type === "decade") await authorizeApp();
   else {
     //authenticated for users...
-    if (spotifyApi.getRefreshToken() != null) {
-      let data = await spotifyApi.refreshAccessToken();
-      spotifyApi.setAccessToken(data.body["access_token"]);
-
+    if (
+      spotifyApi.getRefreshToken() != null ||
+      spotifyApi.getRefreshToken() != req.session.token
+    ) {
       console.log("refreshAccessToken");
-      //req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
-    } else {
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
+
+      console.log();
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
+      console.log(spotifyApi);
+      //req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+    } else {
+      let data = await spotifyApi.refreshAccessToken();
+
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      spotifyApi.setRefreshToken(data.body["refresh_token"]);
+      req.session.token = data.body["access_token"];
       //req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
     }
   }
@@ -773,14 +781,21 @@ exports.getUserListeningHabbits = async (req, res) => {
     req.session.topArtistIdArray = [];
   }
   // databaseTable = determineDatabaseTable(""); //should be users
-  if (spotifyApi == undefined) {
+  /*if (spotifyApi == undefined) {
     res.redirect("/login");
   } else {
     //console.log(spotifyApi.getRefreshToken());
-    if (spotifyApi.getRefreshToken() == null) {
+    if (
+      spotifyApi.getRefreshToken() == null ||
+      spotifyApi.getRefreshToken() != req.session.token
+    ) {
+      console.log("gettiong code...");
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
+
       spotifyApi.setAccessToken(data.body["access_token"]);
+      req.session.token = data.body["access_token"];8?
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
+      req.session.refresh = data.body["refresh_token"];
       console.log(spotifyApi);
 
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
@@ -790,32 +805,30 @@ exports.getUserListeningHabbits = async (req, res) => {
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
       //console.log(spotifyApi);
-      req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...*/
-    } else {
-      let data = await spotifyApi.refreshAccessToken();
-      spotifyApi.setAccessToken(data.body["access_token"]);
-      //console.log("refreshAccessToken");
-
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
-      console.log(req.session.userTopRead);
-    }
+    } else {*/
+  let data = await spotifyApi.refreshAccessToken();
+  spotifyApi.setAccessToken(data.body["access_token"]);
+  console.log("refreshAccessToken");
 
-    await getUserId(req);
-    //await databaseTable.createTempUser(req.session.id); already created
-    //console.log(req.session);
-    await getUserTopTracks(req.session.userTopRead, req.session.retries, req); //gets the top tracks for the user
-    await delay(230); //waits 230ms (gets around spotify api rate limiting)
+  req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
+  console.log(req.session.userTopRead);
 
-    await getSongAudioInformation(req); //gets the audio info each of the top hits
-    let userData = await databaseTable.getUserStatistics(
-      req.session.id,
-      req.session.decade
-    );
+  await getUserId(req);
+  //await databaseTable.createTempUser(req.session.id); already created
+  //console.log(req.session);
+  await getUserTopTracks(req.session.userTopRead, req.session.retries, req); //gets the top tracks for the user
+  await delay(230); //waits 230ms (gets around spotify api rate limiting)
 
-    userData["topArtists"] = await getUserTopArtists(req.session.userTopRead);
+  await getSongAudioInformation(req); //gets the audio info each of the top hits
+  let userData = await databaseTable.getUserStatistics(
+    req.session.id,
+    req.session.decade
+  );
 
-    return userData;
-  }
+  userData["topArtists"] = await getUserTopArtists(req.session.userTopRead);
+
+  return userData;
 };
 
 //*********************************** EXPORTED FUNTIONS ***********************************/
