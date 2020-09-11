@@ -100,7 +100,7 @@ class TimeBreakdown extends React.Component {
                 min={minDecade}
                 max={maxDecade}
                 searchKey={"Contribution"}
-                title={`My Favourite Decades's`}
+                title={`My Favourite Decades`}
               />
             </Grid>
             <Grid item md={2} xs={0}></Grid>
