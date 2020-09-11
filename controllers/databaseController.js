@@ -1002,7 +1002,8 @@ From
             "UserArtists" 
             on "UserArtists"."artistId" = "Artists"."id" 
       where
-         "sessionId" ='${sessionId}'
+         "sessionId" ='${sessionId}' AND
+         "temp" =true
    )
    as x 
 group by
