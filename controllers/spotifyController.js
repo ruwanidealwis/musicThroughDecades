@@ -258,15 +258,6 @@ var getArtistInfo = async (ids) => {
     },
     async (err) => {
       //taken from:https://github.com/thelinmichael/spotify-web-api-node/issues/217
-      if (retries > 0) {
-        console.error(e);
-        await asyncTimeout(
-          e.headers["retry-after"]
-            ? parseInt(e.headers["retry-after"]) * 1000
-            : RETRY_INTERVAL
-        );
-        return getArtistInfo(ids, retries - 1);
-      }
 
       return err;
     }
