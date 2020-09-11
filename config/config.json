@@ -3,7 +3,7 @@
     "username": "ruwani",
     "password": "DATABASE_PASSWORD",
     "database": "musicthroughdecades",
-    "host": "localhost",
+    "host": "postgres",
     "dialect": "postgres"
   },
   "production": {
@@ -12,6 +12,7 @@
     "database": "musicthroughdecades",
     "host": "localhost",
     "dialect": "postgres",
+    "operatorsAliases": false,
     "use_env_variable": "DATABASE_URL"
   }
 }

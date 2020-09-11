@@ -1,0 +1,82 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap");
+.infoContainer {
+  margin-top: 5% !important;
+  margin-bottom: 5% !important;
+  margin: auto;
+  text-align: center;
+  justify-content: center;
+  height: 80% !important;
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background-color: white !important;
+  max-width: 90vw;
+}
+
+.loader {
+  margin-left: auto;
+  margin-right: auto;
+
+  color: white;
+}
+.recievedData {
+  background-color: white;
+  padding: 0% 0% 0% 0%;
+  color: rgb(31, 30, 30);
+  font-family: "Roboto", sans-serif;
+  width: 100%;
+  word-wrap: break-word;
+}
+a.MuiTypography-colorTextSecondary {
+  color: #2e8b57;
+}
+.link {
+  color: #1db954 !important;
+}
+
+.allInfo {
+  width: 100%;
+}
+.playlistButton {
+  background-color: #1db954 !important;
+  color: white !important;
+  margin-left: 2% !important;
+}
+.musicInfo {
+  margin: 1.5%;
+}
+.typgoraphyText {
+  padding-left: 0%;
+  color: rgb(70, 70, 70);
+}
+.divider {
+  height: 5px !important;
+  background-color: rgb(70, 70, 70) !important;
+  margin-right: 30% !important;
+  margin-bottom: 0 !important;
+  padding-left: 0%;
+  margin-left: 0% !important;
+}
+.MuiDialog-paper {
+  text-align: center !important;
+  width: 50% !important;
+  height: 20% !important;
+  background-color: rgb(43, 42, 42) !important;
+  color: white !important;
+}
+@media only screen and (max-width: 767px) {
+  .headphones {
+    margin-left: -20%;
+  }
+
+  .playlistButton {
+    background-color: #1db954 !important;
+    color: white !important;
+    margin: auto !important;
+  }
+
+  .playlistCreateGrid {
+    align-content: center;
+  }
+}

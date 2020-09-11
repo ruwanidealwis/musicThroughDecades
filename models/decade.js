@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   Decade.init(
     {
       name: DataTypes.STRING,
-      description: DataTypes.STRING,
+      description: DataTypes.TEXT,
     },
     {
       sequelize,

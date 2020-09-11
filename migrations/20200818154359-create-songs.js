@@ -22,7 +22,7 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
       },
-      imageUrl: {
+      imageURL: {
         type: Sequelize.STRING,
       },
       yearOfRelease: {
@@ -60,6 +60,9 @@ module.exports = {
       },
       rank: {
         type: Sequelize.INTEGER,
+      },
+      previewURL: {
+        type: Sequelize.STRING,
       },
       temp: {
         type: Sequelize.BOOLEAN,
