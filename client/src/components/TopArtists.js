@@ -2,7 +2,7 @@ import React from "react";
 
 import LargeTitleText from "./SubComponents/largeTitleText";
 
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 import TitleText from "./SubComponents/titleText";
@@ -93,6 +93,7 @@ class TopArtists extends React.Component {
               {this.switchControl("toggleDecadeOn")}
             </Grid>
           </Grid>
+
           {toggleDecadeOn ? (
             <TopTwentyArtists
               searchKey={"hits"}
@@ -104,6 +105,14 @@ class TopArtists extends React.Component {
               data={this.state.decadeData.topArtists}
             />
           )}
+          <Grid item>
+            {this.state.decade == "2010" ? (
+              <Typography variant="body1">
+                The top overall artists of the 2010s is based on US data because
+                the worldwide data is not yet available
+              </Typography>
+            ) : null}
+          </Grid>
         </Grid>
         <Grid item md={6} xs={12}>
           <TitleText text={title} />
@@ -135,6 +144,14 @@ class TopArtists extends React.Component {
               data={this.state.compareValueData.topArtists}
             />
           )}
+          <Grid item>
+            {this.state.compareValue == "2010" ? (
+              <Typography variant="body1">
+                The top overall artists of the 2010s is based on US data because
+                the worldwide data is not yet available
+              </Typography>
+            ) : null}
+          </Grid>
         </Grid>
       </Grid>
     );

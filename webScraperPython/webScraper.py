@@ -277,12 +277,45 @@ def getArtistInfo(decade):
 
         print(topArtists)
         # print(getDecadeInfo(sys.argv[1]))
+    else:
+
+        page = requests.get(
+            "https://en.wikipedia.org/wiki/List_of_best-selling_artists_of_the_2010s_in_the_United_States")  # data from website...
+
+        src = page.content
+        soup = BeautifulSoup(src, 'html.parser')
+
+        songTable = soup.findAll(
+            "table")
+        count = 0
+
+        topArtists = []
+        spotify = spotipy.Spotify(
+            client_credentials_manager=SpotifyClientCredentials())
+        for song in songTable[0].findAll("tr"):
+            if(count != 0):
+                print(song)
+                songRow = song.findAll("td")
+                if(songRow != None):
+                    text = songRow[1].find("a")
+                    id = ""
+                    result = spotify.search(q=text, type="artist", limit=1)
+                    if(len(result['artists']['items']) > 0):
+
+                        id = result['artists']['items'][0]['id']
+
+                    print(id)
+
+                topArtists.append([text.get_text().replace(
+                    "'", "").replace("$", "s"), id])
+            count += 1
+            if(count >= 10):
+                break
+
+        with open("dataFiles/" + decade + "Artists.csv", "w", newline='') as csvfile:
+            writer = csv.writer(
+                csvfile, quoting=csv.QUOTE_NONNUMERIC, delimiter='|')
+            writer.writerows(topArtists)
 
 
-print(getArtistInfo("1950"))
-print(getArtistInfo("1960"))
-
-print(getArtistInfo("1970"))
-print(getArtistInfo("1980"))
-print(getArtistInfo("1990"))
-print(getArtistInfo("2000"))
+print(getArtistInfo("2010"))

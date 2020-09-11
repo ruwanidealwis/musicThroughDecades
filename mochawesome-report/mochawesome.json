@@ -5,9 +5,9 @@
     "passes": 6,
     "pending": 0,
     "failures": 0,
-    "start": "2020-09-10T17:08:18.539Z",
-    "end": "2020-09-10T17:08:38.238Z",
-    "duration": 19699,
+    "start": "2020-09-11T21:18:07.792Z",
+    "end": "2020-09-11T21:18:21.512Z",
+    "duration": 13720,
     "testsRegistered": 6,
     "passPercent": 100,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "8db207f4-2df5-471c-8c22-98e898446ef7",
+      "uuid": "7b3498bc-4b77-4f23-9e3e-49c77b678f03",
       "title": "",
       "fullFile": "",
       "file": "",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "e8332cae-60dc-4192-af19-d07416a3575f",
+          "uuid": "70168daa-e61d-41f6-bab6-df30515b95f0",
           "title": "Test Entry",
           "fullFile": "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/test/app.test.js",
           "file": "/test/app.test.js",
@@ -38,7 +38,7 @@
               "title": "Tests Server Working",
               "fullTitle": "Test Entry Tests Server Working",
               "timedOut": false,
-              "duration": 19,
+              "duration": 30,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -47,26 +47,26 @@
               "context": null,
               "code": "agent.get(\"/\").end((err, res) => {\n  expect(res).to.have.status(200);\n  done();\n});",
               "err": {},
-              "uuid": "8c4cb03f-1422-4306-8565-887a5c7f2a87",
-              "parentUUID": "e8332cae-60dc-4192-af19-d07416a3575f",
+              "uuid": "bedb595d-f983-4972-a42f-448be9566cf6",
+              "parentUUID": "70168daa-e61d-41f6-bab6-df30515b95f0",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "8c4cb03f-1422-4306-8565-887a5c7f2a87"
+            "bedb595d-f983-4972-a42f-448be9566cf6"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 19,
+          "duration": 30,
           "root": false,
           "rootEmpty": false,
           "_timeout": 25000
         },
         {
-          "uuid": "c27bee36-62ae-4fff-932d-aeadf67345ba",
+          "uuid": "c33078a0-c681-4bf0-9f45-b6715d2133ca",
           "title": "Tests two valid decades",
           "fullFile": "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/test/app.test.js",
           "file": "/test/app.test.js",
@@ -77,7 +77,7 @@
               "title": "gets data for two valid decades",
               "fullTitle": "Tests two valid decades gets data for two valid decades",
               "timedOut": false,
-              "duration": 19661,
+              "duration": 13662,
               "state": "passed",
               "speed": "slow",
               "pass": true,
@@ -86,26 +86,26 @@
               "context": null,
               "code": "agent.get(\"/compare/1990-2010\").end((err, res) => {\n  expect(res).to.have.status(200);\n  //expect(res).to.have.cookie(\"type\", \"decade\");\n  //expect(res).to.redirectTo(\"/music\");\n  if (err) return done(err);\n  done();\n});",
               "err": {},
-              "uuid": "682f477f-57ca-4ff4-9c21-1d65e62f7af3",
-              "parentUUID": "c27bee36-62ae-4fff-932d-aeadf67345ba",
+              "uuid": "b1a4ecf7-ce56-4e2d-84aa-df4f5b835b9d",
+              "parentUUID": "c33078a0-c681-4bf0-9f45-b6715d2133ca",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "682f477f-57ca-4ff4-9c21-1d65e62f7af3"
+            "b1a4ecf7-ce56-4e2d-84aa-df4f5b835b9d"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 19661,
+          "duration": 13662,
           "root": false,
           "rootEmpty": false,
           "_timeout": 25000
         },
         {
-          "uuid": "136295be-4cbb-4ab3-99ba-d9afc66f5b28",
+          "uuid": "42a29db8-cc0d-4339-b9cf-8f20f1118aeb",
           "title": "Second decade past vaild time range",
           "fullFile": "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/test/app.test.js",
           "file": "/test/app.test.js",
@@ -125,15 +125,15 @@
               "context": null,
               "code": "agent.get(\"/compare/1990-1920\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 2nd comparator\"\n  );\n  done();\n});",
               "err": {},
-              "uuid": "2543bee1-db7f-4636-b60c-cbfa5aa9b8c2",
-              "parentUUID": "136295be-4cbb-4ab3-99ba-d9afc66f5b28",
+              "uuid": "3a3f765f-9834-4a85-9b49-c048f601f71c",
+              "parentUUID": "42a29db8-cc0d-4339-b9cf-8f20f1118aeb",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "2543bee1-db7f-4636-b60c-cbfa5aa9b8c2"
+            "3a3f765f-9834-4a85-9b49-c048f601f71c"
           ],
           "failures": [],
           "pending": [],
@@ -144,7 +144,7 @@
           "_timeout": 25000
         },
         {
-          "uuid": "45b7fb07-d945-4528-99f5-9faf9a04b1a3",
+          "uuid": "629de0bd-1e4f-482d-a487-18fc0a6bf776",
           "title": "First decade past vaild time range",
           "fullFile": "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/test/app.test.js",
           "file": "/test/app.test.js",
@@ -155,7 +155,7 @@
               "title": "Tests invalid first decade",
               "fullTitle": "First decade past vaild time range Tests invalid first decade",
               "timedOut": false,
-              "duration": 2,
+              "duration": 3,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -164,26 +164,26 @@
               "context": null,
               "code": "agent.get(\"/compare/1920-2000\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 1st comparator\"\n  );\n  done();\n});",
               "err": {},
-              "uuid": "65b35be2-280b-404a-9389-04461481c755",
-              "parentUUID": "45b7fb07-d945-4528-99f5-9faf9a04b1a3",
+              "uuid": "bf4041be-2f67-442c-ba29-06a60ca294d7",
+              "parentUUID": "629de0bd-1e4f-482d-a487-18fc0a6bf776",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "65b35be2-280b-404a-9389-04461481c755"
+            "bf4041be-2f67-442c-ba29-06a60ca294d7"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 2,
+          "duration": 3,
           "root": false,
           "rootEmpty": false,
           "_timeout": 25000
         },
         {
-          "uuid": "9c7db364-e280-4078-a709-13a1be7643a7",
+          "uuid": "f4cdf010-a546-4f48-8b80-227e02f21e16",
           "title": "User enters invalid time range",
           "fullFile": "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/test/app.test.js",
           "file": "/test/app.test.js",
@@ -194,7 +194,7 @@
               "title": "Tests invalid user time range",
               "fullTitle": "User enters invalid time range Tests invalid user time range",
               "timedOut": false,
-              "duration": 1,
+              "duration": 2,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -203,26 +203,26 @@
               "context": null,
               "code": "agent.get(\"/compare/1970-lastWeek\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 2nd comparator\"\n  );\n  done();\n});",
               "err": {},
-              "uuid": "3e6da789-7dc4-4f2f-8014-97b77713d89f",
-              "parentUUID": "9c7db364-e280-4078-a709-13a1be7643a7",
+              "uuid": "49574988-ce0f-4085-8434-b3bf18181bd3",
+              "parentUUID": "f4cdf010-a546-4f48-8b80-227e02f21e16",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "3e6da789-7dc4-4f2f-8014-97b77713d89f"
+            "49574988-ce0f-4085-8434-b3bf18181bd3"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 1,
+          "duration": 2,
           "root": false,
           "rootEmpty": false,
           "_timeout": 25000
         },
         {
-          "uuid": "908d0a37-c9a3-4782-83ce-5c730dc53aa3",
+          "uuid": "58f75b05-1cbc-4af2-ae35-679e0bf18876",
           "title": "User enters their time range before decade",
           "fullFile": "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/test/app.test.js",
           "file": "/test/app.test.js",
@@ -233,7 +233,7 @@
               "title": "Inserts user time range as first comparator",
               "fullTitle": "User enters their time range before decade Inserts user time range as first comparator",
               "timedOut": false,
-              "duration": 2,
+              "duration": 6,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -242,20 +242,20 @@
               "context": null,
               "code": "agent.get(\"/compare/allTime-1980\").end((err, res) => {\n  expect(res).to.have.status(400);\n  expect(res.body.error).to.equals(\n    \"invalid value entered for 1st comparator\"\n  );\n  done();\n});",
               "err": {},
-              "uuid": "fffd2808-7cbc-4808-8689-7f691a3a3afa",
-              "parentUUID": "908d0a37-c9a3-4782-83ce-5c730dc53aa3",
+              "uuid": "04114139-18d7-4e9b-aab2-e5d77ebbee76",
+              "parentUUID": "58f75b05-1cbc-4af2-ae35-679e0bf18876",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "fffd2808-7cbc-4808-8689-7f691a3a3afa"
+            "04114139-18d7-4e9b-aab2-e5d77ebbee76"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 2,
+          "duration": 6,
           "root": false,
           "rootEmpty": false,
           "_timeout": 25000

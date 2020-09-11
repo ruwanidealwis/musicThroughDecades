@@ -61,7 +61,7 @@ let getReadChoice = (comparator) => {
 
 let getCSVData = async (decade, req) => {
   var file = fs.createReadStream(`dataFiles/${decade}.csv`);
-
+  //adapted from: https://github.com/mholt/PapaParse/issues/752
   songReading = (file) => {
     return new Promise(function (resolve, error) {
       Papa.parse(file, {
@@ -94,8 +94,10 @@ let getCSVData = async (decade, req) => {
   };
 
   const SongResults = await songReading(file);
+
   file = fs.createReadStream(`dataFiles/${decade}Artists.csv`);
   const artistResults = await artistReading(file);
+
   /*return new Promise(function (success, nosuccess) {
 >>>>>>> Stashed changes
     let options = {
@@ -389,6 +391,7 @@ let getAlbumInfo = async function (partialAlbumIds) {
  */
 let getSongInformation = async function (decade, req) {
   let arr = [0, 50, 100, 150, 200];
+  console.log("here");
   let artistInfo = [];
   for (const index of arr) {
     if (index > req.session.artistsIdArray.length) {
@@ -691,9 +694,9 @@ exports.getMusicInformation = async (req, decade) => {
   await getSongInformation(decade, req);
 
   let data = await databaseTable.getDecadeStatistics(decade);
-  if (decade !== "2010") {
-    data["topArtists"] = await getArtistInfo(req.session.topArtistIdArray);
-  }
+
+  console.log(req.session.topArtistIdArray);
+  data["topArtists"] = await getArtistInfo(req.session.topArtistIdArray);
 
   req.session.top100Hits = [];
   req.session.fullInfoHitArray = [];
