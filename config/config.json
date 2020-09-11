@@ -4,8 +4,7 @@
     "password": "DATABASE_PASSWORD",
     "database": "musicthroughdecades",
     "host": "localhost",
-    "dialect": "postgres",
-    "logging": false
+    "dialect": "postgres"
   },
   "production": {
     "username": "ruwani",
