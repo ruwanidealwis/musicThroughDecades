@@ -15,6 +15,8 @@ class SongFeatures extends React.Component {
   constructor(props) {
     super(props);
     console.log(props);
+    let compareText = `${this.props.compareValue}`;
+
     let minYear = "";
     let maxYear = "";
     let lowLabel = ` Lowest ${this.props.feature} Songs of the ${this.props.compareValue}'s`;
@@ -77,12 +79,14 @@ class SongFeatures extends React.Component {
     } else {
       lowLabel = `My Lowest ${this.props.feature} Songs`;
       highLabel = `My Highest ${this.props.feature} songs`;
+      compareText = `${this.props.compareValue}`;
     }
     this.state = {
       minYear: minYear,
       maxYear: maxYear,
       highLabel: highLabel,
       lowLabel: lowLabel,
+      compareText: compareText,
     };
     console.log(this.state);
   }
@@ -150,10 +154,11 @@ class SongFeatures extends React.Component {
           <TitleText text={`${this.props.decade}'s`} />
         </Grid>
         <Grid item md={6} xs={12}>
-          <TitleText text={`${this.props.compareValue}'s`} />
+          <TitleText text={this.state.compareText} />
         </Grid>
         <Grid item md={3} xs={12}>
           <Typography variant="subtitle1">
+            <br /> <br />
             <strong>
               Lowest {this.props.feature} Songs of the {this.props.decade}'s
             </strong>
@@ -165,7 +170,6 @@ class SongFeatures extends React.Component {
           />
         </Grid>
         <Grid item md={3} xs={12}>
-          <br /> <br />
           <Typography variant="subtitle1">
             <strong>
               {" "}
