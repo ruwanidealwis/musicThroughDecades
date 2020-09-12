@@ -761,7 +761,7 @@ exports.getAuthorizationURL = (timeRange, req) => {
     redirectUri: redirectUri, //this time we need user to authorize access
   });
   let authorizeURL = spotifyApi.createAuthorizeURL(
-    ["user-top-read", "playlist-modify-public"],
+    ["user-top-read", "playlist-modify-private"],
     state
   ); //generated
   //console.log(redirectUri);
@@ -862,10 +862,10 @@ exports.createPlaylist = (req) => {
       //creates a public playlist
       return spotifyApi.createPlaylist(
         req.session.userId,
-        `My ${req.session.decade}'s reccomendations!`,
+        `My ${req.session.decade}'s recomendations!`,
         {
-          public: true,
-          description: `Some tracks from the ${req.session.decade}'s I might love`,
+          public: false,
+          description: `Made for you by: https://musicthroughdecades.herokuapp.com/`,
         }
       );
     })

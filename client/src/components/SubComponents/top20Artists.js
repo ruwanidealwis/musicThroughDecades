@@ -31,7 +31,6 @@ class TopTwentyArtists extends React.Component {
                         elevation={15}
                         className="infoCard"
                         bgcolor="grey.700"
-                        width="50%"
                       >
                         <CardContent className="cardContent">
                           <Grid container wrap="nowrap" spacing={2}>

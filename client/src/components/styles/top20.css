@@ -1,6 +1,6 @@
 .cover {
   min-width: 7rem;
-  min-height: 100%;
+  min-height: 100% !important;
 
   padding: 0;
   padding-top: 0 !important;
@@ -10,13 +10,13 @@
 }
 
 .infoCard {
+  padding: 0 !important;
   display: flex;
-  padding: 0;
-
   margin: auto;
   margin-bottom: 5% !important;
-  width: 35vh;
-  height: 14vh;
+  width: calc(3em * 5.3);
+  height: calc(3em * 2.2);
+
   object-fit: contain;
   background-color: white !important;
 }
@@ -24,12 +24,15 @@
   .cardContent {
     display: block;
     width: 100%;
-    height: auto;
+    height: 15vh;
+    font-size: 13em !important;
+    padding-bottom: 3% !important;
+    padding-left: 3% !important;
   }
+}
 
-  .grid {
-    width: 100% !important;
-  }
+.grid {
+  width: 100% !important;
 }
 
 .cardContent {

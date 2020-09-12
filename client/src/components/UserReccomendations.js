@@ -82,6 +82,7 @@ class UserReccomendations extends React.Component {
         <div>
           <Dialog
             open={open}
+            className="dialogBox"
             keepMounted
             aria-labelledby="alert-dialog-slide-title"
             aria-describedby="alert-dialog-slide-description"
@@ -101,7 +102,7 @@ class UserReccomendations extends React.Component {
             </Typography>
             <DialogContent>
               <Typography variant="body1">
-                Checkout your new{" "}
+                Check out your new{" "}
                 <Link
                   className="link"
                   target="_blank"

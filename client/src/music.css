@@ -34,7 +34,9 @@ a.MuiTypography-colorTextSecondary {
 .link {
   color: #1db954 !important;
 }
-
+.dialogBox {
+  height: auto !important;
+}
 .allInfo {
   width: 100%;
 }
@@ -61,7 +63,7 @@ a.MuiTypography-colorTextSecondary {
 .MuiDialog-paper {
   text-align: center !important;
   width: 50% !important;
-  height: 20% !important;
+  height: auto !important;
   background-color: rgb(43, 42, 42) !important;
   color: white !important;
 }
