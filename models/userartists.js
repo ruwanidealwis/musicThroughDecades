@@ -26,6 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sessionId: DataTypes.STRING,
       artistId: DataTypes.INTEGER,
+      temp: { type: DataTypes.BOOLEAN, defaultValue: false },
     },
     {
       sequelize,

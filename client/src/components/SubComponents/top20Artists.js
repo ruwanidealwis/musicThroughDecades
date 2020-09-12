@@ -74,7 +74,7 @@ class TopTwentyArtists extends React.Component {
                                 variant="subtitle1"
                                 color="textSecondary"
                               >
-                                {item.genres.slice(0, 3).join(",  ")}
+                                {item.genres.slice(0, 2).join(",  ")}
                               </Typography>
                             </Grid>
                           </Grid>

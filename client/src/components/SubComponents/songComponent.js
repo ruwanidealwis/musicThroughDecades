@@ -68,7 +68,7 @@ class SongComponent extends React.Component {
                   <IconButton
                     style={{
                       scale: 0.8,
-                      marginTop: "32%",
+                      marginTop: "30%",
                       backgroundColor: "#ffffffb8",
                     }}
                     aria-label="play/pause"

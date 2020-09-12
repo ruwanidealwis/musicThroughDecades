@@ -71,11 +71,11 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionId) => {
     sessionId: sessionId,
     songId: song[0].dataValues.id,
   });
+  //newly created...
 
-  if (song[1] === true)
-    for (const artist of songObjects.artists) {
-      //call helper method
-
+  for (const artist of songObjects.artists) {
+    //call helper method
+    if (song[1] === true) {
       await addPermanantArtists(
         artist,
         decadeId.id,
@@ -84,6 +84,7 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionId) => {
         sessionId
       );
     }
+  }
 };
 
 /**
@@ -106,33 +107,51 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
     include: [{ model: db.Artist }],
   });
   ////console.log(song);
-  if (song === null) {
+  if (song == null) {
     //wecreate the song.... but we make it temporary (after we get all the data the song is deleted from the database)
     //console.log(dateArray[0]);
     await createUserEntry(songObjects, dateArray, sessionId, index);
   } else {
     //create a manual association with UserSong and for all the artists aswell
     ////console.log(sessionId);
-    await db.UserSongs.create({
-      sessionId: sessionId,
-      songId: song.id,
-      rank: index,
-    });
-
     //make a user
     song.temp = true;
     song.save();
+
+    let userSong = await db.UserSongs.findOrCreate({
+      where: { sessionId: sessionId, songId: song.id },
+      defaults: {
+        sessionId: sessionId,
+        songId: song.id,
+        rank: index,
+      },
+    });
+
+    if (userSong[1] === false) {
+      let createdSong = await db.UserSongs.findOne({
+        where: { sessionId: sessionId, songId: song.id },
+      });
+
+      createdSong.rank = index;
+      createdSong.save();
+    }
+
     for (const artist of song.Artists) {
       //association could have been created with another song
       let createdArtist = await db.UserArtists.findOrCreate({
-        where: { sessionId: sessionId, artistId: artist.id },
-        default: { sessionId: sessionId, artistId: artist.id, temp: true },
+        where: { artistId: artist.id, sessionId: sessionId },
+        defaults: { temp: true, sessionId: sessionId, artistId: artist.id },
       });
 
-      if (createdArtist[1] == false) {
-        createdArtist[0].dataValues.temp = true;
-        createdArtist[0].save();
-      }
+      console.log("here");
+      let existingArtist = await db.UserArtists.findOne({
+        where: { sessionId: sessionId, artistId: artist.id },
+      });
+
+      existingArtist.temp = true;
+      existingArtist.save(); //normal save not wowkring workaround for now...
+
+      console.log(createdArtist[0]);
     }
   }
 };
@@ -239,7 +258,9 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
         temp: true,
       });
       //create an association with decade
-      await userSong.addArtist(newArtistId);
+      await userSong.addArtist(newArtistId, {
+        through: { temp: true },
+      });
       createArtistId = newArtistId.id;
     } else {
       //already created we just add an extra association
@@ -250,14 +271,27 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
       createArtistId = artist_id.id;
     }
     //null if the song didn't exist before
-    await db.UserArtists.findOrCreate({
+    let create = await db.UserArtists.findOrCreate({
       where: {
         sessionId: sessionId,
         artistId: createArtistId,
       },
-      sessionId: sessionId,
-      artistId: createArtistId,
+
+      defaults: {
+        sessionId: sessionId,
+        artistId: createArtistId,
+        temp: true,
+      },
     });
+
+    if (create[1] == false) {
+      let existingArtist = await db.UserArtists.findOne({
+        where: { sessionId: sessionId, artistId: createArtistId },
+      });
+
+      existingArtist.temp = true;
+      existingArtist.save(); //normal save not wowkring workaround for now...
+    }
   }
   await db.UserSongs.create({
     sessionId: sessionId,
@@ -1003,7 +1037,7 @@ From
             on "UserArtists"."artistId" = "Artists"."id" 
       where
          "sessionId" ='${sessionId}' AND
-         "temp" =true
+         "UserArtists"."temp" =true
    )
    as x 
 group by
@@ -1022,52 +1056,48 @@ order by
 };
 
 let getMostHits = (sessionId) => {
-  return db.tempUser
-    .findAll({
-      where: { sessionId: sessionId },
-      include: [
-        {
-          model: db.Artist,
-          as: "Artists",
-          attributes: ["name", "imageURL", "genres"],
-          include: [
-            {
-              model: db.Songs,
-              where: { temp: true },
-              attributes: ["name"],
-              include: [
-                {
-                  model: db.tempUser,
-                  where: { sessionId: sessionId },
-                  through: { attributes: [] },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    })
-    .then((data) => {
-      let artistArray = [];
-      //////console.log(data);
-      for (const artists of data[0].Artists) {
-        for (const songs of artists.Songs) {
-          //////console.log(songs.name);
-        }
-        ////console.log();
-        artistArray.push({
-          name: artists.name,
-          hits: artists.Songs.length,
-          image: artists.imageURL,
-          genres: artists.genres,
-        });
-      }
-      //have to manually sort //TODO find postgres workaround
-      artistArray.sort((a, b) => {
-        return b.hits - a.hits;
+  return db.UserArtists.findAll({
+    where: { sessionId: sessionId, temp: true },
+    include: [
+      {
+        model: db.Artist,
+        as: "Artist",
+        attributes: ["name", "imageURL", "genres"],
+        include: [
+          {
+            model: db.Songs,
+            where: { temp: true },
+            attributes: ["name"],
+            include: [
+              {
+                model: db.tempUser,
+                where: { sessionId: sessionId },
+                through: { attributes: [] },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  }).then((data) => {
+    let artistArray = [];
+    console.log(data[0]);
+    for (const UserArtists of data) {
+      ////console.log();
+      console.log(UserArtists.Artist.Songs.length);
+      artistArray.push({
+        name: UserArtists.Artist.name,
+        hits: UserArtists.Artist.Songs.length,
+        image: UserArtists.Artist.imageURL,
+        genres: UserArtists.Artist.genres,
       });
-      return artistArray;
+    }
+    //have to manually sort //TODO find postgres workaround
+    artistArray.sort((a, b) => {
+      return b.hits - a.hits;
     });
+    return artistArray;
+  });
 };
 
 exports.getUserStatistics = async (sessionId, decade) => {
