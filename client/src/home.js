@@ -226,9 +226,7 @@ class Home extends React.Component {
       //selected a value will be one of the two picked....
       //only two elements in the array so...
       //console.log("hello!");
-      //console.log(
-        this.state[this.getFormat(this.state.userPicked[0])] === true
-      );
+
       let userPicked = [event.value, this.state.userPicked[1]];
       //console.log(userPicked);
       ////console.log(ReactDOM.findDOMNode("1970s"));

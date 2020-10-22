@@ -18,7 +18,7 @@ app.use(
 //require node module for the spotify api
 app.use(express.static(path.join(__dirname + "/client/build")));
 
-////console.log(path.join(__dirname + "/client/build"));
+//console.log(path.join(__dirname + "/client/build"));
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
@@ -29,5 +29,5 @@ let port = process.env.PORT;
 if (port == null || port == "") {
   port = 8000;
 }
-app.listen(port, () => //console.log(`app listening on port ${port}`)); //app is now listening on port
+app.listen(port, () => console.log(`app listening on port ${port}`)); //app is now listening on port
 module.exports = app;
