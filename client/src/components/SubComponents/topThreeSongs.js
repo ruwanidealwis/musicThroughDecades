@@ -19,7 +19,7 @@ class TopThreeSongs extends React.Component {
       <Grid class="grid" container width="50vh" spacing={2}>
         <Grid container width="50vh" spacing={3}>
           {this.props.data.map((item, index) => {
-            ////console.log(item);
+            //console.log(item);
             return <SongComponent item={item} index={index} arrItem={0} />;
           })}{" "}
         </Grid>

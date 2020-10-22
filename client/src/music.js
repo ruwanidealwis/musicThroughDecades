@@ -28,8 +28,8 @@ const override = css`
 class Music extends React.Component {
   constructor(props) {
     super(props);
-    //console.log(props);
-    //console.log(window.performance);
+    console.log(props);
+    console.log(window.performance);
     if (
       props.location.state == undefined ||
       props.location.state.values == undefined
@@ -69,7 +69,7 @@ class Music extends React.Component {
     fetch(`/compare/${values}?code=${this.state.code}`)
       .then((res) => res.json())
       .then((data) => {
-        //console.log(data);
+        console.log(data);
         this.setState({
           decadeData: data.decade,
           compareValueData: data.comparator,

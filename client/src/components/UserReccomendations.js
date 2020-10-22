@@ -29,14 +29,14 @@ class UserReccomendations extends React.Component {
     fetch(`/music/createPlaylist`)
       .then((res) => res.json())
       .then((data) => {
-        //console.log(data);
+        console.log(data);
 
         this.setState({ playlistURL: data.url, open: true });
-        //console.log(this.state.playlistURL);
+        console.log(this.state.playlistURL);
       });
   }
   componentDidUpdate() {
-    //console.log(this.state);
+    console.log(this.state);
   }
   render() {
     const { open } = this.state;

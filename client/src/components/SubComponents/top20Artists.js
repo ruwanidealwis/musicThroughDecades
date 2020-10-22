@@ -25,7 +25,7 @@ class TopTwentyArtists extends React.Component {
                 {this.props.data
                   .slice(arrItem, arrItem + 5)
                   .map((item, index) => {
-                    //console.log(item);
+                    console.log(item);
                     return (
                       <Card
                         elevation={15}

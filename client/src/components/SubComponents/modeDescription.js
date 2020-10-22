@@ -13,7 +13,7 @@ const bull = <span>•</span>;
 class ModeDescription extends React.Component {
   constructor(props) {
     super(props);
-    //console.log(props);
+    console.log(props);
   }
   //Card inspired from: https://material-ui.com/components/cards/
   render() {

@@ -9,7 +9,7 @@ const style = {
 class LineChart extends React.Component {
   constructor(props) {
     super(props);
-    //console.log(props);
+    console.log(props);
     let dataArray = [];
     let decadeDataArray = [];
     let label = `${this.props.compare}'s`;

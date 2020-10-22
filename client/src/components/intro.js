@@ -12,7 +12,7 @@ var scroller = Scroll.scroller;
 class Intro extends React.Component {
   constructor(props) {
     super(props);
-    //console.log(props);
+    console.log(props);
     let title = `${this.props.comparator}'s`;
     if (this.props.user) {
       title = `My Top Tracks`;

@@ -666,7 +666,7 @@ exports.getMusicInformation = async (req, decade) => {
   if (req.session.type === "decade") await authorizeApp();
   else {
     //authenticated for users...
-    console.log("authenticated.....");
+
     if (spotifyApi == undefined) {
     }
     if (

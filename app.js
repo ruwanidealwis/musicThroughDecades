@@ -18,7 +18,6 @@ app.use(
 //require node module for the spotify api
 app.use(express.static(path.join(__dirname + "/client/build")));
 
-//console.log(path.join(__dirname + "/client/build"));
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
