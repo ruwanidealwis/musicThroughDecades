@@ -173,7 +173,7 @@ class VerticalBarChart extends React.Component {
 
     if (this.props.user) {
       this.state.data.datasets.pop();
-      console.log(this.state.data);
+      ////console.log(this.state.data);
     }
   }
 

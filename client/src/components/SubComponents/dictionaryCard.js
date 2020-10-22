@@ -8,7 +8,7 @@ import Grid from "@material-ui/core/Grid";
 class DictionaryCard extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
+    ////console.log(props);
   }
   //Card inspired from: https://material-ui.com/components/cards/
   render() {

@@ -67,7 +67,7 @@ class TopTwentySongs extends React.Component {
               {this.props.data
                 .slice(arrItem, arrItem + addValue)
                 .map((item, index) => {
-                  //console.log(item);
+                  ////console.log(item);
                   return (
                     <div>
                       {" "}

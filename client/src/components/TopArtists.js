@@ -59,7 +59,7 @@ class TopArtists extends React.Component {
     );
   }
   changeToggle(key, value) {
-    console.log(key);
+    //console.log(key);
     this.setState({ [key]: !value });
   }
 

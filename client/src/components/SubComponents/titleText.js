@@ -4,7 +4,7 @@ import Divider from "@material-ui/core/Divider";
 class TitleText extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
+    //console.log(props);
   }
 
   render() {
