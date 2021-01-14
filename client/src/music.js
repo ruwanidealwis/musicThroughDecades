@@ -73,6 +73,7 @@ class Music extends React.Component {
           compareValueData: data.comparator,
           loading: false,
         });
+        console.log(this.state);
         localStorage.clear();
       });
   }

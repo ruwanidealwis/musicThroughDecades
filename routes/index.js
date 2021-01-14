@@ -87,13 +87,13 @@ router.get("/compare/:comparators", async (req, res) => {
         req,
         res
       );
+      res.status(200).redirect("/music");
 
       await databaseTable.deleteUserSongsFromDatabase(
         req.session.id,
         req.session.decade
       );
       await databaseTable.deleteTempUser(req.session.id);
-      res.status(200).redirect("/music");
     } else {
       res
         .status(400)
@@ -120,6 +120,7 @@ router.get("/compare/:comparators", async (req, res) => {
           req,
           req.session.decade2
         );
+        res.status(200).redirect("/music");
 
         //await databaseTable.deleteSongsFromDB(req.session.decade2);
         //await databaseTable.deleteArtistsFromDB(req.session.decade2);
@@ -135,8 +136,6 @@ router.get("/compare/:comparators", async (req, res) => {
         );
 
         await databaseTable.deleteTempUser(req.session.id);
-
-        res.status(200).redirect("/music");
       } else {
         res
           .status(400)
