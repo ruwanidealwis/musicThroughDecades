@@ -1,10 +1,10 @@
+import { Grid, Typography } from "@material-ui/core";
+import Card from "@material-ui/core/Card";
 import Chip from "@material-ui/core/Chip";
-import React from "react";
+import Divider from "@material-ui/core/Divider";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
-import Divider from "@material-ui/core/Divider";
-import Card from "@material-ui/core/Card";
-import { Grid, Typography } from "@material-ui/core";
+import React from "react";
 
 const style = {
   paddingLeft: "3.2%",

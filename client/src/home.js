@@ -12,10 +12,9 @@ import { ReactComponent as Headphones } from "./images/headphones.svg";
 class Home extends React.Component {
   constructor(props) {
     super(props);
-    console.log(window.location);
+
     const urlParams = new URLSearchParams(window.location.search);
-    //nee
-    console.log(urlParams.get("code"));
+
     const isAuthorized = urlParams.has("authorized") ? true : false;
     this.state = {
       code: urlParams.get("code"),
@@ -51,18 +50,12 @@ class Home extends React.Component {
 
   componentDidMount() {
     //this.getStats();
-    console.log(localStorage);
-    console.log(this.state);
+
     if (this.state.isAuthorized) {
-      console.log("hi authorized!");
-      console.log(localStorage.getItem("query"));
       this.getData(localStorage.getItem("query"));
     }
   }
-  componentDidUpdate(previousProps, previousState) {
-    console.log(previousState);
-    console.log(this.state);
-  }
+  componentDidUpdate(previousProps, previousState) {}
   getFormat(value) {
     switch (value) {
       case "fifties":
@@ -127,7 +120,6 @@ class Home extends React.Component {
   needsUser(secondValue) {
     let userSpotify = ["allTime", "sixMonths", "oneMonth"];
     if (userSpotify.includes(secondValue)) {
-      console.log("needsUser");
       this.setState({ needsAuthorization: true }); //need user authorization....
       return true;
     } else return false;
@@ -136,7 +128,6 @@ class Home extends React.Component {
     fetch("/login")
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
         window.location = data.url; //redirect to authorization URL
       });
   }
@@ -150,14 +141,6 @@ class Home extends React.Component {
         user: this.state.needsAuthorization,
       },
     });
-    /*this.setState({ fetching: true });
-    fetch(`/compare/${values}?code=${this.state.code}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        this.setState({ data: data });
-        localStorage.clear();
-      });*/
   }
 
   async toCompare() {
@@ -176,35 +159,28 @@ class Home extends React.Component {
     let userAuth = false;
     let values = "";
     for (const key of keys) {
-      console.log(key);
-      console.log(this.state[key]);
       if (this.state[key] === true) {
         if (values != "") {
           values = values + this.getFormat(key);
         } else values = values + this.getFormat(key) + "-";
         userAuth = this.needsUser(key);
-        console.log(userAuth);
       }
     }
     if (userAuth) {
       localStorage.setItem("query", values);
       await this.allowLogin();
     } else {
-      console.log("hi");
       this.getData(values);
     }
   }
 
   checkToDisable(event) {
     if (event.checked === false) {
-      console.log("hi");
       this.setState({ count: this.state.count === 0 ? 0 : --this.state.count }); //dont decrease count if its already 0
     } else {
-      console.log("increasing");
       this.setState({ count: ++this.state.count });
     }
 
-    console.log(this.state.count);
     if (this.state.count >= 2) {
       this.setState({ disabled: true });
     } else {
@@ -212,14 +188,10 @@ class Home extends React.Component {
     }
   }
   handleChange(event) {
-    console.log([event]);
-    console.log(event.value);
-    console.log(event.checked);
     localStorage.setItem([event.value], event.checked); //set local storage...
 
     this.checkToDisable(event); //if reached limit --> disable
     let firstVal = this.state.count === 0 ? true : false; //first value picked
-    console.log();
     let needUser = this.needsUser(event.value);
 
     if (event.checked === true) {
@@ -227,7 +199,7 @@ class Home extends React.Component {
       //only two elements in the array so...
 
       let userPicked = [event.value, this.state.userPicked[1]];
-      console.log(userPicked);
+
       //console.log(ReactDOM.findDOMNode("1970s"));
       this.state[this.getFormat(this.state.picked[0])] === true
         ? this.setState({
@@ -239,7 +211,6 @@ class Home extends React.Component {
     } else {
       //unchecks...
 
-      console.log();
       this.state.picked[0] === event.parentNode.id
         ? this.setState({
             picked: ["____________", this.state.picked[1]],

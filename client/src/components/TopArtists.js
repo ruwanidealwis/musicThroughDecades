@@ -1,13 +1,11 @@
-import React from "react";
-
-import LargeTitleText from "./SubComponents/largeTitleText";
-
 import { Grid, Typography } from "@material-ui/core";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
-
-import TitleText from "./SubComponents/titleText";
 import Switch from "@material-ui/core/Switch";
+import React from "react";
+import LargeTitleText from "./SubComponents/largeTitleText";
+import TitleText from "./SubComponents/titleText";
 import TopTwentyArtists from "./SubComponents/top20Artists";
+
 class TopArtists extends React.Component {
   constructor(props) {
     super(props);
@@ -59,18 +57,11 @@ class TopArtists extends React.Component {
     );
   }
   changeToggle(key, value) {
-    console.log(key);
     this.setState({ [key]: !value });
   }
 
   render() {
-    const {
-      decade,
-      compareValue,
-      toggleComparatorOn,
-      toggleDecadeOn,
-      title,
-    } = this.state;
+    const { decade, toggleComparatorOn, toggleDecadeOn, title } = this.state;
     return (
       <Grid container spacing={6} style={{ margin: "auto" }}>
         {" "}
@@ -106,7 +97,7 @@ class TopArtists extends React.Component {
             />
           )}
           <Grid item>
-            {this.state.decade == "2010" ? (
+            {this.state.decade === "2010" ? (
               <Typography variant="body1">
                 The top overall artists of the 2010s is based on US data because
                 the worldwide data is not yet available
@@ -145,7 +136,7 @@ class TopArtists extends React.Component {
             />
           )}
           <Grid item>
-            {this.state.compareValue == "2010" ? (
+            {this.state.compareValue === "2010" ? (
               <Typography variant="body1">
                 The top overall artists of the 2010s is based on US data because
                 the worldwide data is not yet available

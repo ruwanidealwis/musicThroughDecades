@@ -24,7 +24,6 @@ const { resolve } = require("path");
 
 /*********************************************** SET BASIC INFO (if running locally...) *********************************/
 if (process.env.PORT == null) {
-  //console.log("local");
   redirectUri = "http://localhost:8000/callback";
 }
 /**
@@ -68,8 +67,7 @@ let getCSVData = async (decade, req) => {
         dynamicTyping: true,
         complete: async (results) => {
           req.session.top100Hits = formatData(results.data, req);
-          console.log("formatedd data:");
-          console.log(req.session.top100Hits);
+
           resolve(req.session.top100Hits);
         },
       });
@@ -81,8 +79,6 @@ let getCSVData = async (decade, req) => {
       Papa.parse(file, {
         delimiter: "|",
         complete: function (results) {
-          console.log("hello");
-
           for (const artist of results.data) {
             req.session.topArtistIdArray.push(artist[1]);
           }
@@ -97,28 +93,6 @@ let getCSVData = async (decade, req) => {
 
   file = fs.createReadStream(`dataFiles/${decade}Artists.csv`);
   const artistResults = await artistReading(file);
-
-  /*return new Promise(function (success, nosuccess) {
->>>>>>> Stashed changes
-    let options = {
-      mode: "text",
-      pythonPath:
-        "/Library/Frameworks/Python.framework/Versions/3.8/bin/python3",
-      pythonOptions: ["-u"], // get print results in real-time
-      scriptPath:
-        "/Users/ruwanidealwis/Downloads/GitHub/musicThroughDecades/webScraperPython", //should update to local path...
-      args: [req.session.decade],
-    };
-
-    PythonShell.run("./webScraper.py", options, function (err, results) {
-      if (err) {
-        //console.log(err);
-        nosuccess(err);
-      }
-      // results is an array consisting of messages collected during execution
-      success(results);
-    });
-  });*/
 };
 
 /**
@@ -134,9 +108,6 @@ authorizeApp = async () => {
     //adapted from from: https://github.com/thelinmichael/spotify-web-api-node
     spotifyApi.clientCredentialsGrant().then(
       function (data) {
-        //console.log("The access token expires in " + data.body["expires_in"]);
-        //console.log("The access token is " + data.body["access_token"]);
-
         // Save the access token so that it's used in future calls
         spotifyApi.setAccessToken(data.body["access_token"]);
         resolve(spotifyApi);
@@ -162,7 +133,6 @@ let formatData = (data, req) => {
   let allHitsArray = [];
 
   for (const hit of data) {
-    console.log(hit);
     allHitsArray.push({
       track: hit[0],
       year: hit[2],
@@ -172,63 +142,10 @@ let formatData = (data, req) => {
 
     hit[5].split(",").forEach((id) => req.session.artistsIdArray.push(id));
 
-    //console.log("artistsId");
-    // console.log(artistsIdArray);
     req.session.songIdArray.push(hit[4]);
-
-    console.log(hit[5]);
-    console.log(hit[5].split(",").length);
   }
 
   return allHitsArray;
-  /*
-=======
-    //console.log("artistsId");
-    //console.log(artistsIdArray);
-    songIdArray.push(hit[4]);
-    albumIdArray.push(hit[6]);
-    //console.log(hit[5]);
-    //console.log(hit[5].split(",").length);
-  }
-  return allHitsArray;
-  /*
->>>>>>> Stashed changes
->>>>>>> Stashed changes
-  let dataToModify = data[0];
-  //console.log(dataToModify);
-  let allHitsArray = [];
-  let newData = dataToModify.substring(1, data[0].length - 1).split("',");
-
-<<<<<<< Updated upstream
-
-=======
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-  console.log(newData);
-=======
-
-  //console.log(newData);
->>>>>>> Stashed changes
-
-  newData.forEach((hit) => {
-    //console.log(hit);
-    let artists = [];
-    let splitHit = hit.replace("'", "").split(" - ");
-    if (splitHit[1] != null) artists = splitHit[1].split("&") || "";
-    if (splitHit[2] == null) splitHit[2] = "";
-    if (splitHit[3] == null) splitHit[3] = 101;
-    ////console.log(splitHit[0]);
-    allHitsArray.push({
-      track: splitHit[0] || hit,
-      artist: artists[0],
-      year: splitHit[2].replace("'", ""),
-      artistRank: parseInt(splitHit[3]),
-    }); //because of the way the website is structured (this may not be exactly correc t)
-  });
-
-
-};
-*/
 };
 /**
  * Gets information about the artists (name, genres, image)
@@ -241,11 +158,10 @@ var getArtistInfo = async (ids) => {
   return spotifyApi.getArtists(ids).then(
     (data) => {
       index = 0;
-      ////console.log("Artist information", data.body.artists);
+
       data.body.artists.forEach((artistObject) => {
-        ////console.log(artistObject);
         image = "";
-        //console.log(index);
+
         if (artistObject.images[0] != null) image = artistObject.images[0].url;
         let obj = {
           name: artistObject.name,
@@ -293,96 +209,14 @@ var getBasicSongInfo = async (songIdArray, startIndex, req) => {
       }
       returnData.push(object);
 
-      //console.log(object.artists);
-      //console.log(object.release);
-      //console.log(object.name);
       i = i + 1;
-      //console.log(i);
     }
     return returnData;
   });
-  /*return spotifyApi
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
-    .searchTracks((trackObject.track || "") + " " + (trackObject.artist || ""))
-    .then(
-      function (data) {
-        return data.body.tracks.items[0];
-      },
-      function (err) {
-        console.error(err);
-        return err;
-      }
-    )
-    .then(
-      async (data) => {
-        //format array properly...
-        if (data == null) {
-          let object = {
-            id: "",
-            albumId: "",
-            name: trackObject.track,
-            release: trackObject.year,
-            image: "",
-            artists: [{ name: trackObject.artist, imageURL: "" }],
-            popularity: -1,
-            artistRank: trackObject.artistRank,
-          };
-          fullInfoHitArray.push(object);
-          songIdArray.push("");
-        } else {
-          let artistsId = [];
-          data.artists.forEach((artist) => {
-            artistsId.push(artist.id);
-          });
-          let artistInfo = await getArtistInfo(artistsId); //get
-          await delay(170); //waits 100ms (gets around spotify api rate limiting)
-          let object = {
-            spotifyId: data.id,
-            albumId: data.album.id,
-            name: data.name.split("-")[0].trim(), //taken from: https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses
-            release: trackObject.year,
-            image: data.album.images[0].url,
-            artists: artistInfo,
-            popularity: data.popularity,
-            previewURL: data.preview_url,
-            artistRank: trackObject.artistRank,
-          };
-          if (object.release === "") {
-            object.release = data.album.release_date;
-          }
-
-          if (data.preview_url == null) {
-            //console.log("sajiodjaiojeqioajsdiojasdiojio");
-            delay(200);
-            let track = await spotifyApi.getTrack(data.id, { market: "US" });
-            //console.log(track.body.preview_url);
-            object.previewURL = track.body.preview_url;
-          }
-          //console.log(data.album.release_date);
-          fullInfoHitArray.push(object);
-          songIdArray.push(data.id);
-        }
-        return fullInfoHitArray;
-      },
-      (error) => {
-        return err;
-      }
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-    );
-=======
->>>>>>> Stashed changes
-    );*/
 };
 
 let getAlbumInfo = async function (partialAlbumIds) {
   spotifyApi.getAlbums(partialAlbumIds).then((data) => {});
-
-  //console.log(data.body);
 };
 
 /**
@@ -391,7 +225,7 @@ let getAlbumInfo = async function (partialAlbumIds) {
  */
 let getSongInformation = async function (decade, req) {
   let arr = [0, 50, 100, 150, 200];
-  console.log("here");
+
   let artistInfo = [];
   for (const index of arr) {
     if (index > req.session.artistsIdArray.length) {
@@ -402,12 +236,12 @@ let getSongInformation = async function (decade, req) {
       end = index + (req.session.artistsIdArray.length % 50);
     }
     let partialArtistIds = req.session.artistsIdArray.slice(index, end);
-    console.log(partialArtistIds);
+
     artistInfo = artistInfo.concat(await getArtistInfo(partialArtistIds));
   }
   let firstHalf = req.session.songIdArray.slice(0, 50);
   let secondHalf = req.session.songIdArray.slice(50, 100);
-  // console.log(secondHalf);
+
   let firstHalfData = await getBasicSongInfo(firstHalf, 0, req);
   let secondHalfData = await getBasicSongInfo(secondHalf, 50, req);
   let audioData = await getAudioInfo(req.session.songIdArray, 3); //await until
@@ -431,12 +265,6 @@ let getSongInformation = async function (decade, req) {
     //start from where we left off, and add until we get to length
     for (let j = artistIndex; j < end; j++) {
       req.session.fullInfoHitArray[i].artists.push(artistInfo[j]);
-      /* console.log(fullInfoHitArray[i].name);
-      console.log(artistInfo[j]);
-      console.log("start " + artistIndex);
-      console.log("end " + end);
-      console.log("full length " + parseInt(artistIndex));
-      console.log(i);*/
     }
 
     artistIndex = end;
@@ -447,22 +275,6 @@ let getSongInformation = async function (decade, req) {
       req.session.id
     );
   }
-
-  console.log(req.session.fullInfoHitArray);
-  //console.log(artistInfo.length);
-  //console.log(fullInfoHitArray);
-  /*for (const trackObject of top100Hits) {
-=======
-<<<<<<< Updated upstream
-let getSongInformation = async function () {
-  for (const trackObject of top100Hits) {
->>>>>>> Stashed changes
-    //console.log(trackObject);
-    await getBasicSongInfo(trackObject);
-    //await genreInformation(trackObject); //gets genre of ALBUM!
-  } //waits till promise is resolved (this maintains order)
-  console.log("done");
-  //console.log(fullInfoHitArray);*/
 
   return fullInfoHitArray;
 };
@@ -476,8 +288,6 @@ let getSongInformation = async function () {
 let getAudioInfo = async function (songIdArray, retries) {
   return spotifyApi.getAudioFeaturesForTracks(songIdArray).then(
     (data) => {
-      //console.log(songIdArray);
-
       return data.body.audio_features;
     },
     async (err) => {
@@ -511,12 +321,9 @@ let getSongAudioInformation = async function (req) {
     req.session.retries
   ); //await until
 
-  //å//console.log(returnData);
   let i = 0;
 
   for (var songObject of req.session.myTopHits) {
-    ////console.log(returnData[i]);
-    //console.log(songObject);
     if (returnData[i] === null) {
       songObject.danceability = -1;
       songObject.energy = -1;
@@ -550,8 +357,6 @@ let getSongAudioInformation = async function (req) {
  * @return {Promise} Array with the information on the users top hits (if successful), or throws an error (after all retries used up)
  */
 let getUserTopTracks = async (timeRange, retries, req) => {
-  //console.log(timeRange);
-  //console.log(spotifyApi);
   return spotifyApi
     .getMyTopTracks({
       time_range: timeRange,
@@ -559,7 +364,6 @@ let getUserTopTracks = async (timeRange, retries, req) => {
     })
     .then(
       async (data) => {
-        //console.log(data);
         for (var songObject of data.body.items) {
           req.session.songIdArray.push(songObject.id); //push to array to get audio features...
           let artistsId = [];
@@ -586,7 +390,6 @@ let getUserTopTracks = async (timeRange, retries, req) => {
         return myTopHits;
       },
       async (err) => {
-        //console.log(err);
         /* if (retries > 0) {
           console.error(err.headers);
           (await err.headers["retry-after"])
@@ -609,7 +412,7 @@ let getUserId = (req) => {
       req.session.userId = data.body.id;
     },
     function (err) {
-      //console.log("Something went wrong!", err);
+      console.log("Something went wrong!", err);
     }
   );
 };
@@ -626,7 +429,6 @@ let getUserTopArtists = (timeRange) => {
       limit: 10,
     })
     .then(async (data) => {
-      //console.log(data);
       let topArtists = [];
       for (var ArtistObject of data.body.items) {
         topArtists.push({
@@ -660,8 +462,7 @@ exports.getMusicInformation = async (req, decade) => {
 
     req.session.topArtistIdArray = [];
   }
-  console.log("getting csv");
-  console.log(decade);
+
   await getCSVData(decade, req);
   if (req.session.type === "decade") await authorizeApp();
   else {
@@ -676,10 +477,9 @@ exports.getMusicInformation = async (req, decade) => {
       console.log("refreshAccessToken");
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
 
-      console.log();
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
-      console.log(spotifyApi);
+
       //req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
     } else {
       let data = await spotifyApi.refreshAccessToken();
@@ -706,42 +506,6 @@ exports.getMusicInformation = async (req, decade) => {
   req.session.topArtistIdArray = [];
 
   return data;
-  /*return getCSVData(req)
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
-      .then((data) => {
-        return authorizeApp();
-      })
-      .then(async (data) => {
-        // //console.log("hi");
-        ////console.log(top100Hits);
-        /*let login = await spotifyApi.authorizationCodeGrant(req.query.code);
-        spotifyApi.setAccessToken(login.body["access_token"]);
-        spotifyApi.setRefreshToken(login.body["refresh_token"]);
-        return getSongInformation();})
-      .then((data) => {
-        // //console.log(fullInfoHitArray);
-
-        return getSongAudioInformation(
-          fullInfoHitArray,
-          "",
-          decade,
-          req.session.retries
-        );
-      })
-      .then((data) => {
-        // //console.log(fullInfoHitArray);
-        //eturn saveToDatabase(fullInfoHitArray, "");
-        return databaseTable.getDecadeStatistics(decade);
-      })
-      .then((data) => {
-        fullInfoHitArray = [];
-        top100Hits = [];
-        spotifyApi = {}; //empty object again...
-        return data;
-      });*/
 };
 
 /*********************************** EXPORTED FUNTIONS ***********************************/
@@ -764,8 +528,7 @@ exports.getAuthorizationURL = (timeRange, req) => {
     ["user-top-read", "playlist-modify-private"],
     state
   ); //generated
-  //console.log(redirectUri);
-  //console.log(authorizeURL);
+
   return authorizeURL;
 };
 
@@ -790,39 +553,36 @@ exports.getUserListeningHabbits = async (req, res) => {
   /*if (spotifyApi == undefined) {
     res.redirect("/login");
   } else {
-    //console.log(spotifyApi.getRefreshToken());
+    
     if (
       spotifyApi.getRefreshToken() == null ||
       spotifyApi.getRefreshToken() != req.session.token
     ) {
-      console.log("gettiong code...");
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
 
       spotifyApi.setAccessToken(data.body["access_token"]);
       req.session.token = data.body["access_token"];8?
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
       req.session.refresh = data.body["refresh_token"];
-      console.log(spotifyApi);
+   
 
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
 
-      /* //console.log("got here");
+     
       let data = await spotifyApi.authorizationCodeGrant(req.query.code);
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
-      //console.log(spotifyApi);
+   
       req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
     } else {*/
   let data = await spotifyApi.refreshAccessToken();
   spotifyApi.setAccessToken(data.body["access_token"]);
-  console.log("refreshAccessToken");
 
   req.session.userTopRead = getReadChoice(req.session.userTopRead); //what data should be queried for...
-  console.log(req.session.userTopRead);
 
   await getUserId(req);
   //await databaseTable.createTempUser(req.session.id); already created
-  //console.log(req.session);
+
   await getUserTopTracks(req.session.userTopRead, req.session.retries, req); //gets the top tracks for the user
   await delay(230); //waits 230ms (gets around spotify api rate limiting)
 
@@ -851,7 +611,6 @@ exports.createPlaylist = (req) => {
     .refreshAccessToken()
     .then(
       (data) => {
-        //console.log(data.body);
         return data;
       },
       (err) => {
@@ -871,7 +630,6 @@ exports.createPlaylist = (req) => {
     })
     .then(
       (data) => {
-        //console.log(data.body);
         //use the req.comparator object to get the user reccomended songs and add them to playlist
         req.session.playlistId = data.body.id;
         playlistURL = data.body.external_urls.spotify;

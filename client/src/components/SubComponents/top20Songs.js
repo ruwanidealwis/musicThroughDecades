@@ -1,13 +1,5 @@
-import React from "react";
-
-import Typography from "@material-ui/core/Typography";
-import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
-import CardMedia from "@material-ui/core/CardMedia";
 import Grid from "@material-ui/core/Grid";
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import PauseIcon from "@material-ui/icons/Pause";
-import IconButton from "@material-ui/core/IconButton";
+import React from "react";
 import "../styles/top20.css";
 import SongComponent from "./songComponent";
 
@@ -67,7 +59,6 @@ class TopTwentySongs extends React.Component {
               {this.props.data
                 .slice(arrItem, arrItem + addValue)
                 .map((item, index) => {
-                  //console.log(item);
                   return (
                     <div>
                       {" "}

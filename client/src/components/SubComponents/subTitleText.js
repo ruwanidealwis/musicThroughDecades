@@ -10,7 +10,6 @@ const textStyle = {
 class SubTitleText extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
   }
 
   render() {

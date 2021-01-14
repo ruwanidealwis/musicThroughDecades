@@ -14,17 +14,15 @@ const style = {
 class SongFeatures extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props);
+
     let compareText = `${this.props.compareValue}`;
 
     let minYear = "";
     let maxYear = "";
     let lowLabel = ` Lowest ${this.props.feature} Songs of the ${this.props.compareValue}'s`;
     let highLabel = ` Highest ${this.props.feature} Songs of the ${this.props.compareValue}'s`;
-    console.log(this.props.compareValueData[`average${this.props.feature}`]);
 
     if (!this.props.user) {
-      console.log("hi");
       let decadeMin = Math.min(
         ...this.props.decadeData[`yearlyAverage${this.props.feature}`]
       );
@@ -88,7 +86,6 @@ class SongFeatures extends React.Component {
       lowLabel: lowLabel,
       compareText: compareText,
     };
-    console.log(this.state);
   }
 
   render() {

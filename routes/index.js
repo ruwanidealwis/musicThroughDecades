@@ -30,9 +30,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/music/createPlaylist", (req, res) => {
-  //console.log("hello");
   spotifyController.createPlaylist(req).then((url) => {
-    //console.log(url);
     res.status(200).send({ url: url });
     (err) => {
       res.send(400).send({ error: "Could not Create Playlist" });
@@ -41,11 +39,6 @@ router.get("/music/createPlaylist", (req, res) => {
 });
 
 router.get("/music", (req, res) => {
-  //console.log(req.session.userTopRead);
-  //console.log(req.session.id);
-  //console.log(req.session.type);
-  //console.log(req.session.userId);
-
   //logic from :https://github.com/finallyayo/music-history/blob/master/server.js
   //res.redirect(`${clientURL}/?authorized=true`);
   res.status(200).json({
@@ -55,14 +48,11 @@ router.get("/music", (req, res) => {
 });
 
 router.get("/login", (req, res) => {
-  //console.log("logging in");
   timeRange = req.query.timeRange;
   let url = spotifyController.getAuthorizationURL(req);
   res.status(200).send({ url: url }); //now redirects user to authorization... (after successful should return to callback...)
 });
 router.get("/callback", async (req, res) => {
-  //console.log("redirecting to: " + `${clientURL}/?authorized=true`);
-
   res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
 });
 
@@ -78,7 +68,7 @@ router.get("/compare/:comparators", async (req, res) => {
   req.session.songIdArray = [];
   req.session.albumIdArray = [];
   req.session.topArtistIdArray = [];
-  console.log(req.params.comparators.split("-"));
+
   await databaseTable.createTempUser(req.session.id);
   let comparators = req.params.comparators.split("-"); //getting properly formatted comparators
   if (userSpotify.includes(comparators[1])) {
@@ -86,7 +76,7 @@ router.get("/compare/:comparators", async (req, res) => {
     let validated = validateValues(comparators[0]);
     if (validated === true) {
       req.session.decade = comparators[0];
-      //console.log(req.session.decade);
+
       req.session.userTopRead = comparators[1];
       req.session.decadeStats = await spotifyController.getMusicInformation(
         req,
@@ -160,7 +150,7 @@ router.get("/compare/:comparators", async (req, res) => {
   }
 
   /*let validated = validateValues(comparators[0]);
-  //console.log(validated);
+
   if (validated === true) {
     req.session.decade = comparators[0];
 
@@ -208,8 +198,7 @@ router.get("*", (req, res) => {
   //taken from: https://stackoverflow.com/questions/16750524/remove-last-directory-in-url
   let rootPath = __dirname.split(path.sep);
   rootPath.pop();
-  //console.log(req.path);
-  //console.log("hi");
+
   //res.sendFile(path.join(rootPath.join(path.sep) + "/client/build/index.html"));
 });
 

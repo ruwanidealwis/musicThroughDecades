@@ -39,8 +39,6 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionId) => {
     raw: true,
   });
 
-  ////console.log(decadeId);
-
   let song = await db.Songs.findOrCreate({
     where: {
       spotifyId: songObjects.spotifyId,
@@ -66,7 +64,6 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionId) => {
     },
   });
 
-  console.log(song[0].dataValues);
   await db.UserSongs.create({
     sessionId: sessionId,
     songId: song[0].dataValues.id,
@@ -95,7 +92,6 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionId) => {
  * @param {String} sessionId the id of the current session
  */
 exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
-  ////console.log(songObjects);
   //we first have to check if this song exists...
   let dateArray = songObjects.release.split("-"); //get the date (we only care about year, not exact date)
   let song = await db.Songs.findOne({
@@ -106,14 +102,14 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
     },
     include: [{ model: db.Artist }],
   });
-  ////console.log(song);
+
   if (song == null) {
     //wecreate the song.... but we make it temporary (after we get all the data the song is deleted from the database)
-    //console.log(dateArray[0]);
+
     await createUserEntry(songObjects, dateArray, sessionId, index);
   } else {
     //create a manual association with UserSong and for all the artists aswell
-    ////console.log(sessionId);
+
     //make a user
     song.temp = true;
     song.save();
@@ -143,15 +139,12 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionId) => {
         defaults: { temp: true, sessionId: sessionId, artistId: artist.id },
       });
 
-      console.log("here");
       let existingArtist = await db.UserArtists.findOne({
         where: { sessionId: sessionId, artistId: artist.id },
       });
 
       existingArtist.temp = true;
       existingArtist.save(); //normal save not wowkring workaround for now...
-
-      console.log(createdArtist[0]);
     }
   }
 };
@@ -172,7 +165,6 @@ exports.deleteUserSongsFromDatabase = async (sessionId, decade) => {
     ],
   });
 
-  ////console.log(possibleSongs);
   let count = 0;
   for (const song of possibleSongs) {
     let songId = song.id;
@@ -187,11 +179,9 @@ exports.deleteUserSongsFromDatabase = async (sessionId, decade) => {
         //because of cascade delete it will delete this from userSongs database
         for (const artist of song.Artists) {
           // we know they are temporary, but that does not mean they are not associated with other users!
-          ////console.log(artist);
 
           //if there is only one user that is associated with it and that user is current user (then delete it from DB)
-          //////console.log("Other Users.....");
-          // ////console.log(otherUsers);
+
           await deleteUserArtistsFromDatabase(artist, sessionId);
         }
         await db.Songs.destroy({
@@ -201,10 +191,7 @@ exports.deleteUserSongsFromDatabase = async (sessionId, decade) => {
 
       //now should be removed from all associations
     }
-    //console.log(count);
   }
-
-  ////console.log(count);
 };
 
 exports.deleteTempUser = async (sessionId) => {
@@ -246,7 +233,6 @@ let createUserEntry = async (songObjects, dateArray, sessionId, index) => {
       }, //TODO CHANGE THIS}
       raw: true,
     });
-    ////console.log(artist_id);
     let createArtistId;
     if (artist_id === null) {
       //create new artist and then add it...
@@ -354,8 +340,6 @@ let addPermanantArtists = async (
       sessionId: sessionId,
       artistId: artistId.id,
     });
-
-    // ////console.log(artist_id);
   } else {
     //already created we just add an extra association
     await db.SongArtists.create({
@@ -400,8 +384,6 @@ let deleteUserArtistsFromDatabase = async (artist, sessionId) => {
     include: [{ model: db.tempUser }, { model: db.Songs }],
   });
   //if there is only one user that is associated with it and that user is current user (then delete it from DB)
-  ////console.log("Other Users.....");
-  //////console.log(otherUsers);
 
   //if its null it means that the artist was also in another song and was already deleted
   //has to be false otherwise the artist is one of the artists of the decade....
@@ -421,8 +403,6 @@ let getSongDistributionByYear = (decade, year) => {
     where: { name: decade },
     include: [{ model: db.Songs, where: { yearOfRelease: year } }],
   }).then((data) => {
-    ////console.log(data);
-    ////console.log(data.Songs);
     return data.Songs.length;
   });
 };
@@ -446,7 +426,6 @@ exports.getAmount = async (decade) => {
     include: [{ model: db.Songs }],
   }); //only have one, name is unique
 
-  ////console.log(decadeInfo.Songs.length);
   return decadeInfo.Songs.length;
 };
 
@@ -478,7 +457,6 @@ let getTopArtistsByRank = (decade) => {
     let topArtistsArray = [];
     let limit = 0;
     for (const artist of data[0].Artists) {
-      ////console.log(artist);
       if (limit < 10)
         topArtistsArray.push({
           name: artist.name,
@@ -508,10 +486,8 @@ getAverageValue = async (feature, decade, start, end) => {
       });
     })
     .then((data) => {
-      ////console.log(data);
       return data.average;
     });
-  //////console.log(decadeInfo.Songs);
 };
 getTopFeaturesForDecade = async (
   feature,
@@ -546,7 +522,6 @@ getTopFeaturesForDecade = async (
   }); //only have one, name is unique
 
   for (const songs of decadeInfo.Songs) {
-    // ////console.log(songs);
     //cant do it in original query, breaks it
     let songArtists = await db.Songs.findByPk(songs.id, {
       include: [{ model: db.Artist, attributes: ["name"] }],
@@ -574,7 +549,6 @@ let getDecadeDiscription = (decade) => {
     raw: true,
     where: { name: decade },
   }).then((data) => {
-    //console.log(data);
     return data.description;
   });
 };
@@ -592,7 +566,6 @@ let getTopSongs = (decade) => {
     })
       .then((songs) => {
         for (const song of songs) {
-          ////console.log(song);
           let artists = [];
 
           for (const artist of song.Artists) {
@@ -714,10 +687,8 @@ ORDER BY
       );
     })
     .then((data) => {
-      //////console.log(data);
       let topArtists = [];
       for (const artist of data) {
-        ////console.log(artist);
         topArtists.push({
           name: artist["Artists.name"],
           hits: artist["Artists.Songs.count"],
@@ -831,7 +802,7 @@ exports.getDecadeStatistics = async (decade) => {
   keyDistribution = keyDistribution.sort((a, b) => a.key - b.key);
 
   fullStatsObject[`keyDistribution`] = keyDistribution;
-  //////console.log(modeD);
+
   //get Key distributions
   let songDistributionByYear = [];
   let year = parseInt(decade);
@@ -843,12 +814,10 @@ exports.getDecadeStatistics = async (decade) => {
   fullStatsObject[`distributionByYear`] = songDistributionByYear;
   fullStatsObject[`mostPopularGenres`] = await getMostCommonGenres(decade);
 
-  //////console.log(fullStatsObject);
   fullStatsObject[`topArtists`] = await getTopArtistsByRank(decade);
-  //console.log(getDecadeDiscription(decade));
+
   fullStatsObject[`description`] = await getDecadeDiscription(decade);
   return fullStatsObject;
-  //////console.log(fullStatsObject);
 
   //get overll adecade stats
 };
@@ -879,18 +848,16 @@ let getUserTopFeatures = async (sessionId, feature, order, limit) => {
       //order: [[db.UserSongs, "createdAt", "DESC"]],
     })
     .then((data) => {
-      // ////console.log(data);
       let topSongs = [];
-      //////console.log(data);
+
       let i = 1;
-      //////console.log(data);
+
       for (const song of data[0].Songs) {
-        ////console.log(song);
         let artists = [];
         for (const artist of song.Artists) {
           artists.push(artist.name);
         }
-        //console.log(song[feature]);
+
         topSongs.push({
           name: song.name,
           year: song.yearOfRelease,
@@ -929,7 +896,6 @@ let getUserAverageFeature = async (sessionId, feature) => {
       //order: [[db.UserSongs, "createdAt", "DESC"]],
     })
     .then((data) => {
-      // ////console.log(data);
       return data[0].average;
     });
 };
@@ -958,7 +924,7 @@ let getUserDistribution = async (sessionId, feature) => {
     })
     .then((data) => {
       let decadeDistribution = data;
-      ////console.log(data);
+
       for (const key of data) {
         if (feature === "yearOfRelease") {
           decadeDistribution = {};
@@ -1002,7 +968,7 @@ let getSongReccomendations = (decadeId, infoObj) => {
       },
     }).then((data) => {
       let reccomendationsArray = [];
-      ////console.log(data);
+
       for (const song of data) {
         let artists = [];
         for (const artist of song.Artists) {
@@ -1081,10 +1047,8 @@ let getMostHits = (sessionId) => {
     ],
   }).then((data) => {
     let artistArray = [];
-    console.log(data[0]);
+
     for (const UserArtists of data) {
-      ////console.log();
-      console.log(UserArtists.Artist.Songs.length);
       artistArray.push({
         name: UserArtists.Artist.name,
         hits: UserArtists.Artist.Songs.length,
@@ -1171,7 +1135,6 @@ exports.getUserStatistics = async (sessionId, decade) => {
   fullStatsObject[`keyDistribution`] = keyDistribution;
 
   fullStatsObject[`mostPopularGenres`] = await userMostPopularGenres(sessionId);
-  // ////console.log(fullStatsObject);
 
   fullStatsObject[`top10ArtistsByHits`] = await getMostHits(sessionId);
 

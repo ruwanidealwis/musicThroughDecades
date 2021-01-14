@@ -15,7 +15,7 @@ app.use(
     saveUninitialized: true,
   })
 );
-//require node module for the spotify api
+//express use static build for client...
 app.use(express.static(path.join(__dirname + "/client/build")));
 
 app.use(express.json());

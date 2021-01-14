@@ -1,16 +1,13 @@
 import { Button, Grid, Typography } from "@material-ui/core";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import IconButton from "@material-ui/core/IconButton";
+import Link from "@material-ui/core/Link";
+import CloseIcon from "@material-ui/icons/Close";
 import PlaylistAddIcon from "@material-ui/icons/PlaylistAdd";
 import React from "react";
 import LargeTitleText from "./SubComponents/largeTitleText";
 import TopTwentySongs from "./SubComponents/top20Songs";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Link from "@material-ui/core/Link";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
 
 class UserReccomendations extends React.Component {
   constructor(props) {
@@ -27,17 +24,14 @@ class UserReccomendations extends React.Component {
   }
   createPlaylist() {
     fetch(`/music/createPlaylist`)
-      .then((res) => res.json())
+      .then((res) => {
+        return res.json();
+      })
       .then((data) => {
-        console.log(data);
-
         this.setState({ playlistURL: data.url, open: true });
-        console.log(this.state.playlistURL);
       });
   }
-  componentDidUpdate() {
-    console.log(this.state);
-  }
+  componentDidUpdate() {}
   render() {
     const { open } = this.state;
     return (
