@@ -66,11 +66,15 @@ class Music extends React.Component {
 
   getData(values) {
     fetch(`/compare/${values}?code=${this.state.code}`)
-      .then((res) => res.json())
+      .then((res) => {
+        res.headers.forEach(console.log);
+        return res.json();
+      })
       .then((data) => {
+        console.log(data);
         this.setState({
-          decadeData: data.decade,
-          compareValueData: data.comparator,
+          decadeData: data[0].decade,
+          compareValueData: data[1].comparator,
           loading: false,
         });
         console.log(this.state);

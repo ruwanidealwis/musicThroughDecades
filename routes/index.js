@@ -82,12 +82,19 @@ router.get("/compare/:comparators", async (req, res) => {
         req,
         req.session.decade
       );
-
+      res.setHeader("Content-Type", "application/json");
+      console.log(JSON.stringify({ decade: req.session.decade }));
+      res.write("[");
+      res.write(JSON.stringify({ decade: req.session.decadeStats }) + ",");
       req.session.comparator = await spotifyController.getUserListeningHabbits(
         req,
         res
       );
-      res.status(200).redirect("/music");
+
+      //res.write(JSON.stringify({ comparator: req.session.comparator }));
+      res.write(JSON.stringify({ comparator: req.session.comparator }));
+      res.end("]"); //array ending bracket
+      //res.status(200).redirect("/music");
 
       await databaseTable.deleteUserSongsFromDatabase(
         req.session.id,
@@ -112,6 +119,9 @@ router.get("/compare/:comparators", async (req, res) => {
           req,
           req.session.decade
         );
+        res.setHeader("Content-Type", "application/json");
+        res.write("[");
+        res.write(JSON.stringify({ decade: req.session.decadeStats }) + ",");
 
         //await databaseTable.deleteSongsFromDB(req.session.decade);
         //await databaseTable.deleteArtistsFromDB(req.session.decade);
@@ -120,7 +130,8 @@ router.get("/compare/:comparators", async (req, res) => {
           req,
           req.session.decade2
         );
-        res.status(200).redirect("/music");
+        res.write(JSON.stringify({ comparator: req.session.comparator }));
+        res.end("]");
 
         //await databaseTable.deleteSongsFromDB(req.session.decade2);
         //await databaseTable.deleteArtistsFromDB(req.session.decade2);
