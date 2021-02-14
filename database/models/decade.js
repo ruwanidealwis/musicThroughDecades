@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Decade extends Model {
     /**
@@ -9,13 +9,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      //each decade has many top songs, but song has only one decade (song is only ever released "once")
-      this.hasMany(models.Songs, { foreignKey: "decadeId" });
+      // each decade has many top songs,
+      // but song has only one decade (song is only ever released "once")
+      this.hasMany(models.Songs, { foreignKey: 'decadeId' });
 
-      //each decade has many artists, and each aritst can belong to many decades (ex: Michael Jackson, Elton John both appear as top artists in various decades)
+      // each artist can belong to many decades (ex: Michael Jackson)
       this.belongsToMany(models.Artist, {
         through: models.DecadeArtists,
-        foreignKey: "decadeId",
+        foreignKey: 'decadeId',
       });
     }
   }
@@ -26,8 +27,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Decade",
-    }
+      modelName: 'Decade',
+    },
   );
   return Decade;
 };

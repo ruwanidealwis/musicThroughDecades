@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Songs extends Model {
     /**
@@ -9,19 +9,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      this.decade = this.belongsTo(models.Decade, { foreignKey: "decadeId" }); //each song belongs to 1 decade
+      this.decade = this.belongsTo(models.Decade, { foreignKey: 'decadeId' }); // each song belongs to 1 decade
 
       this.belongsToMany(models.Artist, {
         through: models.SongArtists,
-        foreignKey: "songId",
+        foreignKey: 'songId',
       });
 
-      //songs can have many users who listen to it
+      // songs can have many users who listen to it
       this.belongsToMany(models.tempUser, {
         through: models.UserSongs,
-        sourceKey: "id",
-        foreignKey: "songId",
-        otherKey: "sessionId",
+        sourceKey: 'id',
+        foreignKey: 'songId',
+        otherKey: 'sessionId',
       });
     }
   }
@@ -48,8 +48,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Songs",
-    }
+      modelName: 'Songs',
+    },
   );
   return Songs;
 };
