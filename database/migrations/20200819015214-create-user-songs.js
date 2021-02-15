@@ -1,7 +1,6 @@
-"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("UserSongs", {
+    await queryInterface.createTable('UserSongs', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -11,20 +10,20 @@ module.exports = {
       sessionId: {
         type: Sequelize.STRING,
         references: {
-          model: "tempUsers",
-          key: "sessionId",
+          model: 'tempUsers',
+          key: 'sessionId',
         },
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       },
       songId: {
         type: Sequelize.INTEGER,
         references: {
-          model: "Songs",
-          key: "id",
+          model: 'Songs',
+          key: 'id',
         },
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       },
       rank: {
         type: Sequelize.INTEGER,
@@ -40,6 +39,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("UserSongs");
+    await queryInterface.dropTable('UserSongs');
   },
 };

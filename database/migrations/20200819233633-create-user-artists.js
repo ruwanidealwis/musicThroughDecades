@@ -1,7 +1,6 @@
-"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("UserArtists", {
+    await queryInterface.createTable('UserArtists', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -11,20 +10,20 @@ module.exports = {
       sessionId: {
         type: Sequelize.STRING,
         references: {
-          model: "tempUsers",
-          key: "sessionId",
+          model: 'tempUsers',
+          key: 'sessionId',
         },
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       },
       artistId: {
         type: Sequelize.INTEGER,
         references: {
-          model: "Artists",
-          key: "id",
+          model: 'Artists',
+          key: 'id',
         },
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       },
       temp: {
         type: Sequelize.BOOLEAN,
@@ -41,6 +40,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("UserArtists");
+    await queryInterface.dropTable('UserArtists');
   },
 };

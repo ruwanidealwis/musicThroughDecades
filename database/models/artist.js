@@ -1,5 +1,5 @@
-"use strict";
-const { Model } = require("sequelize");
+const { Model } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class Artist extends Model {
     /**
@@ -12,18 +12,18 @@ module.exports = (sequelize, DataTypes) => {
 
       this.belongsToMany(models.Songs, {
         through: models.SongArtists,
-        foreignKey: "artistId",
+        foreignKey: 'artistId',
       });
 
       this.belongsToMany(models.Decade, {
         through: models.DecadeArtists,
-        foreignKey: "artistId",
+        foreignKey: 'artistId',
       });
       this.belongsToMany(models.tempUser, {
         through: models.UserArtists,
-        sourceKey: "id",
-        foreignKey: "artistId",
-        otherKey: "sessionId",
+        sourceKey: 'id',
+        foreignKey: 'artistId',
+        otherKey: 'sessionId',
       });
     }
   }
@@ -32,12 +32,12 @@ module.exports = (sequelize, DataTypes) => {
       name: DataTypes.STRING,
       genres: DataTypes.ARRAY(DataTypes.STRING),
       imageURL: DataTypes.STRING,
-      temp: { type: DataTypes.BOOLEAN, defaultValue: false }, //TODO uncomment later
+      temp: { type: DataTypes.BOOLEAN, defaultValue: false }, // TODO uncomment later
     },
     {
       sequelize,
-      modelName: "Artist",
-    }
+      modelName: 'Artist',
+    },
   );
   return Artist;
 };

@@ -1,7 +1,6 @@
-"use strict";
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("SongArtists", {
+    await queryInterface.createTable('SongArtists', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -11,20 +10,20 @@ module.exports = {
       songId: {
         type: Sequelize.INTEGER,
         references: {
-          model: "Songs",
-          key: "id",
+          model: 'Songs',
+          key: 'id',
         },
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       },
       artistId: {
         type: Sequelize.INTEGER,
         references: {
-          model: "Artists",
-          key: "id",
+          model: 'Artists',
+          key: 'id',
         },
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       },
       createdAt: {
         allowNull: false,
@@ -37,6 +36,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("SongArtists");
+    await queryInterface.dropTable('SongArtists');
   },
 };
