@@ -35,7 +35,9 @@ class Music extends React.Component {
     ) {
       this.props.history.replace("/");
     } else {
-      let compareValue = props.location.state.values.split("-")[1];
+      console.log(props.values);
+      let compareValue = props.location.state.values.valueTwo;
+    
       if (props.location.state.user) {
         if (compareValue === "6Months") {
           compareValue = "the last 6 months";
@@ -49,7 +51,7 @@ class Music extends React.Component {
         loading: true,
         user: props.location.state.user,
         query: props.location.state.values,
-        decade: props.location.state.values.split("-")[0],
+        decade: props.location.state.values.valueOne,
         compareValue: compareValue,
         code: props.location.state.code,
         decadeData: [],
@@ -63,9 +65,67 @@ class Music extends React.Component {
   componentDidMount() {
     if (this.state != null) this.getData(this.state.query);
   }
-
+  //get decade data first ...
   getData(values) {
-    fetch(`/compare/${values}?code=${this.state.code}`)
+    console.log("hello");
+    fetch(`/decadeData?decade=${values.valueOne}&code=${this.state.code}`)
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        console.log(json);
+        this.setState({
+          decadeData: json.decadeData,
+        });
+      })
+      .then(() => {
+        if (this.state.code === null) {
+          //another decade, so same request with different decade
+          fetch(`/decadeData?decade=${values.valueTwo}&code=${this.state.code}`)
+            .then((res) => {
+              return res.json();
+            })
+            .then((json) => {
+              console.log(json);
+              this.setState({
+                compareValueData: json.decadeData,
+                loading: false,
+              });
+            });
+        } else {
+          fetch(
+            `/userData?timeLength=${values.valueTwo}&code=${this.state.code}`
+          )
+            .then((res) => {
+              return res.json();
+            })
+            .then((json) => {
+              console.log(json);
+
+              return json;
+            })
+            .then((data) => {
+              fetch(
+                `/userReccomendations?decade=${values.valueOne}&averageValues=${JSON.stringify(data.averageValue)}` 
+                  
+              )
+                .then((res) => res.json())
+                .then((json) => {
+                  console.log(json);
+                  let compareValueData = data.userData;
+                  compareValueData.userReccomendations = json.reccomendations;
+                  this.setState({
+                    compareValueData: compareValueData,
+                    loading: false,
+                  });
+                });
+            });
+        }
+      });
+
+    //TODO make dynamic
+
+    /* fetch(`/compare/${values}?code=${this.state.code}`)
       .then((res) => {
         res.headers.forEach(console.log);
         return res.json();
@@ -79,7 +139,7 @@ class Music extends React.Component {
         });
         console.log(this.state);
         localStorage.clear();
-      });
+      });*/
   }
 
   render() {
@@ -166,7 +226,9 @@ class Music extends React.Component {
                     />
                     {this.state.user ? (
                       <UserReccomendations
+                        decade={decade}
                         compareValueData={this.state.compareValueData}
+                        compareValue={compareValue}
                       />
                     ) : null}
                   </Grid>
@@ -196,6 +258,3 @@ export default Music;
                       searchKey={"key"}
                     ></PieChart>
                   </Grid>*/
-
-//TODO fix bad information and add decade descrotion
-//TODO make playlist create button nicer

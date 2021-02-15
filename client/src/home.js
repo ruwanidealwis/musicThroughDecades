@@ -52,10 +52,16 @@ class Home extends React.Component {
     //this.getStats();
 
     if (this.state.isAuthorized) {
-      this.getData(localStorage.getItem("query"));
+      const values = JSON.parse(localStorage.getItem("query"));
+      console.log(JSON.parse(localStorage.getItem("query")))
+      console.log(localStorage.getItem("query").values)
+      console.log(localStorage.getItem("query").valueOne)
+      this.getData(values);
     }
   }
   componentDidUpdate(previousProps, previousState) {}
+
+  //TODO refactor : make this a map and get by key value
   getFormat(value) {
     switch (value) {
       case "fifties":
@@ -125,14 +131,15 @@ class Home extends React.Component {
     } else return false;
   }
   allowLogin() {
-    fetch("/login")
+    fetch("/authorize")
       .then((res) => res.json())
       .then((data) => {
-        window.location = data.url; //redirect to authorization URL
+        window.location = data.url; //redirect to authorization  URL
       });
   }
 
   getData(values) {
+    console.log(values);
     this.props.history.push({
       pathname: `/music`,
       state: {
@@ -158,18 +165,27 @@ class Home extends React.Component {
     ];
     let userAuth = false;
     let values = "";
+    let valueOne;
+    let valueTwo;
     for (const key of keys) {
       if (this.state[key] === true) {
         if (values != "") {
+          valueTwo = this.getFormat(key);
           values = values + this.getFormat(key);
-        } else values = values + this.getFormat(key) + "-";
+        } else 
+        {
+          values = values + this.getFormat(key) + "-";
+          valueOne = this.getFormat(key) 
+        }
         userAuth = this.needsUser(key);
       }
     }
     if (userAuth) {
-      localStorage.setItem("query", values);
+      const query = { valueOne: valueOne, valueTwo: valueTwo }
+      localStorage.setItem("query", JSON.stringify(query) );
       await this.allowLogin();
     } else {
+      const values = { valueOne: valueOne, valueTwo: valueTwo };
       this.getData(values);
     }
   }

@@ -21,7 +21,8 @@ The live site is available at: https://musicthroughdecades.herokuapp.com
 
 ## Tools
 
-The backend is built with NodeJs (ExpressJs) and the front end is built with ReactJs with Material-UI. PostgreSQL is used as temporary storage (the data is only stored during the computation) and Python (BeautifulSoup) was used to read CSV and webscrape sites in order to retrive music data.
+The backend is built with NodeJs (ExpressJs) and the front end is built with ReactJs with Material-UI. PostgreSQL is used as storage (user data is only stored during the computation) and Python (BeautifulSoup) was used to read CSV and webscrape sites in order to retrive music data.
+
 * NodeJs/ExpressJs
 * ReactJs
 * Material UI
@@ -31,4 +32,5 @@ The backend is built with NodeJs (ExpressJs) and the front end is built with Rea
 * ChartJs
 
 ## Next Steps
-* Use of Machine Learning to develop a more intelligent music reccomendation alogrithm. 
+* Add retries to external API calls
+* Develop a more complex (+accurate) algorithm for music reccomendations
