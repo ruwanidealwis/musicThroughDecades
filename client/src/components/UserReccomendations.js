@@ -23,7 +23,18 @@ class UserReccomendations extends React.Component {
     };
   }
   createPlaylist() {
-    fetch(`/music/createPlaylist`)
+    fetch(`/music/createPlaylist`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        timeLength:this.state.compareValue,
+        decade: this.state.decade,
+        userID: this.state.compareValueData.userID,
+        songIDArray: this.state.compareValueData.userReccomendations,
+      }),
+    })
       .then((res) => {
         return res.json();
       })

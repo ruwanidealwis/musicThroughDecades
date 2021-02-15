@@ -1,0 +1,113 @@
+/**
+ * Files contain all the helper methods used by the application
+ * @author ruwanidealwis
+ *
+ */
+const Papa = require('papaparse');
+const fs = require('fs');
+
+/**
+ * Validate entered values
+ * This is an additional check, because input is valdiated by the front end
+ * @param {String} decade - decade being compared
+ * @return {boolean} true if it is a valid year to compare, false if else.
+ */
+exports.validateValues = (decade) => {
+  const decades = ['1950', '1960', '1970', '1980', '1990', '2000', '2010'];
+
+  if (decades.includes(decade)) {
+    return true;
+  } return false;
+};
+
+/**
+ * Adds a delay
+ * taken from: https://stackoverflow.com/questions/14226803/wait-5-seconds-before-executing-next-line
+ * @param {Number} ms - the length of the relay
+ * @return {Promise} resolves after the delay
+ */
+exports.delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
+/**
+ * Gets the time range for the top songs according to what the user wants
+ * @param {string} comparator - String that indicates which time range the user wants
+ * @return {String} returns time range in format compatible for spotify api query
+ */
+exports.getReadChoice = (comparator) => {
+  switch (comparator) {
+    case 'allTime':
+      return 'long_term';
+    case '6Months':
+      return 'medium_term';
+    case '1Month':
+      return 'short_term';
+    default:
+      return 'long_term';
+  }
+};
+
+/**
+ * Formats webscraped data
+ * @summary Formats webscraped data into an object with specified, track,year, and artist keys
+ * @param {array} data - Data scraped from the web
+ * @return  {Array} Returns object array with information extracted (track, artists, year)
+ */
+const formatData = (data, req) => {
+  const allHitsArray = [];
+
+  for (const hit of data) {
+    allHitsArray.push({
+      track: hit[0],
+      year: hit[2],
+      artists: hit[5].split(',').length,
+      artistRank: hit[3],
+    }); // because of the way the website is structured (this may not be exactly correc t)
+
+    hit[5].split(',').forEach((ID) => req.session.artistsIDArray.push(ID));
+
+    req.session.songIDArray.push(hit[4]);
+  }
+
+  return allHitsArray;
+};
+
+exports.getCSVData = async (decade, req) => {
+  const file = fs.createReadStream(`dataFiles/${decade}.csv`);
+  const artistFile = fs.createReadStream(`dataFiles/${decade}Artists.csv`);
+  // adapted from: https://github.com/mholt/PapaParse/issues/752
+  const songReading = (filetoParse) => new Promise((resolve) => {
+    Papa.parse(filetoParse, {
+      dynamicTyping: true,
+      complete: async (results) => {
+        req.session.top100Hits = formatData(results.data, req);
+
+        resolve(req.session.top100Hits);
+      },
+    });
+  });
+
+  const artistReading = (filetoParse) => new Promise((resolve) => {
+    Papa.parse(filetoParse, {
+      delimiter: '|',
+      complete(results) {
+        for (const artist of results.data) {
+          req.session.topArtistIDArray.push(artist[1]);
+        }
+
+        resolve(req.session.topArtistIDArray);
+      },
+    });
+  });
+
+  await songReading(file);
+  await artistReading(artistFile);
+};
+
+/**
+* converts first letter to capital(hi ===> Hi)
+* taken from: https://dzone.com/articles/capitalize-first-letter-string-javascript
+* @summary If the description is long, write your summary here.Otherwise, feel free to remove this.
+* @param { String } string - string to convert to capital
+* @return { String } String with first letter capital
+*/
+exports.jsUcfirst = (string) => string.charAt(0).toUpperCase() + string.slice(1);

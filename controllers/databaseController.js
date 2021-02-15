@@ -2,7 +2,7 @@
 const { Sequelize } = require('sequelize');
 const { Op } = require('sequelize');
 const utils = require('../utils/utils');
-/** @global */ const db = require('../models/index.js');
+/** @global */ const db = require('../database/models/index.js');
 
 /** ****** UPDATES DATABASE_ ******* */
 
@@ -31,7 +31,7 @@ const deleteUserArtistsFromDatabase = async (artist, sessionID) => {
       }
     }
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
@@ -43,10 +43,11 @@ const deleteUserArtistsFromDatabase = async (artist, sessionID) => {
 exports.createTempUser = async (sessionID) => {
   try {
     await db.tempUser.create({
-      sessionID,
+      sessionId: sessionID,
     });
   } catch (e) {
-    throw new Error({ error: e });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -63,7 +64,6 @@ const addPermanantArtists = async (
   decadeId,
   song,
   songObj,
-  sessionID,
 ) => {
   try {
     const dbArtist = await db.Artist.findOne({
@@ -72,7 +72,7 @@ const addPermanantArtists = async (
       where: {
         name: artist.name,
         imageURL: artist.image,
-      }, // TODO CHANGE THIS}
+      },
       raw: true,
     });
     if (dbArtist === null) {
@@ -80,7 +80,7 @@ const addPermanantArtists = async (
       const newArtist = await db.Artist.create({
         name: artist.name,
         imageURL: artist.image,
-        genres: artist.genres, // TODO CHANGE THIS
+        genres: artist.genres,
       });
       // create an association with decade, and song
       await song.addArtist(newArtist);
@@ -90,37 +90,18 @@ const addPermanantArtists = async (
         decadeId,
         rank: songObj.artistRank,
       });
-
-      // TODO CHECK why???
-      await db.UserArtists.findOrCreate({
-        where: {
-          sessionID,
-          artistId: newArtist.id,
-        },
-        sessionID,
-        artistId: newArtist.id,
-      });
     } else {
       // already created we just add an extra association
+
       await db.SongArtists.create({
         artistId: dbArtist.id,
         songId: song.id,
       });
 
-      // TODO CHECK why???
-      await db.UserArtists.findOrCreate({
-        where: {
-          sessionID,
-          artistId: dbArtist.id,
-        },
-        sessionID,
-        artistId: dbArtist.id,
-      });
-
       // determine if the artist is associated with the current decade being searched
       const currentDecades = await db.Artist.findOne({
         attributes: ['id'],
-        where: { name: dbArtist.name, imageURL: dbArtist.image },
+        where: { name: artist.name, imageURL: artist.name },
         include: [{ model: db.Decade, where: { id: decadeId } }],
         raw: true,
       });
@@ -135,11 +116,10 @@ const addPermanantArtists = async (
       }
     }
   } catch (e) {
-    throw new Error({ error: e });
+    console.error(e);
+    throw new Error(e);
   }
 };
-
-/** *** QUERIES DATABASE_ ******* */
 
 /**
  * returns true if the music data for the specific decade is in the database
@@ -149,7 +129,7 @@ const addPermanantArtists = async (
  */
 exports.decadeDataAvailable = async (decade) => {
   try {
-    const decadeData = db.Decade.findOne({
+    const decadeData = await db.Decade.findOne({
       where: { name: decade },
       include: [{ model: db.Songs }],
     });
@@ -158,7 +138,8 @@ exports.decadeDataAvailable = async (decade) => {
     }
     return false;
   } catch (e) {
-    throw new Error({ error: e });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -169,7 +150,7 @@ exports.decadeDataAvailable = async (decade) => {
  * @param {Number} index specifies the rank
  * @throws error if method fails to add to database
  */
-exports.addSongToDatabase = async (songObjects, decade, index, sessionID) => {
+exports.addSongToDatabase = async (songObjects, decade, index) => {
   try {
     const dbDecade = await db.Decade.findOne({
       attributes: ['id'],
@@ -179,7 +160,7 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionID) => {
 
     const song = await db.Songs.findOrCreate({
       where: {
-        spotifyId: songObjects.spotifyId,
+        spotifyId: songObjects.spotifyID,
       },
       defaults: {
         name: songObjects.name,
@@ -187,7 +168,7 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionID) => {
         imageURL: songObjects.image,
         valence: songObjects.audioData.valence,
         danceability: songObjects.audioData.danceability,
-        popularity: songObjects.audioData.popularity,
+        popularity: songObjects.popularity,
         key: songObjects.audioData.key,
         mode: songObjects.audioData.mode,
         speechiness: songObjects.audioData.speechiness,
@@ -197,32 +178,24 @@ exports.addSongToDatabase = async (songObjects, decade, index, sessionID) => {
         instrumentalness: songObjects.audioData.instrumentalness,
         rank: index,
         decadeId: dbDecade.id,
-        spotifyId: songObjects.spotifyId,
+        spotifyId: songObjects.spotifyID,
         previewURL: songObjects.previewURL,
       },
     });
 
-    // TODO check why??
-    await db.UserSongs.create({
-      sessionID,
-      songId: song[0].dataValues.id,
-    });
-    // newly created...
-
     for (const artist of songObjects.artists) {
       // call helper method
-      // TODO why??
+
       if (song[1] === true) {
         await addPermanantArtists(
           artist,
           dbDecade.id,
           song[0],
           songObjects,
-          sessionID,
         );
       }
     }
-  } catch (e) { throw new Error({ error: e }); }
+  } catch (e) { console.error(e); throw new Error(e); }
 };
 
 /**
@@ -239,17 +212,17 @@ const createUserEntry = async (songObjects, dateArray, sessionID, index) => {
       name: songObjects.name,
       yearOfRelease: dateArray[0],
       imageURL: songObjects.imageUrl,
-      valence: songObjects.valence,
-      danceability: songObjects.danceability,
+      valence: songObjects.audioData.valence,
+      danceability: songObjects.audioData.danceability,
       popularity: songObjects.popularity,
-      key: songObjects.key,
-      mode: songObjects.mode,
-      speechiness: songObjects.speechiness,
-      tempo: songObjects.tempo,
-      acousticness: songObjects.acousticness,
-      energy: songObjects.energy,
-      instrumentalness: songObjects.instrumentalness,
-      spotifyId: songObjects.spotifyId,
+      key: songObjects.audioData.key,
+      mode: songObjects.audioData.mode,
+      speechiness: songObjects.audioData.speechiness,
+      tempo: songObjects.audioData.tempo,
+      acousticness: songObjects.audioData.acousticness,
+      energy: songObjects.audioData.energy,
+      instrumentalness: songObjects.audioData.instrumentalness,
+      spotifyId: songObjects.spotifyID,
       previewURL: songObjects.previewURL,
       temp: true, // song is temporary and no decade Id.... (we need to delete it)
     });
@@ -259,7 +232,7 @@ const createUserEntry = async (songObjects, dateArray, sessionID, index) => {
         where: {
           name: artist.name,
           imageURL: artist.image,
-        }, // TODO CHANGE THIS}
+        },
         raw: true,
       });
       let createArtistId;
@@ -288,12 +261,12 @@ const createUserEntry = async (songObjects, dateArray, sessionID, index) => {
       // add user association
       const create = await db.UserArtists.findOrCreate({
         where: {
-          sessionID,
+          sessionId: sessionID,
           artistId: createArtistId,
         },
 
         defaults: {
-          sessionID,
+          sessionId: sessionID,
           artistId: createArtistId,
           temp: true,
         },
@@ -301,9 +274,8 @@ const createUserEntry = async (songObjects, dateArray, sessionID, index) => {
 
       // newly created association
       if (create[1] === false) {
-        // TODO what is the point of this?
         const existingArtist = await db.UserArtists.findOne({
-          where: { sessionID, artistId: createArtistId },
+          where: { sessionId: sessionID, artistId: createArtistId },
         });
 
         existingArtist.temp = true;
@@ -312,12 +284,13 @@ const createUserEntry = async (songObjects, dateArray, sessionID, index) => {
     }
     // add an association with user songs
     await db.UserSongs.create({
-      sessionID,
+      sessionId: sessionID,
       songId: userSong.id,
       rank: index,
     }); // add this to user and session ID to the associated table
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -334,7 +307,7 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionID) => {
     const song = await db.Songs.findOne({
       attributes: ['id'],
       where: {
-        spotifyId: songObjects.spotifyId, // spotifyId for each song is unique!
+        spotifyId: songObjects.spotifyID, // spotifyId for each song is unique!
       },
       include: [{ model: db.Artist }],
     });
@@ -345,12 +318,8 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionID) => {
     } else {
     // create a manual association with UserSong and for all the artists aswell
 
-      // TODO check why??
-      song.temp = true;
-      song.save();
-
       const userSong = await db.UserSongs.findOrCreate({
-        where: { sessionID, songId: song.id },
+        where: { sessionId: sessionID, songId: song.id },
         defaults: {
           sessionID,
           songId: song.id,
@@ -358,10 +327,10 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionID) => {
         },
       });
 
-      // TODO false means??
+      // if entry wasn't just created?
       if (userSong[1] === false) {
         const createdSong = await db.UserSongs.findOne({
-          where: { sessionID, songId: song.id },
+          where: { sessionId: sessionID, songId: song.id },
         });
 
         createdSong.rank = index;
@@ -371,13 +340,12 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionID) => {
       for (const artist of song.Artists) {
       // association could have been created with another song
         await db.UserArtists.findOrCreate({
-          where: { artistId: artist.id, sessionID },
-          defaults: { temp: true, sessionID, artistId: artist.id },
+          where: { artistId: artist.id, sessionId: sessionID },
+          defaults: { temp: true, sessionId: sessionID, artistId: artist.id },
         });
-        // TODO why??
 
         const existingArtist = await db.UserArtists.findOne({
-          where: { sessionID, artistId: artist.id },
+          where: { sessionId: sessionID, artistId: artist.id },
         });
 
         existingArtist.temp = true;
@@ -385,7 +353,7 @@ exports.addUserSongToDatabase = async (songObjects, index, sessionID) => {
       }
     }
   } catch (e) {
-    throw new Error({ error: e });
+    console.error(e); throw new Error(e);
   }
 };
 
@@ -399,21 +367,20 @@ exports.deleteUserSongsFromDatabase = async (sessionID) => {
   // after we get all the nescessary information...the song will be deleted
     const possibleSongs = await db.Songs.findAll({
       attributes: ['name', 'id'],
-      where: { [Op.or]: [{ temp: true }] }, // only user songs are temp
+      where: { temp: true }, // only user songs are temp
       include: [
         { model: db.tempUser },
         { model: db.Artist },
 
       ],
     });
-
     for (const song of possibleSongs) {
       const songId = song.id;
 
       // this avoids the case where two users are using the app at the same time,
       // and both have the same top song
       if (song.tempUsers.length === 1) {
-        if (song.tempUsers[0].sessionID === sessionID) {
+        if (song.tempUsers[0].sessionId === sessionID) {
           for (const artist of song.Artists) {
           // delete arists associated with the song (if valid)
             await deleteUserArtistsFromDatabase(artist, sessionID);
@@ -425,7 +392,8 @@ exports.deleteUserSongsFromDatabase = async (sessionID) => {
       }
     }
   } catch (e) {
-    throw new Error({ error: e });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -436,11 +404,14 @@ exports.deleteUserSongsFromDatabase = async (sessionID) => {
  */
 exports.deleteTempUser = async (sessionID) => {
   try {
-    await db.tempUser.destroy({ where: { sessionID } }); // delete it from userDB
+    await db.tempUser.destroy({ where: { sessionId: sessionID } }); // delete it from userDB
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
+
+/** * QUERY METHODS ******** */
 
 /**
  * gets the number of top songs released in the decade
@@ -448,15 +419,16 @@ exports.deleteTempUser = async (sessionID) => {
  * @param {string} year  year to be queries
  * @return {number} the number of songs from that year in the top 100
  */
-const getSongDistributionByYear = (decade, year) => {
+const getSongDistributionByYear = async (decade, year) => {
   try {
-    const decadeData = db.Decade.findOne({
+    const decadeData = await db.Decade.findOne({
       where: { name: decade },
       include: [{ model: db.Songs, where: { yearOfRelease: year } }],
     });
     return decadeData.Songs.length;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -475,7 +447,8 @@ const getDecadeID = async (decade) => {
     });
     return dbDecade.id;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -517,7 +490,8 @@ const getTopArtistsByRank = async (decade) => {
     }
     return topArtistsArray;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -543,18 +517,19 @@ const getAverageValue = async (feature, decade, start, end) => {
     });
     return song.average;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
 /**
  * Gets the songs with the top feature (most danceable etc)
- * @param {*} feature feature to be queried
- * @param {*} ordering ascending or desceding order
- * @param {*} limit  number of items returned
- * @param {*} decade  decade to be queried
- * @param {*} start start year
- * @param {*} end  end year
+ * @param {string} feature feature to be queried
+ * @param {string} ordering ascending or desceding order
+ * @param {number} limit  number of items returned
+ * @param {string} decade  decade to be queried
+ * @param {number} start start year
+ * @param {number} end  end year
  * @returns {Array} of songs
  * @throws an error if the query fails
  */
@@ -611,7 +586,8 @@ const getTopFeaturesForDecade = async (
     }
     return objArray;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -630,7 +606,8 @@ const getDecadeDiscription = async (decade) => {
     });
     return decadeData.description;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -670,7 +647,8 @@ const getTopSongs = async (decade) => {
     }
     return topSongArray;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e);
+    throw new Error(e);
   }
 };
 
@@ -696,7 +674,7 @@ const getFeatureDistribution = async (decade, feature) => {
     });
     return songs;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
@@ -741,7 +719,7 @@ const getMostCommonGenres = async (decade) => {
       );
     return commonGenreData;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
@@ -753,43 +731,43 @@ const getMostCommonGenres = async (decade) => {
  */
 const getTopArtists = async (decade, limit) => {
   try {
-    const decadeID = getDecadeID(decade);
+    const decadeID = await getDecadeID(decade);
 
     // TODO check later, couldnt get sequelize query to work
     const topArtistData = await db.sequelize.query(
       `SELECT
-            "Decade"."id",
-            "Artists"."name" AS "Artists.name",
-            "Artists"."imageURL" AS "Artists.imageURL",
-              "Artists"."genres" AS "Artists.genres",
-            COUNT("Artists -> Songs"."id") AS "Artists.Songs.count" 
-          FROM
-            "Decades" AS "Decade" 
-            LEFT OUTER JOIN
-                (
-          ( "DecadeArtists" AS "Artists -> DecadeArtists" 
-                  INNER JOIN
-                      "Artists" AS "Artists" 
-                      ON "Artists"."id" = "Artists -> DecadeArtists"."artistId") 
-                  INNER JOIN
-                      (
-                        "SongArtists" AS "Artists -> Songs -> SongArtists" 
-                        INNER JOIN
-                            "Songs" AS "Artists -> Songs" 
-                            ON "Artists -> Songs"."id" = "Artists -> Songs -> SongArtists"."songId"
-                      )
-                      ON "Artists"."id" = "Artists -> Songs -> SongArtists"."artistId" 
-                      AND "Artists -> Songs"."decadeId" = ${decadeID}
-                )
-                ON "Decade"."id" = "Artists -> DecadeArtists"."decadeId" 
-          WHERE
-            "Decade"."id" = ${decadeID}
-          GROUP BY
-            "Decade"."id",
-            "Artists"."id" 
-          ORDER BY
-            "Artists.Songs.count" desc
-            LIMIT ${limit}`,
+          "Decade"."id",
+          "Artists"."name" AS "Artists.name",
+          "Artists"."imageURL" AS "Artists.imageURL",
+            "Artists"."genres" AS "Artists.genres",
+          COUNT("Artists -> Songs"."id") AS "Artists.Songs.count" 
+        FROM
+          "Decades" AS "Decade" 
+          LEFT OUTER JOIN
+              (
+        ( "DecadeArtists" AS "Artists -> DecadeArtists" 
+                INNER JOIN
+                    "Artists" AS "Artists" 
+                    ON "Artists"."id" = "Artists -> DecadeArtists"."artistId") 
+                INNER JOIN
+                    (
+                      "SongArtists" AS "Artists -> Songs -> SongArtists" 
+                      INNER JOIN
+                          "Songs" AS "Artists -> Songs" 
+                          ON "Artists -> Songs"."id" = "Artists -> Songs -> SongArtists"."songId"
+                    )
+                    ON "Artists"."id" = "Artists -> Songs -> SongArtists"."artistId" 
+                    AND "Artists -> Songs"."decadeId" = ${decadeID}
+              )
+              ON "Decade"."id" = "Artists -> DecadeArtists"."decadeId" 
+        WHERE
+          "Decade"."id" = ${decadeID}
+        GROUP BY
+          "Decade"."id",
+          "Artists"."id" 
+        ORDER BY
+          "Artists.Songs.count" desc
+          LIMIT ${limit}`,
       {
         model: db.Decade,
         mapToModel: true, // pass true here if you have any mapped fields
@@ -807,14 +785,14 @@ const getTopArtists = async (decade, limit) => {
     }
     return topArtists;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
 /**
  * gets average value of feature data
  * @param {string} sessionID - sessionID of current user
- * @param {*} feature  - feature to be queried
+ * @param {string} feature  - feature to be queried
  * @returns {number} the average value for that feature
  * @throws an error if the query fails
  */
@@ -822,15 +800,14 @@ const getUserAverageFeature = async (sessionID, feature) => {
   try {
     const userData = await db.tempUser.findAll({
       attributes: [
-        'sessionID',
+        'sessionId',
         [Sequelize.fn('AVG', Sequelize.col(`Songs.${feature}`)), 'average'],
       ],
 
-      where: { sessionID },
+      where: { sessionId: sessionID },
       include: {
         model: db.Songs,
         as: 'Songs',
-        where: { temp: true },
         raw: true,
         attributes: [],
         through: { attributes: [] },
@@ -839,16 +816,17 @@ const getUserAverageFeature = async (sessionID, feature) => {
       raw: true,
 
     });
+
     return userData[0].average;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
 /**
  * gets the breakdown of distrubtion for each feature (+ year)
  * @param {string} sessionID - sessionID of current user
- * @param {*} feature = feature being queried
+ * @param {string} feature = feature being queried
  * @returns {Array} highlighting the distrubtion
  * @throws error if query fails
  * ex: for mode it is [1-numberOfSongs, 0-numberofSongs]
@@ -863,11 +841,10 @@ const getUserDistribution = async (sessionID, feature) => {
           [Sequelize.fn('Count', Sequelize.col(`Songs.${feature}`)), 'count'],
         ],
 
-        where: { sessionID },
+        where: { sessionId: sessionID },
         include: {
           model: db.Songs,
           as: 'Songs',
-          where: { temp: true },
           raw: true,
           attributes: [],
           through: { attributes: [] },
@@ -880,27 +857,31 @@ const getUserDistribution = async (sessionID, feature) => {
     let decadeDistribution = userSongs;
 
     // TODO check if its breaking
+    // eslint-disable-next-line no-unused-vars
+
     if (feature === 'yearOfRelease') {
-    // specifically counts how many songs belong in a decade
+      // specifically counts how many songs belong in a decade
       decadeDistribution = {};
-      for (const featureValue of userSongs) {
-      // `${featureValue.yearOfRelease - (featureValue.yearOfRelease % 10)}'s` gets decade
+
+      for (const song of userSongs) {
+        // `${featureValue.yearOfRelease - (featureValue.yearOfRelease % 10)}'s` gets decade
         decadeDistribution[
-          `${featureValue.yearOfRelease - (featureValue.yearOfRelease % 10)}'s`
-        ] += featureValue.count;
+          `${song.yearOfRelease - (song.yearOfRelease % 10)}'s`
+        ] = decadeDistribution[
+          `${song.yearOfRelease - (song.yearOfRelease % 10)}'s`] + song.count || song.count; // not sure why?
       }
     }
 
     return decadeDistribution;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
 /**
  * gets reccomendations from a specific decade based on user's habbits
  * @param {string} decade = decade being queried
- * @param {*} infoObj - information about the user's listening habbits
+ * @param {Object} infoObj - information about the user's listening habbits
  * @returns {Array} songs that match listening habits
  * @throws an error if query fails
  */
@@ -946,7 +927,7 @@ const getSongReccomendations = async (decade, infoObj) => {
     }
     return reccomendationsArray;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
@@ -974,7 +955,7 @@ const userMostPopularGenres = async (sessionID) => {
                           "UserArtists" 
                           on "UserArtists"."artistId" = "Artists"."id" 
                     where
-                      "sessionID" ='${sessionID}' AND
+                      "sessionId" ='${sessionID}' AND
                       "UserArtists"."temp" =true
                 )
                 as x 
@@ -990,20 +971,20 @@ const userMostPopularGenres = async (sessionID) => {
       );
     return popularGenres;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
 /**
  * gets user's top artist (by the number of songs)
- * @param {*} sessionID - current sessionID of user
+ * @param {string} sessionID - current sessionID of user
  * @returns {Array} of the users top songs
  * @throws an error if query fails
  */
 const getMostHits = async (sessionID) => {
   try {
     const userArtists = await db.UserArtists.findAll({
-      where: { sessionID, temp: true },
+      where: { sessionId: sessionID, temp: true },
       include: [
         {
           model: db.Artist,
@@ -1012,12 +993,12 @@ const getMostHits = async (sessionID) => {
           include: [
             {
               model: db.Songs,
-              where: { temp: true },
+              // doesn't have to be temporary ...
               attributes: ['name'],
               include: [
                 {
                   model: db.tempUser,
-                  where: { sessionID },
+                  where: { sessionId: sessionID },
                   through: { attributes: [] },
                 },
               ],
@@ -1029,27 +1010,27 @@ const getMostHits = async (sessionID) => {
 
     const artistArray = [];
 
-    for (const UserArtists of userArtists) {
+    for (const userArtist of userArtists) {
       artistArray.push({
-        name: UserArtists.Artist.name,
-        hits: UserArtists.Artist.Songs.length,
-        image: UserArtists.Artist.imageURL,
-        genres: UserArtists.Artist.genres,
+        name: userArtist.Artist.name,
+        hits: userArtist.Artist.Songs.length,
+        image: userArtist.Artist.imageURL,
+        genres: userArtist.Artist.genres,
       });
     }
     artistArray.sort((a, b) => b.hits - a.hits); // TODO figure out how to force sequelize to order
     return artistArray;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
 /**
  * Gets the top songs for each feature for a specific user, and feature also includes rank
- * @param {*} sessionID - sessionID of the current user
- * @param {*} feature - feature that is queried
- * @param {*} order - sorted in ascending or descding
- * @param {*} limit - number of items to return
+ * @param {string} sessionID - sessionID of the current user
+ * @param {string} feature - feature that is queried
+ * @param {string} order - sorted in ascending or descding
+ * @param {number} limit - number of items to return
  */
 const getUserTopFeatures = async (sessionID, feature, order, limit) => {
   try {
@@ -1061,14 +1042,13 @@ const getUserTopFeatures = async (sessionID, feature, order, limit) => {
       ];
     }
     attributes = `Songs->UserSongs"."${feature}`;
-    const userData = db.tempUser
+    const userData = await db.tempUser
       .findAll({
-        attributes: ['sessionID', attributes],
-        where: { sessionID },
+        attributes: ['sessionId', attributes],
+        where: { sessionId: sessionID },
         include: [
           {
             model: db.Songs,
-            where: { temp: true },
             raw: true,
             include: [{ model: db.Artist }],
           },
@@ -1082,7 +1062,6 @@ const getUserTopFeatures = async (sessionID, feature, order, limit) => {
     const topSongs = [];
 
     let i = 1;
-
     for (const song of userData[0].Songs) {
       const artists = [];
       for (const artist of song.Artists) {
@@ -1102,7 +1081,7 @@ const getUserTopFeatures = async (sessionID, feature, order, limit) => {
     }
     return topSongs;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 
@@ -1225,7 +1204,7 @@ exports.getDecadeStatistics = async (decade) => {
     fullStatsObject.description = await getDecadeDiscription(decade);
     return fullStatsObject;
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
 };
 /**
@@ -1236,7 +1215,7 @@ exports.getDecadeStatistics = async (decade) => {
  * @return {Object} of user music stats
  * @throws an error if data retrival fails
  */
-exports.getUserStatistics = async (sessionID, decade) => {
+exports.getUserStatistics = async (sessionID) => {
   try {
     const avgObj = {};
     const fullStatsObject = {};
@@ -1291,11 +1270,6 @@ exports.getUserStatistics = async (sessionID, decade) => {
       sessionID,
       'popularity',
     );
-    // get distribution (all these involve count)
-    fullStatsObject.songsByDecade = await getUserDistribution(
-      sessionID,
-      'yearOfRelease',
-    );
 
     fullStatsObject.modeDistribution = await getUserDistribution(
       sessionID,
@@ -1309,13 +1283,27 @@ exports.getUserStatistics = async (sessionID, decade) => {
     fullStatsObject.mostPopularGenres = await userMostPopularGenres(sessionID);
     fullStatsObject.top10ArtistsByHits = await getMostHits(sessionID);
 
-    fullStatsObject.userReccomendations = await getSongReccomendations(
-      decade,
-      avgObj,
+    // get distribution (all these involve count)
+    fullStatsObject.songsByDecade = await getUserDistribution(
+      sessionID,
+      'yearOfRelease',
     );
-
-    return fullStatsObject;
+    return { fullStatsObject, averageFeatureData: avgObj };
   } catch (e) {
-    throw new Error({ error: e.message });
+    console.error(e); throw new Error(e);
   }
+};
+
+/**
+ * gets songs from a specific decade that the user would enjoy
+ * @param {Object} averageFeatureValues - average value for each feature for user (valence, etc)
+ * @param {string} decade - decade to get recomendations from
+ * @return {Array} of songs
+ */
+exports.getUserRecomendations = async (averageFeatureValues, decade) => {
+  const userReccomendations = await getSongReccomendations(
+    decade,
+    averageFeatureValues,
+  );
+  return userReccomendations;
 };

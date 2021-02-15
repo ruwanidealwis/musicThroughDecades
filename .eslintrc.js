@@ -3,6 +3,7 @@ module.exports = {
     browser: true,
     commonjs: true,
     es2021: true,
+    node: true,
   },
   extends: [
     'airbnb-base',
@@ -11,7 +12,8 @@ module.exports = {
     ecmaVersion: 12,
   },
   rules: {
-    'no-restricted-syntax': ['error', 'ForInStatement'],
+    'no-restricted-syntax': ['error', 'ForInStatement',
+    ],
     'no-await-in-loop': 'off',
     'no-console': process.env.NODE_ENV === 'production' ? 2 : 0,
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,

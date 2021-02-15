@@ -21,8 +21,10 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "jsdocs": "^1.0.0",
     "material-ui-icons": "^1.0.0-beta.36",
     "nock": "^13.0.4",
+    "node-cache": "^5.1.2",
     "papaparse": "^5.3.0",
     "path": "^0.12.7",
     "pg": "^8.3.0",
@@ -33,6 +35,9 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "eslint": "^7.20.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
     "mocha": "^8.1.3",
     "mochawesome": "^6.1.1"
   }
