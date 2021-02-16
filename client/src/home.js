@@ -53,10 +53,16 @@ class Home extends React.Component {
 
     if (this.state.isAuthorized) {
       const values = JSON.parse(localStorage.getItem("query"));
-      console.log(JSON.parse(localStorage.getItem("query")))
-      console.log(localStorage.getItem("query").values)
-      console.log(localStorage.getItem("query").valueOne)
-      this.getData(values);
+      fetch(`/authTokens?code=${this.state.code}`)
+        .then((response) => {
+          sessionStorage.setItem("Authorization", response.headers.get("Authorization"));
+          sessionStorage.setItem("RefreshToken", response.headers.get("refreshToken"));
+        })
+        .then(() => {
+          console.log(localStorage.getItem("query").values);
+          console.log(localStorage.getItem("query").valueOne);
+          this.getData(values);
+        });
     }
   }
   componentDidUpdate(previousProps, previousState) {}
@@ -131,7 +137,7 @@ class Home extends React.Component {
     } else return false;
   }
   allowLogin() {
-    fetch("/authorize")
+    fetch("/authorize", {method:"GET"})
       .then((res) => res.json())
       .then((data) => {
         window.location = data.url; //redirect to authorization  URL
@@ -172,17 +178,16 @@ class Home extends React.Component {
         if (values != "") {
           valueTwo = this.getFormat(key);
           values = values + this.getFormat(key);
-        } else 
-        {
+        } else {
           values = values + this.getFormat(key) + "-";
-          valueOne = this.getFormat(key) 
+          valueOne = this.getFormat(key);
         }
         userAuth = this.needsUser(key);
       }
     }
     if (userAuth) {
-      const query = { valueOne: valueOne, valueTwo: valueTwo }
-      localStorage.setItem("query", JSON.stringify(query) );
+      const query = { valueOne: valueOne, valueTwo: valueTwo };
+      localStorage.setItem("query", JSON.stringify(query));
       await this.allowLogin();
     } else {
       const values = { valueOne: valueOne, valueTwo: valueTwo };
@@ -291,7 +296,7 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: fifties ? "#f8a055" : "#426e86",
+                    backgroundColor: fifties ? "#9fa8da" : "#81c784",
                   }}
                   id={"1950s"}
                   className="buttonToggle"
@@ -306,7 +311,7 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: sixties ? "#f8a055" : "#426e86",
+                    backgroundColor: sixties ? "#9fa8da" : "#81c784",
                   }}
                   id={"1960s"}
                   className="buttonToggle"
@@ -321,7 +326,7 @@ class Home extends React.Component {
 
                 <ToggleButton
                   style={{
-                    backgroundColor: seventies ? "#f8a055" : "#426e86",
+                    backgroundColor: seventies ? "#9fa8da" : "#81c784",
                   }}
                   id={"1970s"}
                   className="buttonToggle"
@@ -335,7 +340,7 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: eighties ? "#f8a055" : "#426e86",
+                    backgroundColor: eighties ? "#9fa8da" : "#81c784",
                   }} //={this.style(eighties)}
                   id={"1980s"}
                   className="buttonToggle"
@@ -359,7 +364,7 @@ class Home extends React.Component {
               >
                 <ToggleButton
                   style={{
-                    backgroundColor: nineties ? "#f8a055" : "#426e86",
+                    backgroundColor: nineties ? "#9fa8da" : "#81c784",
                   }}
                   id={"1990s"}
                   className="buttonToggle"
@@ -373,7 +378,7 @@ class Home extends React.Component {
                 </ToggleButton>
                 <ToggleButton
                   style={{
-                    backgroundColor: twothousands ? "#f8a055" : "#426e86",
+                    backgroundColor: twothousands ? "#9fa8da" : "#81c784",
                   }}
                   className="buttonToggle"
                   id={"2000s"}
@@ -389,7 +394,7 @@ class Home extends React.Component {
                 <ToggleButton
                   id={"2010s"}
                   style={{
-                    backgroundColor: twenty10s ? "#f8a055" : "#426e86",
+                    backgroundColor: twenty10s ? "#9fa8da" : "#81c784",
                   }}
                   className="buttonToggle"
                   size="lg"
@@ -418,7 +423,7 @@ class Home extends React.Component {
           <ToggleButtonGroup type="checkbox" className=" buttonGroup">
             <ToggleButton
               style={{
-                backgroundColor: allTime ? "#f8a055" : "#426e86",
+                backgroundColor: allTime ? "#9fa8da" : "#81c784",
               }}
               size="lg"
               id={"All Time"}
@@ -435,7 +440,7 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: sixMonths ? "#f8a055" : "#426e86",
+                backgroundColor: sixMonths ? "#9fa8da" : "#81c784",
               }}
               id={"Last 6 Months"}
               className="buttonToggle"
@@ -453,7 +458,7 @@ class Home extends React.Component {
 
             <ToggleButton
               style={{
-                backgroundColor: oneMonth ? "#f8a055" : "#426e86",
+                backgroundColor: oneMonth ? "#9fa8da" : "#81c784",
               }}
               id={"Last Month"}
               className="buttonToggle"

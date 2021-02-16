@@ -52,9 +52,10 @@ exports.getReadChoice = (comparator) => {
  * @param {array} data - Data scraped from the web
  * @return  {Array} Returns object array with information extracted (track, artists, year)
  */
-const formatData = (data, req) => {
+const formatData = (data) => {
   const allHitsArray = [];
-
+  const songIDArray = [];
+  const artistsIDArray = [];
   for (const hit of data) {
     allHitsArray.push({
       track: hit[0],
@@ -63,15 +64,21 @@ const formatData = (data, req) => {
       artistRank: hit[3],
     }); // because of the way the website is structured (this may not be exactly correc t)
 
-    hit[5].split(',').forEach((ID) => req.session.artistsIDArray.push(ID));
+    hit[5].split(',').forEach((ID) => artistsIDArray.push(ID));
 
-    req.session.songIDArray.push(hit[4]);
+    songIDArray.push(hit[4]);
   }
-
-  return allHitsArray;
+  return {
+    allHitsArray, songIDArray, artistsIDArray,
+  };
 };
 
-exports.getCSVData = async (decade, req) => {
+/**
+ * gets information about top songs for each decade from CSV files
+ * @param {string} decade - decade to determine which csv file to read
+ * @returns {Object} - song & artist information about the top 100 songs for each decade
+ */
+exports.getCSVData = async (decade) => {
   const file = fs.createReadStream(`dataFiles/${decade}.csv`);
   const artistFile = fs.createReadStream(`dataFiles/${decade}Artists.csv`);
   // adapted from: https://github.com/mholt/PapaParse/issues/752
@@ -79,28 +86,29 @@ exports.getCSVData = async (decade, req) => {
     Papa.parse(filetoParse, {
       dynamicTyping: true,
       complete: async (results) => {
-        req.session.top100Hits = formatData(results.data, req);
+        const csvData = formatData(results.data);
 
-        resolve(req.session.top100Hits);
+        resolve(csvData);
       },
     });
   });
-
+  const topArtistIDArray = [];
   const artistReading = (filetoParse) => new Promise((resolve) => {
     Papa.parse(filetoParse, {
       delimiter: '|',
       complete(results) {
         for (const artist of results.data) {
-          req.session.topArtistIDArray.push(artist[1]);
+          topArtistIDArray.push(artist[1]);
         }
 
-        resolve(req.session.topArtistIDArray);
+        resolve(topArtistIDArray);
       },
     });
   });
 
-  await songReading(file);
-  await artistReading(artistFile);
+  const csvData = await songReading(file);
+  csvData.topArtistIDArray = await artistReading(artistFile);
+  return csvData;
 };
 
 /**
@@ -111,3 +119,23 @@ exports.getCSVData = async (decade, req) => {
 * @return { String } String with first letter capital
 */
 exports.jsUcfirst = (string) => string.charAt(0).toUpperCase() + string.slice(1);
+
+/**
+ * check if the user is authorized
+ * @param {Request} req express request object
+ * @return {Boolean} true if authorized, false if not
+ */
+exports.isAuthorized = (req) => {
+  // TODO check if there is a way to verify token itself (like a jwt)
+  const authHeader = req.header('Authorization');
+
+  const refreshToken = req.header('RefreshToken');
+  if (authHeader === undefined || refreshToken === undefined) {
+    return false;
+  }
+  const token = authHeader.split(' ')[1];
+  if (token === '' || refreshToken === '') {
+    return false;
+  }
+  return true;
+};

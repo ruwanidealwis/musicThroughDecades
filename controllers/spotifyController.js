@@ -9,7 +9,6 @@ const utils = require('../utils/utils');
 
 /** ******* constiable declaration */
 /** @global full array with relevant info of top songs for decade */ const fullInfoHitArray = [];
-/** @global user top hits for specific range */ const myTopHits = [];
 /** @global client id for app */ const clientID = process.env.CLIENTID;
 /** @global instance  of spotify api */let spotifyApi;
 /** @global clientSecret of app */ const clientSecret = process.env.CLIENTSECRET;
@@ -34,6 +33,27 @@ const authorizeApp = async () => {
     });
     const credentials = await spotifyApi.clientCredentialsGrant();
     spotifyApi.setAccessToken(credentials.body.access_token);
+  } catch (e) {
+    console.error(e);
+    throw new Error(e);
+  }
+};
+
+/**
+ * @summary initalizes web-api instance,
+ * @param {String} accessToken  - access token
+ * @param {String} refreshToken - refresh token
+ * @return {void}
+ * @throws error if the authorizationf ails
+ */
+const initalizeApp = async (accessToken, refreshToken) => {
+  try {
+    spotifyApi = new SpotifyWebApi({
+      clientId: clientID,
+      clientSecret,
+    });
+    spotifyApi.setAccessToken(accessToken);
+    spotifyApi.setRefreshToken(refreshToken);
   } catch (e) {
     console.error(e);
     throw new Error(e);
@@ -89,12 +109,12 @@ const getAudioInfo = async (songIDArray) => {
 /**
  * @summary gets information about the specific songs
  * @param {Array<string>} songIDArray -spotify IDs of the songs
- * @param startIndex allows matching with corresponding array
- * @param {request} req express request object
+ * @param {number} startIndex allows matching with corresponding array
+ * @param {Array} top100Hits information about the 100 hits of a decade
  * @return {Promise<Array>} array of Track Objects
  * @throws error if there is a problem with API calls
  */
-const getBasicSongInfo = async (songIDArray, startIndex, req) => {
+const getBasicSongInfo = async (songIDArray, startIndex, top100Hits) => {
   try {
     const returnData = [];
     let i = startIndex;
@@ -105,12 +125,12 @@ const getBasicSongInfo = async (songIDArray, startIndex, req) => {
         spotifyID: track.id,
         albumID: track.album.id,
         name: track.name.split('-')[0].trim(),
-        release: req.session.top100Hits[i].year,
-        artists: req.session.top100Hits[i].artists,
+        release: top100Hits[i].year,
+        artists: top100Hits[i].artists,
         image: track.album.images[0].url,
         popularity: track.popularity,
         previewURL: track.preview_url,
-        artistRank: req.session.top100Hits[i].artistRank,
+        artistRank: top100Hits[i].artistRank,
       };
       if (songObject.release === 0) {
         songObject.release = parseInt(track.album.release_date.split('-')[0], 10);
@@ -129,10 +149,13 @@ const getBasicSongInfo = async (songIDArray, startIndex, req) => {
 /**
  * @summary traverses the list of all top 100 songs to get the basic info (artist, year, album) API
  * @param {string} decade the decade being queried
+ * @param {Array<String>} artistsIDArray spotify ID's of the top artists of decade
+ * @param {Array<String>} songIDArray spotify ID's of the top songs of decade
+ * @param {Array} top100Hits information about the top 100 songs for a decade
  * @return {Array} Array of objects with full info about the audio features
  * @throws error if any of the external API calls fail
  */
-const getSongInformation = async (decade, req) => {
+const getSongInformation = async (decade, artistsIDArray, songIDArray, top100Hits) => {
   try {
     const arr = [0, 50, 100, 150, 200];
     let artistInfo = [];
@@ -140,54 +163,54 @@ const getSongInformation = async (decade, req) => {
     // gets artist information
     // spotify API allows an array of Artist IDs (can look up 50 artists at once)
     for (const index of arr) {
-      if (index > req.session.artistsIDArray.length) {
+      if (index > artistsIDArray.length) {
         break;
       }
       let end = index + 50;
-      if (end > req.session.artistsIDArray.length) {
-        end = index + (req.session.artistsIDArray.length % 50); // ensure end is not too large
+      if (end > artistsIDArray.length) {
+        end = index + (artistsIDArray.length % 50); // ensure end is not too large
       }
 
       // slice array to get 0-49, 50-100 etc (to reduce external API calls)
-      const partialArtistIDs = req.session.artistsIDArray.slice(index, end);
+      const partialArtistIDs = artistsIDArray.slice(index, end);
 
       // get artist information from the API and concat to gether;
       artistInfo = artistInfo.concat(await getArtistInfo(partialArtistIDs));
     }
 
     // slice songs, same logic as Artist, reduce external API calls from 100 to 2
-    const firstHalf = req.session.songIDArray.slice(0, 50);
-    const firstHalfData = await getBasicSongInfo(firstHalf, 0, req);
+    const firstHalf = songIDArray.slice(0, 50);
+    const firstHalfData = await getBasicSongInfo(firstHalf, 0, top100Hits);
 
-    const secondHalf = req.session.songIDArray.slice(50, 100);
-    const secondHalfData = await getBasicSongInfo(secondHalf, 50, req);
+    const secondHalf = songIDArray.slice(50, 100);
+    const secondHalfData = await getBasicSongInfo(secondHalf, 50, top100Hits);
 
     // join the data
-    req.session.fullInfoHitArray = firstHalfData.concat(secondHalfData);
+    const fullSongData = firstHalfData.concat(secondHalfData);
 
     // get audio features (danceability, valence etc.)
-    const audioData = await getAudioInfo(req.session.songIDArray, 3); // await until
+    const audioData = await getAudioInfo(songIDArray, 3); // await until
 
     let artistIndex = 0;
     // join all the audio features with the array with the song information
     // eslint-disable-next-line no-plusplus
     for (let i = 0; i < 100; i++) {
       // alternative ?
-      req.session.fullInfoHitArray[i].audioData = audioData[i];
+      fullSongData[i].audioData = audioData[i];
 
       // this ensures that correct artists are linked with the correct songs
-      const length = req.session.fullInfoHitArray[i].artists; // number of artists per song...
+      const length = fullSongData[i].artists; // number of artists per song...
       const end = artistIndex + length;
-      req.session.fullInfoHitArray[i].artists = [];
+      fullSongData[i].artists = [];
       // eslint-disable-next-line no-plusplus
       for (let j = artistIndex; j < end; j++) {
-        req.session.fullInfoHitArray[i].artists.push(artistInfo[j]);
+        fullSongData[i].artists.push(artistInfo[j]);
       }
 
       artistIndex = end; // ensures artist data is clean;
 
       await databaseTable.addSongToDatabase(
-        req.session.fullInfoHitArray[i],
+        fullSongData[i],
         decade,
         i,
       );
@@ -202,21 +225,23 @@ const getSongInformation = async (decade, req) => {
 /**
  *
  * @summary adds audio date to users top tracks
- * @param {Request} req - the express request object
+ * @param {Array} topTracks - the top 100 tracks for the user
+ * @param {Array} songIDArray - spotify ID's of the users top tracks
+ * @param {Array} sessionID - express session ID
  * @returns {void}
  * @throws an error if the API calls fail or if database updates fail
  */
 
-const getUserSongAudioInformation = async (req) => {
+const getUserSongAudioInformation = async (topTracks, songIDArray, sessionID) => {
   try {
     const returnData = await getAudioInfo(
-      req.session.songIDArray,
-      req.session.retries,
+      songIDArray,
+      3,
     ); // await until
 
     let i = 0;
 
-    for (const songObject of req.session.myTopHits) {
+    for (const songObject of topTracks) {
       if (returnData[i] === null) {
         songObject.audioData = null;
       } else {
@@ -224,7 +249,7 @@ const getUserSongAudioInformation = async (req) => {
       }
       i += 1;
 
-      await databaseTable.addUserSongToDatabase(songObject, i, req.session.id);
+      await databaseTable.addUserSongToDatabase(songObject, i, sessionID);
     }
   } catch (e) {
     console.error(e);
@@ -236,11 +261,13 @@ const getUserSongAudioInformation = async (req) => {
  * Usess spotify API to get the top tracks for the current user
  * @param {Number} retries - the number of times to retry the API request (if it fails)
  * @param {String} timeRange - specifies the time range to search for top tracks
- * @returns {Array} information about the users top hits
+ * @returns {Object} information about the users top hits, and an array of spotify ids
  * @throws error if the API call fails
  */
-const getUserTopTracks = async (timeRange, retries, req) => {
+const getUserTopTracks = async (timeRange, retries) => {
   try {
+    const songIDArray = [];
+    const myTopHits = [];
     const userTopTracks = await spotifyApi
       .getMyTopTracks({
         time_range: timeRange,
@@ -249,7 +276,7 @@ const getUserTopTracks = async (timeRange, retries, req) => {
 
     // iterate through top tracks and get information
     for (const songObject of userTopTracks.body.items) {
-      req.session.songIDArray.push(songObject.id); // push to array to get audio features...
+      songIDArray.push(songObject.id); // push to array to get audio features...
       const artistsID = [];
       // get all artists
       songObject.artists.forEach((songArtists) => {
@@ -269,9 +296,9 @@ const getUserTopTracks = async (timeRange, retries, req) => {
         artists: artistInfo,
         imageUrl: songObject.album.images[0].url,
       };
-      req.session.myTopHits.push(object); // push it to the array
+      myTopHits.push(object); // push it to the array
     }
-    return myTopHits;
+    return { myTopHits, songIDArray };
   } catch (e) {
     console.error(e);
     throw new Error(e);
@@ -280,14 +307,11 @@ const getUserTopTracks = async (timeRange, retries, req) => {
 
 /**
  * @summary  Gets the id for the currently authenticated user
- * @param {Request} req -express req object
  * @returns {String} the id of the current user
  */
-const getUserID = async (req) => {
+const getUserID = async () => {
   try {
     const currentUser = await spotifyApi.getMe();
-
-    req.session.userID = currentUser.body.id;
     return currentUser.body.id;
   } catch (e) {
     console.error(e);
@@ -325,78 +349,77 @@ const getUserTopArtists = async (timeRange) => {
 };
 
 /**
- * Authorizes the app with user permissions
- * @param {Request} req request object (express)
- * @return {Void} void
+ * Authorizes the app with the user permission
+ * @param {string} code given by spotify
+ * @return {Object} returns access token and refresh token
  * @throws error if the authorization fails
  */
-const authorizeUser = async (req) => {
+exports.authorizeUser = async (code) => {
   try {
-    if (
+    spotifyApi = new SpotifyWebApi({
+      clientId: clientID,
+      clientSecret,
+      redirectUri, // this time we need user to authorize access
+    });
+    const data = await spotifyApi.authorizationCodeGrant(code);
+    return {
+      accessToken: data.body.access_token,
+      refreshToken: data.body.refresh_token,
+    };
+  } catch (e) {
+    console.error(e);
+    throw new Error(e);
+  }
+};
+/* if (
       spotifyApi.getRefreshToken() == null
       || spotifyApi.getAccessToken() !== req.session.token
     ) {
       console.log('setting access token ....');
 
       const data = await spotifyApi.authorizationCodeGrant(req.session.code);
-      req.session.token = data.body.access_token;
-      spotifyApi.setAccessToken(data.body.access_token);
-      spotifyApi.setRefreshToken(data.body.refresh_token);
-    } else {
-      console.log('refreshing... access token ....');
-      const data = await spotifyApi.refreshAccessToken();
 
-      spotifyApi.setAccessToken(data.body.access_token);
-      spotifyApi.setRefreshToken(data.body.refresh_token);
-      req.session.token = data.body.access_token;
+      return {
+        accessToken: data.body.access_token,
+        refreshToken: data.body.refresh_token,
+      };
     }
+    console.log('refreshing... access token ....');
+    const data = await spotifyApi.refreshAccessToken();
+
+    spotifyApi.setAccessToken(data.body.access_token);
+    spotifyApi.setRefreshToken(data.body.refresh_token);
+    req.session.token = data.body.access_token;
   } catch (e) {
     console.error(e);
     throw new Error(e);
   }
-};
+}; */
 
 /**
  * Gets music data for a specific decade, if available in the database, returns from db,
  * but makes call to Spotify API if the data is not available
- *  @param {Request} req Express request object
  * @param {string} decade decade being queried
  * @return {Promise<fullInfoHitArray>} --> all relevant data for the application
  * @throws error if any step in getting music fails
  */
-exports.getDecadeMusic = async (req, decade) => {
+exports.getDecadeMusic = async (decade) => {
   try {
-    // need to run python script and get spotify authentication...
-    if (req.session.songIDArray.length !== 0) {
-      // reset all data...
-      req.session.top100Hits = [];
-      req.session.fullInfoHitArray = [];
-      req.session.artistsIDArray = [];
-      req.session.songIDArray = [];
-
-      req.session.topArtistIDArray = [];
-    }
     // checks if data is already in the db
     const dataAvailable = await databaseTable.decadeDataAvailable(decade);
-
+    console.log(dataAvailable);
     if (!dataAvailable) {
       // get the data from the spotify API using CSV fiels
-      if (req.session.type === 'decade') { await authorizeApp(req); } else {
-        await authorizeUser(req);
-      }
-      await utils.getCSVData(decade, req);
-      await getSongInformation(decade, req);
+      await authorizeApp();
+      const {
+        allHitsArray, songIDArray, artistsIDArray,
+      } = await utils.getCSVData(decade);
+
+      await getSongInformation(decade, artistsIDArray, songIDArray, allHitsArray);
     }
 
     // gets data from database
     const data = await databaseTable.getDecadeStatistics(decade);
-
-    req.session.top100Hits = [];
-    req.session.fullInfoHitArray = [];
-    req.session.artistsIDArray = [];
-    req.session.songIDArray = [];
-    req.session.albumIDArray = [];
-    req.session.topArtistIDArray = [];
 
     // returns all the data
     return data;
@@ -433,43 +456,35 @@ exports.getAuthorizationURL = () => {
 /**
  *
  * @summary gets spotify information of spotify user
- * @param {request} req - express request object
+*  @param {string} timeLength - time length to query from
+ * @param {string} sessionID - express session ID
+ * @param {string} accessToken - authorization token given by spotify
+ * @param {string} refreshToken -refresh token given by spotify
  * @return {Object} Object containing the relevant stats for the users listening habbits
  * @throws error if any external api calls fail
  */
-exports.getUserListeningHabits = async (req) => {
+exports.getUserListeningHabits = async (timeLength, sessionID, accessToken, refreshToken) => {
   try {
-    if (req.session.songIDArray.length !== 0) {
-      req.session.myTopHits = [];
-      req.session.artistsIDArray = [];
-      req.session.songIDArray = [];
+    // initalize web-api instance
+    initalizeApp(accessToken, refreshToken);
 
-      req.session.topArtistIDArray = [];
-    }
-    await authorizeUser(req);
-
-    // spotifyApi.setAccessToken(data.body.access_token);
-    // spotifyApi.setRefreshToken(data.body.refresh_token);
-    req.session.userTopRead = utils.getReadChoice(req.session.userTopRead);
-    await getUserID(req);
-    // await databaseTable.createTempUser(req.session.id); already created
-
+    const userRead = utils.getReadChoice(timeLength); // convert time elngth to spotify terms
     // gets the top tracks for the user
-    await getUserTopTracks(req.session.userTopRead, req.session.retries, req);
+    const { myTopHits, songIDArray } = await getUserTopTracks(userRead, 3);
 
     await utils.delay(230); // waits 230ms -- throttles request
 
-    await getUserSongAudioInformation(req); // gets the audio info each of the top hits
-
+    // gets the audio info each of the top hits
+    await getUserSongAudioInformation(myTopHits, songIDArray, sessionID);
     // get user information from db
-    const userData = await databaseTable.getUserStatistics(
-      req.session.id,
+    const { fullStatsObject, averageFeatureData } = await databaseTable.getUserStatistics(
+      sessionID,
     );
 
     // get user top artists
-    userData.fullStatsObject.topArtists = await getUserTopArtists(req.session.userTopRead);
-    userData.fullStatsObject.userID = await getUserID(req);
-    return userData;
+    fullStatsObject.topArtists = await getUserTopArtists(userRead);
+    fullStatsObject.userID = await getUserID();
+    return { fullStatsObject, averageFeatureData };
   } catch (e) {
     console.error(e);
     throw new Error(e);

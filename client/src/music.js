@@ -37,7 +37,7 @@ class Music extends React.Component {
     } else {
       console.log(props.values);
       let compareValue = props.location.state.values.valueTwo;
-    
+
       if (props.location.state.user) {
         if (compareValue === "6Months") {
           compareValue = "the last 6 months";
@@ -68,7 +68,12 @@ class Music extends React.Component {
   //get decade data first ...
   getData(values) {
     console.log("hello");
-    fetch(`/decadeData?decade=${values.valueOne}&code=${this.state.code}`)
+    fetch(`/decadeData?decade=${values.valueOne}&code=${this.state.code}`, {
+      headers: {
+        Authorization: localStorage.getItem("Authorization"),
+        RefreshToken: localStorage.getItem("RefreshToken"),
+      },
+    })
       .then((res) => {
         return res.json();
       })
@@ -81,7 +86,12 @@ class Music extends React.Component {
       .then(() => {
         if (this.state.code === null) {
           //another decade, so same request with different decade
-          fetch(`/decadeData?decade=${values.valueTwo}&code=${this.state.code}`)
+          fetch(`/decadeData?decade=${values.valueTwo}&code=${this.state.code}`, {
+            headers: {
+              Authorization: localStorage.getItem("Authorization"),
+              RefreshToken: localStorage.getItem("RefreshToken"),
+            },
+          })
             .then((res) => {
               return res.json();
             })
@@ -94,7 +104,13 @@ class Music extends React.Component {
             });
         } else {
           fetch(
-            `/userData?timeLength=${values.valueTwo}&code=${this.state.code}`
+            `/userData?timeLength=${values.valueTwo}&code=${this.state.code}`, 
+            {
+              headers: {
+                Authorization: sessionStorage.getItem("Authorization"),
+                RefreshToken: sessionStorage.getItem("RefreshToken"),
+              },
+            }
           )
             .then((res) => {
               return res.json();
@@ -106,8 +122,15 @@ class Music extends React.Component {
             })
             .then((data) => {
               fetch(
-                `/userReccomendations?decade=${values.valueOne}&averageValues=${JSON.stringify(data.averageValue)}` 
-                  
+                `/userReccomendations?decade=${
+                  values.valueOne
+                }&averageValues=${JSON.stringify(data.averageValue)}`, 
+                {
+                  headers: {
+                    Authorization: sessionStorage.getItem("Authorization"),
+                    RefreshToken: sessionStorage.getItem("RefreshToken"),
+                  },
+                }
               )
                 .then((res) => res.json())
                 .then((json) => {
