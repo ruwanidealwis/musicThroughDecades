@@ -32,10 +32,10 @@ class OverallBarChart extends React.Component {
         datasets: [
           {
             label: `${this.props.decade}'s`,
-            backgroundColor: "#426e86",
-            borderColor: "#426e86",
+            backgroundColor: "#81c784",
+            borderColor: "#81c784",
 
-            hoverBackgroundColor: ["#426e86cc"],
+            hoverBackgroundColor: ["#81c784cc"],
             hoverBorderColor: "rgba(255,99,132,1)",
             data: [
               this.props.decadeData.averageValence * 100,
@@ -50,10 +50,10 @@ class OverallBarChart extends React.Component {
           },
           {
             label: `${this.props.compareValue}'s`,
-            backgroundColor: "#f8a055",
-            borderColor: "#f8a055",
+            backgroundColor: "#9fa8da",
+            borderColor: "#9fa8da",
 
-            hoverBackgroundColor: ["#426e86cc"],
+            hoverBackgroundColor: ["#81c784cc"],
             hoverBorderColor: "rgba(255,99,132,1)",
             data: [
               this.props.compareValueData.averageValence * 100,
