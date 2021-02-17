@@ -8,7 +8,6 @@ const SpotifyWebApi = require('spotify-web-api-node');
 const utils = require('../utils/utils');
 
 /** ******* constiable declaration */
-/** @global full array with relevant info of top songs for decade */ const fullInfoHitArray = [];
 /** @global client id for app */ const clientID = process.env.CLIENTID;
 /** @global instance  of spotify api */let spotifyApi;
 /** @global clientSecret of app */ const clientSecret = process.env.CLIENTSECRET;
@@ -121,6 +120,7 @@ const getBasicSongInfo = async (songIDArray, startIndex, top100Hits) => {
     const trackDataArray = await spotifyApi.getTracks(songIDArray);
 
     for (const track of trackDataArray.body.tracks) {
+      console.log(top100Hits[i]);
       const songObject = {
         spotifyID: track.id,
         albumID: track.album.id,
@@ -150,16 +150,16 @@ const getBasicSongInfo = async (songIDArray, startIndex, top100Hits) => {
  * @summary traverses the list of all top 100 songs to get the basic info (artist, year, album) API
  * @param {string} decade the decade being queried
  * @param {Array<String>} artistsIDArray spotify ID's of the top artists of decade
- * @param {Array<String>} songIDArray spotify ID's of the top songs of decade
+ * @param {Array<String>} songIDArray spotify ID's of the top songs of decade: LENGTH <=100
  * @param {Array} top100Hits information about the top 100 songs for a decade
- * @return {Array} Array of objects with full info about the audio features
+ * @return {Array} returns list of data added to the db
  * @throws error if any of the external API calls fail
  */
 const getSongInformation = async (decade, artistsIDArray, songIDArray, top100Hits) => {
   try {
     const arr = [0, 50, 100, 150, 200];
+    const fullInfoHitArray = [];
     let artistInfo = [];
-
     // gets artist information
     // spotify API allows an array of Artist IDs (can look up 50 artists at once)
     for (const index of arr) {
@@ -179,29 +179,31 @@ const getSongInformation = async (decade, artistsIDArray, songIDArray, top100Hit
     }
 
     // slice songs, same logic as Artist, reduce external API calls from 100 to 2
-    const firstHalf = songIDArray.slice(0, 50);
-    const firstHalfData = await getBasicSongInfo(firstHalf, 0, top100Hits);
+    // expected there will be exactly 100 inputs
+    const firstHalf = songIDArray.slice(0, (songIDArray.length / 2));
 
-    const secondHalf = songIDArray.slice(50, 100);
-    const secondHalfData = await getBasicSongInfo(secondHalf, 50, top100Hits);
+    const firstHalfData = await getBasicSongInfo(firstHalf, 0, top100Hits);
+    const secondHalf = songIDArray.slice((songIDArray.length / 2));// other half
+    const secondHalfData = await getBasicSongInfo(secondHalf, (songIDArray.length / 2),
+      top100Hits);
 
     // join the data
     const fullSongData = firstHalfData.concat(secondHalfData);
-
     // get audio features (danceability, valence etc.)
     const audioData = await getAudioInfo(songIDArray, 3); // await until
-
     let artistIndex = 0;
     // join all the audio features with the array with the song information
     // eslint-disable-next-line no-plusplus
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < fullSongData.length; i++) {
       // alternative ?
+
       fullSongData[i].audioData = audioData[i];
 
       // this ensures that correct artists are linked with the correct songs
       const length = fullSongData[i].artists; // number of artists per song...
       const end = artistIndex + length;
       fullSongData[i].artists = [];
+
       // eslint-disable-next-line no-plusplus
       for (let j = artistIndex; j < end; j++) {
         fullSongData[i].artists.push(artistInfo[j]);
@@ -214,8 +216,8 @@ const getSongInformation = async (decade, artistsIDArray, songIDArray, top100Hit
         decade,
         i,
       );
+      fullInfoHitArray.push(fullSongData[i]);
     }
-
     return fullInfoHitArray;
   } catch (e) {
     throw new Error(e);
@@ -225,7 +227,7 @@ const getSongInformation = async (decade, artistsIDArray, songIDArray, top100Hit
 /**
  *
  * @summary adds audio date to users top tracks
- * @param {Array} topTracks - the top 100 tracks for the user
+ * @param {Array} topTracks - the top 100 tracks for the user (length <=100)
  * @param {Array} songIDArray - spotify ID's of the users top tracks
  * @param {Array} sessionID - express session ID
  * @returns {void}
@@ -273,18 +275,15 @@ const getUserTopTracks = async (timeRange, retries) => {
         time_range: timeRange,
         limit: 50,
       });
-
     // iterate through top tracks and get information
     for (const songObject of userTopTracks.body.items) {
       songIDArray.push(songObject.id); // push to array to get audio features...
       const artistsID = [];
-      // get all artists
+
       songObject.artists.forEach((songArtists) => {
         artistsID.push(songArtists.id);
       });
-
       const artistInfo = await getArtistInfo(artistsID, retries); // get
-
       // create object with information
       const object = {
         spotifyID: songObject.id,
@@ -334,11 +333,11 @@ const getUserTopArtists = async (timeRange) => {
         limit: 10,
       });
 
-    for (const ArtistObject of userTopArtists.body.items) {
+    for (const artistObject of userTopArtists.body.items) {
       topArtists.push({
-        name: ArtistObject.name,
-        image: ArtistObject.images[0].url,
-        genres: ArtistObject.genres,
+        name: artistObject.name,
+        image: artistObject.images[0].url,
+        genres: artistObject.genres,
       });
     }
     return topArtists;
@@ -371,30 +370,6 @@ exports.authorizeUser = async (code) => {
     throw new Error(e);
   }
 };
-/* if (
-      spotifyApi.getRefreshToken() == null
-      || spotifyApi.getAccessToken() !== req.session.token
-    ) {
-      console.log('setting access token ....');
-
-      const data = await spotifyApi.authorizationCodeGrant(req.session.code);
-
-      return {
-        accessToken: data.body.access_token,
-        refreshToken: data.body.refresh_token,
-      };
-    }
-    console.log('refreshing... access token ....');
-    const data = await spotifyApi.refreshAccessToken();
-
-    spotifyApi.setAccessToken(data.body.access_token);
-    spotifyApi.setRefreshToken(data.body.refresh_token);
-    req.session.token = data.body.access_token;
-  } catch (e) {
-    console.error(e);
-    throw new Error(e);
-  }
-}; */
 
 /**
  * Gets music data for a specific decade, if available in the database, returns from db,
@@ -407,9 +382,9 @@ exports.getDecadeMusic = async (decade) => {
   try {
     // checks if data is already in the db
     const dataAvailable = await databaseTable.decadeDataAvailable(decade);
-    console.log(dataAvailable);
     if (!dataAvailable) {
       // get the data from the spotify API using CSV fiels
+
       await authorizeApp();
       const {
         allHitsArray, songIDArray, artistsIDArray,
@@ -500,12 +475,12 @@ exports.getUserListeningHabits = async (timeLength, sessionID, accessToken, refr
  * @return {string} playlist url
  * @throws error if playlist creation fails
  */
-exports.createPlaylist = async (userID, songIDArray, decade, timeLength) => {
+exports.createPlaylist = async (userID, songIDArray, decade) => {
   try {
     await spotifyApi.refreshAccessToken();
     const newPlaylist = await spotifyApi.createPlaylist(
       userID,
-      `My ${decade}'s recomendations (${timeLength})!`,
+      `My ${decade}'s recomendations)!`,
       {
         public: false,
         description: 'Made for you by: https://musicthroughdecades.herokuapp.com/',

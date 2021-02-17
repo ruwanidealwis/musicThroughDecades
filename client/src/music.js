@@ -70,8 +70,8 @@ class Music extends React.Component {
     console.log("hello");
     fetch(`/decadeData?decade=${values.valueOne}&code=${this.state.code}`, {
       headers: {
-        Authorization: localStorage.getItem("Authorization"),
-        RefreshToken: localStorage.getItem("RefreshToken"),
+        Authorization: sessionStorage.getItem("Authorization"),
+        RefreshToken: sessionStorage.getItem("RefreshToken"),
       },
     })
       .then((res) => {

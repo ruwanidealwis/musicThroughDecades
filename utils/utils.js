@@ -7,15 +7,28 @@ const Papa = require('papaparse');
 const fs = require('fs');
 
 /**
- * Validate entered values
+ * Validate decade
  * This is an additional check, because input is valdiated by the front end
  * @param {String} decade - decade being compared
  * @return {boolean} true if it is a valid year to compare, false if else.
  */
-exports.validateValues = (decade) => {
+exports.validateDecade = (decade) => {
   const decades = ['1950', '1960', '1970', '1980', '1990', '2000', '2010'];
-
   if (decades.includes(decade)) {
+    return true;
+  } return false;
+};
+
+/**
+ * Validate user time length;
+ * This is an additional check, because input is valdiated by the front end
+ * @param {String} decade - decade being compared
+ * @return {boolean} true if it is a valid year to compare, false if else.
+ */
+exports.validateTimeLength = (timeLength) => {
+  const timeLengths = ['allTime', '6Months', '1Month'];
+
+  if (timeLengths.includes(timeLength)) {
     return true;
   } return false;
 };

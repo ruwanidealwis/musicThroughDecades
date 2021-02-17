@@ -52,14 +52,19 @@ router.post('/music/createPlaylist', async (req, res) => {
   if (!utils.isAuthorized(req)) {
     res.status(401).send({ error: 'Unauthorized. Please allow permissions to view this endpoint.' });
   } else {
-    try {
-      const {
-        songIDArray, userID, decade, timeLength,
-      } = req.body;
-      const url = await spotifyController.createPlaylist(userID, songIDArray, decade, timeLength);
-      res.status(201).send({ url });
-    } catch (e) {
-      res.status(400).send({ error: 'Something went wrong, please try again later' });
+    const {
+      songIDArray, userID, decade,
+    } = req.body;
+    if (!utils.validateDecade(decade)) {
+      res.status(400).send({ error: 'Decade Parameter Invalid.' });
+    } else {
+      try {
+        utils.validateDecade(decade);
+        const url = await spotifyController.createPlaylist(userID, songIDArray, decade);
+        res.status(201).send({ url });
+      } catch (e) {
+        res.status(500).send({ error: 'Something went wrong, please try again later' });
+      }
     }
   }
 });
@@ -79,7 +84,7 @@ router.get('/authorize', (req, res) => {
     const url = spotifyController.getAuthorizationURL();
     res.status(200).send({ url }); // now redirects user to authorization (handled by Spotify)...
   } catch (e) {
-    res.send(400).send({ error: 'Something went wrong, please try again later' });
+    res.send(500).send({ error: 'Something went wrong, please try again later' });
   }
 });
 
@@ -96,7 +101,7 @@ router.get('/callback', async (req, res) => {
   try {
     res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
   } catch (e) {
-    res.status(400).send({ error: 'Something went wrong, please try again later' });
+    res.status(500).send({ error: 'Something went wrong, please try again later' });
   }
 });
 
@@ -108,14 +113,19 @@ router.get('/callback', async (req, res) => {
  * @param {callback} middleware - Express middleware.
  */
 router.get('/authTokens', async (req, res) => {
+  const { code } = req.query;
+  if (code == null) {
+    res.status(400).send({ error: 'Please supply a code.' });
+  }
   try {
     const { refreshToken, accessToken } = await spotifyController.authorizeUser(req.query.code);
     // store the tokens in auth headers so client cn pass them
     res.setHeader('Authorization', `Bearer ${accessToken}`);
     res.setHeader('refreshToken', refreshToken); // custom token
+    console.log(req.query.code);
     res.status(200).send({ status: 'ok' });
   } catch (e) {
-    res.status(400).send({ error: 'Something went wrong, please try again later' });
+    res.status(500).send({ error: 'Something went wrong, please try again later' });
   }
 });
 
@@ -128,7 +138,7 @@ router.get('/authTokens', async (req, res) => {
  */
 router.get('/decadeData', async (req, res) => {
   const { decade } = req.query;
-  if (!utils.validateValues(decade)) {
+  if (!utils.validateDecade(decade)) {
     res.status(400).send({ error: 'Decade Parameter Invalid.' });
   } else {
     // check if item is in cache ...
@@ -164,45 +174,49 @@ router.get('/userData', async (req, res) => {
     res.status(401).send({ error: 'Unauthorized. Please allow permissions to view this endpoint.' });
   } else {
     const { timeLength } = req.query;
-    const data = myCache.get(`${req.session.id}${timeLength}`);
-    const accessToken = req.header('authorization').split(' ')[1];
-    const refreshToken = req.header('RefreshToken');
-    if (data === undefined) {
-      try {
-        await databaseTable.createTempUser(req.session.id);
-
-        // eslint-disable-next-line max-len
-        const { fullStatsObject, averageFeatureData } = await spotifyController.getUserListeningHabits(
-          timeLength,
-          req.session.id,
-          accessToken,
-          refreshToken,
-        );
-
-        const userMusicData = {
-          userData: fullStatsObject,
-          averageValue: averageFeatureData,
-        };
-        myCache.set(`${req.session.id}${timeLength}`, userMusicData, 500); // cache response for 500 seconds
-        // user values can't be stored, so they are deleted after relevant information is gathered
-
-        // send all the data
-        res.status(200).send({
-          userData: userMusicData.userData,
-          averageValue: averageFeatureData,
-        });
-        await databaseTable.deleteUserSongsFromDatabase(
-          req.session.id,
-          req.session.decade,
-        );
-        await databaseTable.deleteTempUser(req.session.id);
-      } catch (e) {
-        res.status(400).send({ error: 'Something went wrong, please try again later' });
-      }
+    if (!utils.validateTimeLength(timeLength)) {
+      res.status(400).send({ error: 'Time Length Parameter Invalid.' });
     } else {
-      // send from cache
-      console.log('in cache');
-      res.status(200).send(data);
+      const data = myCache.get(`${req.session.id}${timeLength}`);
+      const accessToken = req.header('authorization').split(' ')[1];
+      const refreshToken = req.header('RefreshToken');
+      if (data === undefined) {
+        try {
+          await databaseTable.createTempUser(req.session.id);
+
+          // eslint-disable-next-line max-len
+          const { fullStatsObject, averageFeatureData } = await spotifyController.getUserListeningHabits(
+            timeLength,
+            req.session.id,
+            accessToken,
+            refreshToken,
+          );
+
+          const userMusicData = {
+            userData: fullStatsObject,
+            averageValue: averageFeatureData,
+          };
+          myCache.set(`${req.session.id}${timeLength}`, userMusicData, 500); // cache response for 500 seconds
+          // user values can't be stored, so they are deleted after relevant information is gathered
+
+          // send all the data
+          res.status(200).send({
+            userData: userMusicData.userData,
+            averageValue: averageFeatureData,
+          });
+          await databaseTable.deleteUserSongsFromDatabase(
+            req.session.id,
+            req.session.decade,
+          );
+          await databaseTable.deleteTempUser(req.session.id);
+        } catch (e) {
+          res.status(500).send({ error: 'Something went wrong, please try again later' });
+        }
+      } else {
+        // send from cache
+        console.log('in cache');
+        res.status(200).send(data);
+      }
     }
   }
 });
@@ -217,13 +231,18 @@ router.get('/userReccomendations', async (req, res) => {
   if (!utils.isAuthorized(req)) {
     res.status(401).send({ error: 'Unauthorized. Please allow permissions to view this endpoint.' });
   } else {
-    try {
-      const { averageValues, decade } = req.query;
-      const averageValueObject = JSON.parse(averageValues);
-      const reccomendations = await databaseTable.getUserRecomendations(averageValueObject, decade);
-      res.status(200).send({ reccomendations });
-    } catch (e) {
-      res.status(400).send({ error: 'Something went wrong, please try again later' });
+    const { averageValues, decade } = req.query;
+    if (!utils.validateDecade(decade)) {
+      res.status(400).send({ error: 'Input Parameters Invalid.' });
+    } else {
+      try {
+        const averageValueObject = JSON.parse(averageValues);
+        // eslint-disable-next-line max-len
+        const reccomendations = await databaseTable.getUserRecomendations(averageValueObject, decade);
+        res.status(200).send({ reccomendations });
+      } catch (e) {
+        res.status(500).send({ error: 'Something went wrong, please try again later' });
+      }
     }
   }
 });
