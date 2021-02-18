@@ -7,12 +7,12 @@
 const express = require('express');
 const path = require('path');
 const NodeCache = require('node-cache');
+const utils = require('../utils/utils');
 
 /** @global stores databasetable */ const databaseTable = require('../controllers/databaseController');
+/** @global spotify controller */const spotifyController = require('../controllers/spotifyController');
 
 /** @global chache */ const myCache = new NodeCache({ stdTTL: 100, checkperiod: 120 });
-
-const spotifyController = require('../controllers/spotifyController');
 
 // inital express user and URLs
 const router = express.Router();
@@ -45,24 +45,32 @@ router.get('/', (req, res) => {
  * @function
  * @param {string} path - Express path
  * @param {callback} middleware - Express middleware.  catch(e){
-    res.send(400).send({ error: e.message });
+    res.send(400).send({ error: "Something went wrong, please try again later" });
  */
 
 router.post('/music/createPlaylist', async (req, res) => {
-  try {
+  if (!utils.isAuthorized(req)) {
+    res.status(401).send({ error: 'Unauthorized. Please allow permissions to view this endpoint.' });
+  } else {
     const {
-      songIDArray, userID, decade, timeLength,
+      songIDArray, userID, decade,
     } = req.body;
-    console.log(req.body);
-    const url = await spotifyController.createPlaylist(userID, songIDArray, decade, timeLength);
-    res.status(201).send({ url });
-  } catch (e) {
-    res.status(400).send({ error: e.message });
+    if (!utils.validateDecade(decade)) {
+      res.status(400).send({ error: 'Decade Parameter Invalid.' });
+    } else {
+      try {
+        utils.validateDecade(decade);
+        const url = await spotifyController.createPlaylist(userID, songIDArray, decade);
+        res.status(201).send({ url });
+      } catch (e) {
+        res.status(500).send({ error: 'Something went wrong, please try again later' });
+      }
+    }
   }
 });
 
 /**
- * User authorizes the app to use its information (done by Spotify)
+ * User authorizes the app by creating a reasource URL
  * Method is only called if the user would like to compare their own data!
  * sends 200 (ok) if successful, or 400 if there is an error, and redirects to /callback
  * Authorization defined by the Spotify API: https://developer.spotify.com/documentation/general/guides/authorization-guide/
@@ -73,10 +81,10 @@ router.post('/music/createPlaylist', async (req, res) => {
  */
 router.get('/authorize', (req, res) => {
   try {
-    const url = spotifyController.getAuthorizationURL(req);
+    const url = spotifyController.getAuthorizationURL();
     res.status(200).send({ url }); // now redirects user to authorization (handled by Spotify)...
   } catch (e) {
-    res.send(400).send({ error: e.message });
+    res.send(500).send({ error: 'Something went wrong, please try again later' });
   }
 });
 
@@ -89,7 +97,36 @@ router.get('/authorize', (req, res) => {
  * @param {callback} middleware - Express middleware.
  */
 router.get('/callback', async (req, res) => {
-  res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
+  // TODO send a response with the auth header (access token) and refresh token
+  try {
+    res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
+  } catch (e) {
+    res.status(500).send({ error: 'Something went wrong, please try again later' });
+  }
+});
+
+/**
+ * gets the refresh and access tokens for the current user by authorizing WITHIN the app
+ * @name get/authTokens
+ * @function
+ * @param {string} path - Express path
+ * @param {callback} middleware - Express middleware.
+ */
+router.get('/authTokens', async (req, res) => {
+  const { code } = req.query;
+  if (code == null) {
+    res.status(400).send({ error: 'Please supply a code.' });
+  }
+  try {
+    const { refreshToken, accessToken } = await spotifyController.authorizeUser(req.query.code);
+    // store the tokens in auth headers so client cn pass them
+    res.setHeader('Authorization', `Bearer ${accessToken}`);
+    res.setHeader('refreshToken', refreshToken); // custom token
+    console.log(req.query.code);
+    res.status(200).send({ status: 'ok' });
+  } catch (e) {
+    res.status(500).send({ error: 'Something went wrong, please try again later' });
+  }
 });
 
 /**
@@ -100,38 +137,28 @@ router.get('/callback', async (req, res) => {
  * @param {callback} middleware - Express middleware.
  */
 router.get('/decadeData', async (req, res) => {
-  const { decade, code } = req.query;
-  // initalize session vars
-  req.session.top100Hits = [];
-  req.session.fullInfoHitArray = [];
-  req.session.artistsIDArray = [];
-  req.session.songIDArray = [];
-  req.session.topArtistIDArray = [];
-
-  req.session.type = 'decade'; // determines how to authorize app
-
-  // check if item is in cache ...
-  const data = myCache.get(decade);
-  if (data === undefined) {
-    if (code !== 'null') { req.session.code = code; req.session.type = 'user'; } // auth code (if user authorization needed)
-    // TODO validate decade is a valid decade in the list of possible decades
-    console.log(code);
-    try {
-      req.session.decadeStats = await spotifyController.getDecadeMusic(
-        req,
-        decade,
-      );
-      res.status(200).send({ decadeData: req.session.decadeStats });
-      myCache.set(decade, req.session.decadeStats, 1000); // cache response for 1000 seconds
-    } catch (e) {
-      console.error(e);
-      res.status(400).send({ error: e.message });
-    }
+  const { decade } = req.query;
+  if (!utils.validateDecade(decade)) {
+    res.status(400).send({ error: 'Decade Parameter Invalid.' });
   } else {
+    // check if item is in cache ...
+    const data = myCache.get(decade);
+    if (data === undefined) {
+      try {
+        const decadeStats = await spotifyController.getDecadeMusic(
+          decade,
+        );
+        res.status(200).send({ decadeData: decadeStats });
+        myCache.set(decade, decadeStats, 1000); // cache response for 1000 seconds
+      } catch (e) {
+        console.error(e);
+        res.status(500).send({ error: 'Something went wrong, please try again later' });
+      }
+    } else {
     // retrieve from cache
-    console.log('in cache!');
-    req.session.decadeStats = data;
-    res.status(200).send({ decadeData: req.session.decadeStats });
+      console.log('in cache!');
+      res.status(200).send({ decadeData: data });
+    }
   }
 });
 
@@ -143,56 +170,54 @@ router.get('/decadeData', async (req, res) => {
  * @param {callback} middleware - Express middleware.
  */
 router.get('/userData', async (req, res) => {
-  // TODO validate decade is a valid decade in the list of possible decades
-
-  const { timeLength, code } = req.query;
-  req.session.code = code;
-  req.session.type = 'user';
-  req.session.userTopRead = timeLength;
-
-  // initalize session vars
-  req.session.fullInfoHitArray = [];
-  req.session.artistsIDArray = [];
-  req.session.songIDArray = [];
-  req.session.topArtistIDArray = [];
-  req.session.myTopHits = [];
-
-  const data = myCache.get(`${req.session.id}${timeLength}`);
-
-  if (data === undefined) {
-    try {
-      await databaseTable.createTempUser(req.session.id);
-
-      const userData = await spotifyController.getUserListeningHabits(
-        req,
-        res,
-      );
-      req.session.compareValue = userData.fullStatsObject;
-
-      const userMusicData = {
-        userData: req.session.compareValue,
-        averageValue: userData.averageFeatureData,
-      };
-      myCache.set(`${req.session.id}${timeLength}`, userMusicData, 500); // cache response for 500 seconds
-      // user values can't be stored, so they are deleted after relevant information is gathered
-
-      // send all the data
-      res.status(200).send({
-        userData: req.session.compareValue,
-        averageValue: userData.averageFeatureData,
-      });
-      await databaseTable.deleteUserSongsFromDatabase(
-        req.session.id,
-        req.session.decade,
-      );
-      await databaseTable.deleteTempUser(req.session.id);
-    } catch (e) {
-      res.status(400).send({ error: e.message });
-    }
+  if (!utils.isAuthorized(req)) {
+    res.status(401).send({ error: 'Unauthorized. Please allow permissions to view this endpoint.' });
   } else {
-    // send from cache
-    console.log('in cache');
-    res.status(200).send(data);
+    const { timeLength } = req.query;
+    if (!utils.validateTimeLength(timeLength)) {
+      res.status(400).send({ error: 'Time Length Parameter Invalid.' });
+    } else {
+      const data = myCache.get(`${req.session.id}${timeLength}`);
+      const accessToken = req.header('authorization').split(' ')[1];
+      const refreshToken = req.header('RefreshToken');
+      if (data === undefined) {
+        try {
+          await databaseTable.createTempUser(req.session.id);
+
+          // eslint-disable-next-line max-len
+          const { fullStatsObject, averageFeatureData } = await spotifyController.getUserListeningHabits(
+            timeLength,
+            req.session.id,
+            accessToken,
+            refreshToken,
+          );
+
+          const userMusicData = {
+            userData: fullStatsObject,
+            averageValue: averageFeatureData,
+          };
+          myCache.set(`${req.session.id}${timeLength}`, userMusicData, 500); // cache response for 500 seconds
+          // user values can't be stored, so they are deleted after relevant information is gathered
+
+          // send all the data
+          res.status(200).send({
+            userData: userMusicData.userData,
+            averageValue: averageFeatureData,
+          });
+          await databaseTable.deleteUserSongsFromDatabase(
+            req.session.id,
+            req.session.decade,
+          );
+          await databaseTable.deleteTempUser(req.session.id);
+        } catch (e) {
+          res.status(500).send({ error: 'Something went wrong, please try again later' });
+        }
+      } else {
+        // send from cache
+        console.log('in cache');
+        res.status(200).send(data);
+      }
+    }
   }
 });
 
@@ -203,13 +228,22 @@ router.get('/userData', async (req, res) => {
  * @param {callback} middleware - Express middleware.
  */
 router.get('/userReccomendations', async (req, res) => {
-  try {
+  if (!utils.isAuthorized(req)) {
+    res.status(401).send({ error: 'Unauthorized. Please allow permissions to view this endpoint.' });
+  } else {
     const { averageValues, decade } = req.query;
-    const averageValueObject = JSON.parse(averageValues);
-    const reccomendations = await databaseTable.getUserRecomendations(averageValueObject, decade);
-    res.status(200).send({ reccomendations });
-  } catch (e) {
-    res.status(400).send({ error: e.message });
+    if (!utils.validateDecade(decade)) {
+      res.status(400).send({ error: 'Input Parameters Invalid.' });
+    } else {
+      try {
+        const averageValueObject = JSON.parse(averageValues);
+        // eslint-disable-next-line max-len
+        const reccomendations = await databaseTable.getUserRecomendations(averageValueObject, decade);
+        res.status(200).send({ reccomendations });
+      } catch (e) {
+        res.status(500).send({ error: 'Something went wrong, please try again later' });
+      }
+    }
   }
 });
 
@@ -220,7 +254,6 @@ router.get('/userReccomendations', async (req, res) => {
    * @param {string} path - Express path
    * @param {callback} middleware - Express middleware.
    */
-
 router.get('*', () => {
   // taken from: https://stackoverflow.com/questions/16750524/remove-last-directory-in-url
   const rootPath = __dirname.split(path.sep);

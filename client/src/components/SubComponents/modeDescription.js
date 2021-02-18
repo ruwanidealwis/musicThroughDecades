@@ -5,7 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import DictionaryCard from "./dictionaryCard";
 
 const textStyle = {
-  color: "#f8a055",
+  color: "#9fa8da",
   paddingLeft: "3%",
 };
 const bull = <span>•</span>;

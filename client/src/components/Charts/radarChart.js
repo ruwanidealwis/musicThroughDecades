@@ -18,12 +18,12 @@ class RadarChart extends React.Component {
         datasets: [
           {
             label: `${this.props.decade}`,
-            backgroundColor: "#426e868e",
-            borderColor: "#426e86",
-            pointBackgroundColor: "#426e86",
+            backgroundColor: "#81c7848e",
+            borderColor: "#81c784",
+            pointBackgroundColor: "#81c784",
             pointBorderColor: "#fff",
             pointHoverBackgroundColor: "#fff",
-            pointHoverBorderColor: "#426e86",
+            pointHoverBorderColor: "#81c784",
             data: [
               this.props.decadeData.averageValence,
               this.props.decadeData.averageEnergy,
@@ -36,12 +36,12 @@ class RadarChart extends React.Component {
           },
           {
             label: `${this.props.compareValue}`,
-            backgroundColor: "#f8a0558e",
-            borderColor: "#f8a055",
-            pointBackgroundColor: "#f8a055",
+            backgroundColor: "#9fa8da8e",
+            borderColor: "#9fa8da",
+            pointBackgroundColor: "#9fa8da",
             pointBorderColor: "#fff",
             pointHoverBackgroundColor: "#fff",
-            pointHoverBorderColor: "#f8a055",
+            pointHoverBorderColor: "#9fa8da",
             data: [
               this.props.compareValueData.averageValence,
               this.props.compareValueData.averageEnergy,
