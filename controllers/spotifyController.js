@@ -486,7 +486,6 @@ exports.createPlaylist = async (userID, songIDArray, decade) => {
         description: 'Made for you by: https://musicthroughdecades.herokuapp.com/',
       },
     );
-
     const playlistID = newPlaylist.body.id;
     const playlistURL = newPlaylist.body.external_urls.spotify;
     const reccomendationIDArray = [];

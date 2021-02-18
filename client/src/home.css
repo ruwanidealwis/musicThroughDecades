@@ -76,14 +76,14 @@ html {
   box-shadow: 3px 3px 12px #888888 !important;
 }
 .buttonToggle:hover {
-  background-color: #54637e;
-  border: #54637e;
+  background-color: #68a06b;
+  border: #68a06b;
   transform: scale(1.09);
 }
 
 .buttonToggle.disabled {
-  background-color: #46728a !important;
-  border: #46728a;
+  background-color: #68a06b !important;
+  border: #68a06b;
 }
 .buttonGroup {
   align-items: center;

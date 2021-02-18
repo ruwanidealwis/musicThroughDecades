@@ -317,5 +317,3 @@ def getArtistInfo(decade):
                 csvfile, quoting=csv.QUOTE_NONNUMERIC, delimiter='|')
             writer.writerows(topArtists)
 
-
-print(getArtistInfo("2010"))
