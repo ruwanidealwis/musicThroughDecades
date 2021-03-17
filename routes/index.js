@@ -97,7 +97,6 @@ router.get('/authorize', (req, res) => {
  * @param {callback} middleware - Express middleware.
  */
 router.get('/callback', async (req, res) => {
-  // TODO send a response with the auth header (access token) and refresh token
   try {
     res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
   } catch (e) {
@@ -122,7 +121,6 @@ router.get('/authTokens', async (req, res) => {
     // store the tokens in auth headers so client cn pass them
     res.setHeader('Authorization', `Bearer ${accessToken}`);
     res.setHeader('refreshToken', refreshToken); // custom token
-    console.log(req.query.code);
     res.status(200).send({ status: 'ok' });
   } catch (e) {
     res.status(500).send({ error: 'Something went wrong, please try again later' });
@@ -206,7 +204,6 @@ router.get('/userData', async (req, res) => {
           });
           await databaseTable.deleteUserSongsFromDatabase(
             req.session.id,
-            req.session.decade,
           );
           await databaseTable.deleteTempUser(req.session.id);
         } catch (e) {
