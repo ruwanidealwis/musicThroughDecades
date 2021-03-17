@@ -17,11 +17,10 @@ require('pg').defaults.parseInt8 = true;
 let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config, {
-    dialectOptions: {
-      ssl: {
-        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
-      },
+    ssl: {
+      rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
     },
+
   });
 } else {
   sequelize = new Sequelize(
@@ -30,10 +29,8 @@ if (config.use_env_variable) {
     config.password,
     config,
     {
-      dialectOptions: {
-        ssl: {
-          rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
-        },
+      ssl: {
+        rejectUnauthorized: false, // <<<<<<< YOU NEED THIS
       },
     },
   );
