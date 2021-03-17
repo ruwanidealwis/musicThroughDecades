@@ -97,7 +97,6 @@ router.get('/authorize', (req, res) => {
  * @param {callback} middleware - Express middleware.
  */
 router.get('/callback', async (req, res) => {
-  // TODO send a response with the auth header (access token) and refresh token
   try {
     res.redirect(`${clientURL}/?authorized=true&code=${req.query.code}`);
   } catch (e) {
